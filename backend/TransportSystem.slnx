@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/">
+    <Project Path="src/TransportSystem.Core.Application/TransportSystem.Core.Application.csproj" />
+    <Project Path="src/TransportSystem.Core.Domain/TransportSystem.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/TransportSystem.Infrastructure.Identity/TransportSystem.Infrastructure.Identity.csproj" />
+    <Project Path="src/TransportSystem.Infrastructure.Persistence/TransportSystem.Infrastructure.Persistence.csproj" />
+    <Project Path="src/TransportSystem.Infrastructure.Shared/TransportSystem.Infrastructure.Shared.csproj" Id="53f15bb9-7acc-4fc0-bc37-909af9fc306f" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/TransportSystem.WebApi/TransportSystem.WebApi.csproj" />
+  </Folder>
+</Solution>
