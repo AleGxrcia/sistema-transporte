@@ -1,0 +1,31 @@
+﻿using TransportSystem.Core.Domain.Fleet.Aggregates.Driver;
+using TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle;
+
+namespace TransportSystem.Core.Domain.Fleet.Repositories
+{
+    public interface IDriverRepository
+    {
+        Task<Driver?> GetByIdAsync(Guid id, CancellationToken 
+            cancellationToken = default);
+
+        Task<Driver?> GetByNationalIdAsync(string nationalId, 
+            CancellationToken cancellationToken = default);
+
+        Task<Driver?> GetByLicenseNumberAsync(string licenseNumber, 
+            CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<Vehicle>> GetAllAsync(
+            CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<Driver>> GetAvailableForAssignmentAsync(CancellationToken
+            cancellationToken = default);
+
+        // Para alertas del dashboard
+        Task<IReadOnlyList<Driver>> GetWithExpiringLicenseAsync(int withinDays, CancellationToken
+            cancellationToken = default);
+
+        Task AddAsync(Driver driver, CancellationToken cancellationToken = default);
+        void Update(Vehicle vehicle);
+        void Delete(Vehicle vehicle);
+    }
+}
