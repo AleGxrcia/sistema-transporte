@@ -8,9 +8,9 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
         public LicenseCategory Category { get; }
         public DateTime ExpirationDate { get; }
 
-        public DriverLicense(string Number, LicenseCategory category, DateTime expirationDate)
+        public DriverLicense(string number, LicenseCategory category, DateTime expirationDate)
         {
-            Number = Number;
+            Number = number;
             Category = category;
             ExpirationDate = expirationDate;
         }
