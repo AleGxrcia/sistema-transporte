@@ -14,7 +14,7 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
         Task<Driver?> GetByLicenseNumberAsync(string licenseNumber, 
             CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<Vehicle>> GetAllAsync(
+        Task<IReadOnlyList<Driver>> GetAllAsync(
             CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<Driver>> GetAvailableForAssignmentAsync(CancellationToken
@@ -25,7 +25,7 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
             cancellationToken = default);
 
         Task AddAsync(Driver driver, CancellationToken cancellationToken = default);
-        void Update(Vehicle vehicle);
-        void Delete(Vehicle vehicle);
+        void Update(Driver vehicle);
+        void Delete(Driver vehicle);
     }
 }
