@@ -131,15 +131,5 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
             License = newLicense;
             UpdatedAt = DateTime.UtcNow;
         }
-
-        public void Delete()
-        {
-            if (Status == DriverStatus.OnTrip)
-                throw new DomainException("DRIVER_CANNOT_DELETE",
-                    "No se puede eliminar un conductor que está en viaje.");
-
-            IsDeleted = true;
-            UpdatedAt = DateTime.UtcNow;
-        }
     }
 }
