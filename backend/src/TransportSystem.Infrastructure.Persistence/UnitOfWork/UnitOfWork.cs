@@ -1,7 +1,7 @@
 ﻿using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Infrastructure.Persistence.Contexts;
 
-namespace TransportSystem.Infrastructure.Persistence.UnitOfWork
+namespace TransportSystem.Infrastructure.Persistence.UnitOfWorkk
 {
     public class UnitOfWork : IUnitOfWork
     {
