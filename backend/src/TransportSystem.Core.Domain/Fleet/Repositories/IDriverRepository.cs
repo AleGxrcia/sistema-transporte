@@ -1,5 +1,4 @@
 ﻿using TransportSystem.Core.Domain.Fleet.Aggregates.Driver;
-using TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle;
 
 namespace TransportSystem.Core.Domain.Fleet.Repositories
 {
