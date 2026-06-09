@@ -17,7 +17,7 @@ namespace TransportSystem.Core.Domain.Transportation.Repositories
 
         Task AddAsync(TravelRequest request, CancellationToken cancellationToken = default);
         void Update(TravelRequest request);
-        void Delete(TravelRequest vehicle);
+        void Delete(TravelRequest request);
 
     }
 }
