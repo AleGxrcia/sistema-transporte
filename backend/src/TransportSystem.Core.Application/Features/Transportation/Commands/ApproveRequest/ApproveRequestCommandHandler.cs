@@ -30,7 +30,7 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Appr
 
             request.Approve(_currentUser.Id);
 
-            await _requestRepository.UpdateAsync(request, cancellationToken);
+            _requestRepository.Update(request);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
