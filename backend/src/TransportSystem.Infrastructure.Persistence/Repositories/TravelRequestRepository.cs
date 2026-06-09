@@ -7,39 +7,38 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
 {
     public class TravelRequestRepository : ITravelRequestRepository
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext _dbcontext;
 
         public TravelRequestRepository(ApplicationContext context)
         {
-            _context = context;
+            _dbcontext = context;
         }
 
         public async Task AddAsync(TravelRequest request, CancellationToken cancellationToken = default)
         {
-            await _context.TravelRequests.AddAsync(request, cancellationToken);
+            await _dbcontext.TravelRequests.AddAsync(request, cancellationToken);
         }
 
-        public Task UpdateAsync(TravelRequest request, CancellationToken cancellationToken = default)
+        public void Update(TravelRequest request)
         {
-           _context.TravelRequests.Update(request);
-            return Task.CompletedTask;
+            _dbcontext.TravelRequests.Update(request);
         }
 
         public void Delete(TravelRequest vehicle)
         {
-            _context.Remove(vehicle);
+            _dbcontext.Remove(vehicle);
         }
 
         public async Task<IReadOnlyList<TravelRequest>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.TravelRequests
+            return await _dbcontext.TravelRequests
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
 
         public async Task<TravelRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.TravelRequests.
+            return await _dbcontext.TravelRequests.
                 FirstOrDefaultAsync(tr => tr.Id == id, cancellationToken);
         }
 
