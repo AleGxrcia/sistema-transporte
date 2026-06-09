@@ -24,7 +24,7 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
             cancellationToken = default);
 
         Task AddAsync(Driver driver, CancellationToken cancellationToken = default);
-        void Update(Driver vehicle);
-        void Delete(Driver vehicle);
+        void Update(Driver driver);
+        void Delete(Driver driver);
     }
 }

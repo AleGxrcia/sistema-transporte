@@ -14,6 +14,6 @@ namespace TransportSystem.Core.Domain.Transportation.Repositories
 
         Task AddAsync(Schedule schedule, CancellationToken cancellationToken = default);
         void Update(Schedule schedule); 
-        void Delete(Guid id);
+        void Delete(Schedule schedule);
     }
 }
