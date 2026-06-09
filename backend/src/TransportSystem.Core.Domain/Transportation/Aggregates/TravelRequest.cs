@@ -46,7 +46,7 @@ namespace TransportSystem.Core.Domain.Transportation.Aggregates
             return new TravelRequest
             {
                 Id = Guid.NewGuid(),
-                RequestNumber = RequestNumber.Create(now.Year, requestSequence),
+                RequestNumber = RequestNumber.FromGuid(now.Year, Guid.NewGuid()),
                 RequestingArea = requestingArea.Trim(),
                 RequestedByUserId = requestedByUserId,
                 Destination = destination,
