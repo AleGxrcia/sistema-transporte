@@ -34,7 +34,7 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Canc
 
             request.Cancel(command.Reason, _currentUser.Id);
 
-            await _requestRepository.UpdateAsync(request, cancellationToken);
+            _requestRepository.Update(request);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

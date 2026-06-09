@@ -55,8 +55,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Comp
             vehicle.ReturnFromTrip();
             driver.ReturnFromTrip();
 
-            await _scheduleRepository.UpdateAsync(schedule, cancellationToken);
-            await _requestRepository.UpdateAsync(request, cancellationToken);
+            _scheduleRepository.Update(schedule);
+            _requestRepository.Update(request);
             _vehicleRepository.Update(vehicle);
             _driverRepository.Update(driver);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

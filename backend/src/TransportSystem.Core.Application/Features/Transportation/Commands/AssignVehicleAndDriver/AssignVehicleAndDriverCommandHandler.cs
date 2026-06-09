@@ -82,10 +82,10 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
             vehicle.MarkAsOnTrip();
             driver.MarkAsOnTrip();
 
-            await _requestRepository.UpdateAsync(request, cancellationToken);
+            _requestRepository.Update(request);
             _vehicleRepository.Update(vehicle);
             _driverRepository.Update(driver);
-            await _scheduleRepository.UpdateAsync(schedule, cancellationToken);
+            _scheduleRepository.Update(schedule);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

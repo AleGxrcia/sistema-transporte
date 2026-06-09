@@ -41,8 +41,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Star
             schedule.StartAssignment(assignment.Id);
             request.StartTrip();
 
-            await _scheduleRepository.UpdateAsync(schedule, cancellationToken);
-            await _requestRepository.UpdateAsync(request, cancellationToken);
+            _scheduleRepository.Update(schedule);
+            _requestRepository.Update(request);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
