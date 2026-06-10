@@ -2,7 +2,8 @@
 {
     public record AvailableDriverDto(
         Guid Id,
-        string FullName,
+        string firstName,
+        string lastName,
         string LicenseNumber,
         string LicenseType,
         DateTime LicenseExpirationDate

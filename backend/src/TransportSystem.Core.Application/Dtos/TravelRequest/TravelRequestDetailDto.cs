@@ -20,6 +20,6 @@
         Guid? AssignedVehicleId,
         Guid? AssignedDriverId,
         DateTime CreatedAt,
-        DateTime UpdatedAt
+        DateTime? UpdatedAt
     );
 }
