@@ -15,11 +15,4 @@
     <ProjectReference Include="..\TransportSystem.Core.Domain\TransportSystem.Core.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Transportation\Queries\GetRequestById\" />
-    <Folder Include="Features\Transportation\Queries\GetScheduleByDate\" />
-    <Folder Include="Features\Transportation\Queries\GetDashboardSummary\" />
-    <Folder Include="Features\Transportation\Queries\GetPendingRequests\" />
-  </ItemGroup>
-
 </Project>
