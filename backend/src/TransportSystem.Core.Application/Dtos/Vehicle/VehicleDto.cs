@@ -13,6 +13,6 @@
         decimal CurrentMileage,
         DateTime? LastMaintenanceDate,
         DateTime CreatedAt,
-        DateTime UpdatedAt
+        DateTime? UpdatedAt
     );
 }

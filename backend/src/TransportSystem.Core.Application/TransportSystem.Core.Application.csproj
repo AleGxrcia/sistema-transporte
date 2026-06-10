@@ -16,12 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Fleet\Drivers\Queries\GetDrivers\" />
-    <Folder Include="Features\Fleet\Drivers\Queries\GetDriverById\" />
-    <Folder Include="Features\Fleet\Drivers\Queries\GetAvailableDrivers\" />
-    <Folder Include="Features\Fleet\Vehicles\Queries\GetVehicles\" />
-    <Folder Include="Features\Fleet\Vehicles\Queries\GetVehicleById\" />
-    <Folder Include="Features\Fleet\Vehicles\Queries\GetAvailableVehicles\" />
     <Folder Include="Features\Transportation\Queries\GetRequestById\" />
     <Folder Include="Features\Transportation\Queries\GetScheduleByDate\" />
     <Folder Include="Features\Transportation\Queries\GetDashboardSummary\" />
