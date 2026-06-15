@@ -13,7 +13,7 @@ namespace TransportSystem.Core.Domain.Transportation.Repositories
             CancellationToken cancellationToken = default);
 
         Task AddAsync(Schedule schedule, CancellationToken cancellationToken = default);
-        Task UpdateAsync(Schedule schedule, CancellationToken cancellationToken = default); 
-        Task DeleteAsync(Guid id);
+        void Update(Schedule schedule); 
+        void Delete(Schedule schedule);
     }
 }

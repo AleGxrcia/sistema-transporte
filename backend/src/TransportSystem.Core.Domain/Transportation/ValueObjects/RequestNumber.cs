@@ -22,6 +22,15 @@ namespace TransportSystem.Core.Domain.Transportation.ValueObjects
                     "El secuencial debe ser mayor a cero.");
 
             return new RequestNumber($"TR-{year}-{sequence:D4}");
+        } 
+
+        public static RequestNumber FromGuid(int year, Guid id)
+        {
+            if (year < 2026 || year > 2100)
+                throw new DomainException("REQUEST_NUMBER_INVALID_YEAR",
+                    $"El año {year} no es válido para un número de solicitud.");
+
+            return new RequestNumber($"TR-{year}-{id.ToString("N")[..6].ToUpperInvariant()}");
         }
 
         public static RequestNumber Restore(string value)

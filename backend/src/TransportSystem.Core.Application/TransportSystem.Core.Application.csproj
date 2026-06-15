@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TransportSystem.Core.Domain\TransportSystem.Core.Domain.csproj" />
   </ItemGroup>
 

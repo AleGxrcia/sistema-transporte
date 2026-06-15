@@ -19,15 +19,14 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
             await _dbContext.Schedules.AddAsync(schedule, cancellationToken);
         }
 
-        public Task UpdateAsync(Schedule schedule, CancellationToken cancellationToken = default)
+        public void Update(Schedule schedule)
         {
             _dbContext.Schedules.Update(schedule);
-            return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(Guid id)
+        public void Delete(Schedule schedule)
         {
-            throw new NotImplementedException();
+            _dbContext.Remove(schedule);
         }
 
         public async Task<Schedule?> GetByDateWithAssignmentsAsync(DateTime date, CancellationToken cancellationToken = default)
