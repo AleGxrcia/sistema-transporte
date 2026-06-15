@@ -7,7 +7,6 @@ namespace TransportSystem.Core.Application.Dtos.Auth
         string FirstName,
         string LastName,
         string Password,
-        UserRole Role,
-        string Origin
+        UserRole Role
     );
 }
