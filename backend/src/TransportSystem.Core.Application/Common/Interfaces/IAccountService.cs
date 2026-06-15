@@ -8,7 +8,7 @@ namespace TransportSystem.Core.Application.Common.Interfaces
         Task<AuthResult> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
         Task RevokeTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
-        Task<UserResult> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
+        Task<UserResult> CreateUserAsync(CreateUserRequest request, string origin, CancellationToken cancellationToken = default);
         Task<UserResult> UpdateUserAsync(string userId, UpdateUserRequest request, CancellationToken cancellationToken = default);
         Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default);
         Task SetUserActiveStatusAsync(string userId, bool isActive, CancellationToken cancellationToken = default);
