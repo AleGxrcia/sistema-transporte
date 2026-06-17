@@ -27,7 +27,7 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             builder.Property(a => a.ActualDepartureTime);
             builder.Property(a => a.ActualReturnTime);
             builder.Property(a => a.CreatedAt).IsRequired();
-            builder.Property(a => a.UpdatedAt).IsRequired();
+            builder.Property(a => a.UpdatedAt);
 
             // TimeSlot
             builder.OwnsOne(a => a.TimeSlot, ts =>

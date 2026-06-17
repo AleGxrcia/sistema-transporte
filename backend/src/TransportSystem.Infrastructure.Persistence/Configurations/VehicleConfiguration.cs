@@ -40,7 +40,7 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
                 .HasColumnType("date");
 
             builder.Property(v => v.CreatedAt).IsRequired();
-            builder.Property(v => v.UpdatedAt).IsRequired();
+            builder.Property(v => v.UpdatedAt);
 
             // LicensePlate
             builder.OwnsOne(v => v.LicensePlate, lp =>

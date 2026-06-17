@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TransportSystem.Core.Domain.Fleet.Aggregates.Driver;
 
@@ -34,7 +34,7 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
                 .HasColumnName("StatusId");
 
             builder.Property(d => d.CreatedAt).IsRequired();
-            builder.Property(d => d.UpdatedAt).IsRequired();
+            builder.Property(d => d.UpdatedAt);
 
             // Value Object: NationalId
             builder.OwnsOne(d => d.NationalId, ni =>
