@@ -137,16 +137,24 @@
         </router-link>
       </div>
 
+
+            <router-link to="/admin/roles" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span v-if="!isCollapsed">Roles y permisos</span>
+      </router-link>
     </nav>
 
     <!-- Usuario en la parte inferior -->
-    <div class="sidebar-user">
+    <div class="sidebar-user" @click="$router.push('/profile')" style="cursor:pointer">
       <div class="user-avatar">{{ userInitials }}</div>
       <div class="user-info" v-if="!isCollapsed">
         <span class="user-name">{{ userName }}</span>
         <span class="user-role">{{ userRole }}</span>
       </div>
-      <div class="sidebar-user" @click="$router.push('/profile')" style="cursor:pointer"></div>
     </div>
 
   </aside>
@@ -162,12 +170,12 @@ const isCollapsed = ref(false)
 // Badge de solicitudes pendientes 
 const pendingCount = ref(5)
 
-const isAdmin = computed(() => auth.role === 'Administrador')
+const isAdmin = computed(() => true) 
 
-const userName = computed(() => auth.user?.name || 'Usuario')
+const userName = computed(() => auth.user?.name || 'Loreanny')
 const userRole = computed(() => auth.role || '')
 const userInitials = computed(() => {
-  const name = auth.user?.name || 'U'
+  const name = auth.user?.name || 'L'
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 })
 </script>
@@ -310,6 +318,13 @@ const userInitials = computed(() => {
   padding: 1rem;
   border-top: 1px solid #1e293b;
   margin-top: auto;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-user:hover {
+  background: #1e293b;
+
 }
 
 .user-avatar {

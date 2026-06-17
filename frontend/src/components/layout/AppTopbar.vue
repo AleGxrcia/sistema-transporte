@@ -110,7 +110,7 @@ const title = computed(() => {
     '/maintenance':  'Mantenimiento',
     '/fuel':         'Combustible',
     '/trips':        'Historial de viajes',
-    '/reports':      'Reportes',
+    '/reports':      'Reportes y estadísticas',
     '/notifications':'Notificaciones',
     '/profile':      'Mi perfil',
     '/admin/users':  'Usuarios',
@@ -124,7 +124,7 @@ const fechaHoy = computed(() =>
 )
 
 const userInitials = computed(() => {
-  const name = auth.user?.name || 'U'
+  const name = auth.user?.name || 'L'
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 })
 
