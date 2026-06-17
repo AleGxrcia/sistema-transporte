@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle;
 
@@ -47,9 +47,11 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             {
                 km.Property(x => x.Value)
                     .HasColumnName("NextMaintenanceKmScheduled")
-                    .HasColumnType("decimal(10,2)")
-                    .IsRequired(false);
+                    .HasColumnType("decimal(10,2)");
             });
+
+            builder.Navigation(m => m.NextMaintenanceKmScheduled)
+                .IsRequired(false);
 
             builder.Property(m => m.CreatedAt).IsRequired();
 
