@@ -12,6 +12,7 @@ using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Infrastructure.Identity.Contexts;
 using TransportSystem.Infrastructure.Identity.Entities;
 using TransportSystem.Infrastructure.Identity.Services;
+using TransportSystem.Infrastructure.Identity.Settings;
 
 namespace TransportSystem.Infrastructure.Identity
 {
@@ -31,16 +32,23 @@ namespace TransportSystem.Infrastructure.Identity
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
+                options.User.RequireUniqueEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddRoles<IdentityRole>()
+            .AddSignInManager()
             .AddEntityFrameworkStores<IdentityContext>()
             .AddDefaultTokenProviders();
 
             services.AddScoped<IAccountService, AccountService>();
 
-            var jwtSettings = configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["SecretKey"]
-                ?? throw new InvalidOperationException("JwtSettings:SecretKey no está configurado.");
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+                ?? throw new InvalidOperationException("JwtSettings section is missing or invalid.");
+
+            services.AddOptions<JwtSettings>()
+                .Bind(configuration.GetSection("JwtSettings"))
+                .ValidateOnStart();
 
             services.AddAuthentication(options =>
             {
@@ -49,7 +57,7 @@ namespace TransportSystem.Infrastructure.Identity
             })
             .AddJwtBearer(options =>
             {
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true;
                 options.SaveToken = false;
 
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -59,9 +67,9 @@ namespace TransportSystem.Infrastructure.Identity
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
                 };
 
                 options.Events = new JwtBearerEvents
@@ -75,7 +83,8 @@ namespace TransportSystem.Infrastructure.Identity
                         var result = JsonSerializer.Serialize(new
                         {
                             Code = "UNAUTHORIZED",
-                            Message = "Token inválido o expirado. Inicia sesión nuevamente."
+                            Message = "Token inválido o expirado. Inicia sesión nuevamente.",
+                            Errors = ""
                         });
 
                         await context.Response.WriteAsync(result);
@@ -88,7 +97,8 @@ namespace TransportSystem.Infrastructure.Identity
                         var result = JsonSerializer.Serialize(new
                         {
                             Code = "FORBIDDEN",
-                            Message = "No tienes permisos suficientes para acceder a este recurso."
+                            Message = "No tienes permisos suficientes para acceder a este recurso.",
+                            Errors = ""
                         });
 
                         await context.Response.WriteAsync(result);
