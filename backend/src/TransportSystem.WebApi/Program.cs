@@ -7,6 +7,7 @@ using TransportSystem.Infrastructure.Identity.Seeds;
 using TransportSystem.Infrastructure.Persistence;
 using TransportSystem.Infrastructure.Shared;
 using TransportSystem.WebApi.Extensions;
+using TransportSystem.WebApi.Middlewares;
 using TransportSystem.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +22,13 @@ builder.Services.AddSharedInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerExtension();
+builder.Services.AddCorsExtension();
 
 var app = builder.Build();
 
@@ -53,13 +57,13 @@ if (app.Environment.IsDevelopment())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseExceptionHandler();
+
+app.UseSwaggerExtension();
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -67,3 +71,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

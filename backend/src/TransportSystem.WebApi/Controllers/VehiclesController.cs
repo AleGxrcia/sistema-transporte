@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Dtos.Vehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.CloseMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeactivateVehicle;
@@ -60,7 +60,7 @@ namespace TransportSystem.WebApi.Controllers
             CancellationToken cancellationToken)
         {
             var result = await Sender.Send(cmd, cancellationToken);
-            return CreatedAtRoute("GetVehicleById", new { result }, result);
+            return CreatedAtRoute("GetVehicleById", new { id = result }, result);
         }
 
         [HttpPut("{id:guid}")]

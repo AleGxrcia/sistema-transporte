@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Dtos.Driver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.DeleteDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.ReactivateDriver;
@@ -55,7 +55,7 @@ namespace TransportSystem.WebApi.Controllers
             [FromBody] RegisterDriverCommand cmd, CancellationToken cancellationToken)
         {
             var result = await Sender.Send(cmd, cancellationToken);
-            return CreatedAtRoute("GetDriverById", new { result }, result);
+            return CreatedAtRoute("GetDriverById", new { id = result }, result);
         }
 
         [HttpPut("{id:guid}")]

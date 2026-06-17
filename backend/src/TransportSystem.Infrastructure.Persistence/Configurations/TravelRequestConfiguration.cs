@@ -36,7 +36,7 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             builder.Property(r => r.AssignedVehicleId);
             builder.Property(r => r.AssignedDriverId);
             builder.Property(r => r.CreatedAt).IsRequired();
-            builder.Property(r => r.UpdatedAt).IsRequired();
+            builder.Property(r => r.UpdatedAt);
 
             // RequestNumber
             builder.OwnsOne(r => r.RequestNumber, rn =>
