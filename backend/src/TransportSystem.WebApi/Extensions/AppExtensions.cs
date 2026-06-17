@@ -1,5 +1,4 @@
-﻿using Swashbuckle.AspNetCore.SwaggerUI;
-using TransportSystem.WebApi.Middlewares;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace TransportSystem.WebApi.Extensions
 {
@@ -19,12 +18,6 @@ namespace TransportSystem.WebApi.Extensions
                 });
             }
 
-            return app;
-        }
-
-        public static WebApplication UseErrorHandlingMiddleware(this WebApplication app)
-        {
-            app.UseMiddleware<GlobalExceptionHandler>();
             return app;
         }
     }
