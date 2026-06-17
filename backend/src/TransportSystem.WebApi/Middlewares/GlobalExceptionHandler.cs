@@ -1,11 +1,12 @@
-﻿using System.Net;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Common.Exceptions;
 using TransportSystem.Core.Domain.Common;
-using TransportSystem.WebApi.Contracts.Common;
 
 namespace TransportSystem.WebApi.Middlewares
 {
-    public class GlobalExceptionHandler
+    public sealed class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
 
@@ -16,48 +17,57 @@ namespace TransportSystem.WebApi.Middlewares
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            var (statusCode, code, message, errors) = exception switch
+            var (statusCode, title, detail) = exception switch
             {
                 UnauthorizedException ex =>
-                    (HttpStatusCode.Unauthorized, "UNAUTHORIZED", ex.Message, null),
+                    (StatusCodes.Status401Unauthorized, "Unauthorized", ex.Message),
 
                 ForbiddenException ex =>
-                    (HttpStatusCode.Forbidden, "FORBIDDEN", ex.Message, null),
+                    (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),
 
                 NotFoundException ex =>
-                    (HttpStatusCode.NotFound, "NOT_FOUND", ex.Message, null),
+                    (StatusCodes.Status404NotFound, "Not Found", ex.Message),
 
                 ConflictException ex =>
-                    (HttpStatusCode.Conflict, "CONFLICT", ex.Message, null),
+                    (StatusCodes.Status409Conflict, "Conflict", ex.Message),
 
                 ValidationException ex =>
-                    (HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR", "Se encontraron errores de validación.", ex.Errors),
+                    (StatusCodes.Status422UnprocessableEntity, "Validation Error", "Se encontraron errores de validación."),
 
                 DomainException ex =>
-                    (HttpStatusCode.UnprocessableEntity, ex.Code, ex.Message, null),
+                    (StatusCodes.Status422UnprocessableEntity, ex.Code, ex.Message),
 
                 OperationCanceledException =>
-                    (HttpStatusCode.BadRequest, "CANCELLED", "La solicitud fue cancelada por el cliente.", null),
+                    (StatusCodes.Status400BadRequest, "Cancelled", "La solicitud fue cancelada por el cliente."),
 
                 _ =>
-                    (HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "Ocurrió un error inesperado en el servidor.", null)
+                    (StatusCodes.Status500InternalServerError, "Internal Server Error", "Ocurrió un error inesperado en el servidor.")
             };
 
-            if (statusCode == HttpStatusCode.InternalServerError)
+            if (statusCode == StatusCodes.Status500InternalServerError)
             {
                 _logger.LogError(exception, "Error inesperado crítico: {Message}", exception.Message);
             }
             else
             {
-                _logger.LogWarning("Excepción controlada {StatusCode} [{Code}]: {Message}", (int)statusCode, code, message);
+                _logger.LogWarning("Excepción controlada {StatusCode} [{Title}]: {Detail}", statusCode, title, detail);
             }
 
-            var response = new ErrorResponse(code, message, errors);
+            var problemDetails = new ProblemDetails
+            {
+                Status = statusCode,
+                Title = title,
+                Detail = detail,
+                Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
+            };
 
-            httpContext.Response.StatusCode = (int)statusCode;
-            httpContext.Response.ContentType = "application/json";
+            if (exception is ValidationException validationException)
+            {
+                problemDetails.Extensions["errors"] = validationException.Errors;
+            }
 
-            await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+            httpContext.Response.StatusCode = statusCode;
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
             return true;
         }
