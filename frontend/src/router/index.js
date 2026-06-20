@@ -1,116 +1,164 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store.js'
+
+const AppLayout = () => import('@/components/layout/AppLayout.vue')
+
+const routes = [
+  {
+    path: '/',
+    redirect: '/dashboard',
+  },
+
+  // Auth routes (no layout, no auth required)
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/auth/LoginView.vue'),
+    meta: { requiresAuth: false, title: 'Iniciar sesión' },
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/views/auth/RecoverPasswordView.vue'),
+    meta: { requiresAuth: false, title: 'Recuperar contraseña' },
+  },
+
+  // App routes (with layout, auth required)
+  {
+    path: '/',
+    component: AppLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/dashboard/DashboardView.vue'),
+        meta: { title: 'Dashboard', module: 'dashboard' },
+      },
+
+      {
+        path: 'vehicles',
+        name: 'vehicles',
+        component: () => import('@/views/vehicles/VehiclesView.vue'),
+        meta: { title: 'Vehículos', module: 'vehicles' },
+      },
+      {
+        path: 'vehicles/:id',
+        name: 'vehicle-detail',
+        component: () => import('@/views/vehicles/VehicleDetailView.vue'),
+        meta: { title: 'Detalle de vehículo', module: 'vehicles' },
+      },
+
+      {
+        path: 'drivers',
+        name: 'drivers',
+        component: () => import('@/views/drivers/DriversView.vue'),
+        meta: { title: 'Conductores', module: 'drivers' },
+      },
+      {
+        path: 'drivers/:id',
+        name: 'driver-detail',
+        component: () => import('@/views/drivers/DriversDetailView.vue'),
+        meta: { title: 'Detalle de conductor', module: 'drivers' },
+      },
+
+      {
+        path: 'requests',
+        name: 'requests',
+        component: () => import('@/views/requests/RequestsView.vue'),
+        meta: { title: 'Solicitudes', module: 'requests' },
+      },
+
+      {
+        path: 'schedules',
+        name: 'schedules',
+        component: () => import('@/views/calendar/CalendarView.vue'),
+        meta: { title: 'Agenda', module: 'schedules' },
+      },
+
+      {
+        path: 'fuel',
+        name: 'fuel',
+        component: () => import('@/views/fuel/FuelView.vue'),
+        meta: { title: 'Combustible', module: 'fuel' },
+      },
+
+      {
+        path: 'reports',
+        name: 'reports',
+        component: () => import('@/views/reports/ReportsView.vue'),
+        meta: {
+          title: 'Reportes',
+          module: 'reports',
+          roles: ['Administrador', 'Supervisor'],
+        },
+      },
+
+      {
+        path: 'users',
+        name: 'users',
+        component: () => import('@/views/admin/UsersView.vue'),
+        meta: {
+          title: 'Usuarios',
+          module: 'users',
+          roles: ['Administrador'],
+        },
+      },
+      {
+        path: 'roles',
+        name: 'roles',
+        component: () => import('@/views/admin/RolesView.vue'),
+        meta: {
+          title: 'Roles y permisos',
+          module: 'roles',
+          roles: ['Administrador'],
+        },
+      },
+
+      {
+        path: 'profile',
+        name: 'profile',
+        component: () => import('@/views/profile/ProfileView.vue'),
+        meta: { title: 'Mi perfil' },
+      },
+    ],
+  },
+]
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    { path: '/', redirect: '/login' },
-    { path: '/login',    name: 'login',    component: () => import('@/views/auth/LoginView.vue') },
-    { path: '/recover',  name: 'recover',  component: () => import('@/views/auth/RecoverPasswordView.vue') },
-    { path: '/register', name: 'register', component: () => import('@/views/auth/RegisterView.vue') },
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior: () => ({ top: 0 }),
+})
 
-    // Rutas con layout
-    {
-      path: '/dashboard',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'dashboard', component: () => import('@/views/dashboard/DashboardView.vue') },
-      ]
-    },
-    {
-      path: '/requests',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'requests', component: () => import('@/views/requests/RequestsView.vue') },
-        { path: 'new', name: 'request-new', component: () => import('@/views/requests/RequestNewView.vue') },
-      ]
-    },
-    {
-      path: '/trips',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'trips', component: () => import('@/views/trips/TripHistoryView.vue') },
-      ]
-    },
-    {
-      path: '/vehicles',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'vehicles', component: () => import('@/views/vehicles/VehiclesView.vue') },
-        { path: ':id', name: 'vehicle-detail', component: () => import('@/views/vehicles/VehicleDetailView.vue') },
-      ]
-    },
-    {
-      path: '/drivers',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'drivers', component: () => import('@/views/drivers/DriversView.vue') },
-        { path: ':id', name: 'driver-detail', component: () => import('@/views/drivers/DriversDetailView.vue') },
-      ]
-    },
-    {
-      path: '/calendar',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'calendar', component: () => import('@/views/calendar/CalendarView.vue') },
-      ]
-    },
-    {
-      path: '/assignments',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'assignments', component: () => import('@/views/assignments/AssignmentView.vue') },
-      ]
-    },
-    {
-      path: '/maintenance',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'maintenance', component: () => import('@/views/maintenance/MaintenanceView.vue') },
-      ]
-    },
-    {
-      path: '/fuel',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'fuel', component: () => import('@/views/fuel/FuelView.vue') },
-      ]
-    },
-    {
-      path: '/reports',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'reports', component: () => import('@/views/reports/ReportsView.vue') },
-      ]
-    },
-    {
-      path: '/admin/users',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'admin-users', component: () => import('@/views/admin/UsersView.vue') },
-      ]
-    },
-    {
-      path: '/profile',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'profile', component: () => import('@/views/profile/ProfileView.vue') },
-      ]
-    },
-    {
-      path: '/notifications',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'notifications', component: () => import('@/views/notifications/NotificationsView.vue') },
-      ]
-    },
-        {
-      path: '/admin/roles',
-      component: () => import('@/components/layout/AppLayout.vue'),
-      children: [
-        { path: '', name: 'admin-roles', component: () => import('@/views/admin/RolesView.vue') },
-      ]
-    },
-  ]
+router.beforeEach(async (to, _from) => {
+  document.title = to.meta.title
+    ? `${to.meta.title} — TransFleet`
+    : 'TransFleet'
+
+  const authStore = useAuthStore()
+
+  authStore.restoreSession()
+
+  const isAuthenticated = authStore.isAuthenticated
+  const requiresAuth = to.meta.requiresAuth !== false
+
+  if (!requiresAuth && isAuthenticated) {
+    return { name: 'dashboard' }
+  }
+
+  if (requiresAuth && !isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (requiresAuth && isAuthenticated && to.meta.roles?.length) {
+    const userRole = authStore.currentRole
+    if (!to.meta.roles.includes(userRole)) {
+      return { name: 'dashboard' }
+    }
+  }
+
+  return true
 })
 
 export default router

@@ -9,18 +9,6 @@
       <h1 class="auth-title">Bienvenido</h1>
       <p class="auth-subtitle">Inicia sesión con tus credenciales</p>
 
-      <div class="role-tabs">
-        <button
-          v-for="rol in roles"
-          :key="rol"
-          class="role-tab"
-          :class="{ active: rolSeleccionado === rol }"
-          @click="rolSeleccionado = rol"
-        >
-          {{ rol }}
-        </button>
-      </div>
-
       <form @submit.prevent="handleLogin" class="auth-form">
 
         <div class="form-group">
@@ -69,14 +57,11 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/composables/useAuth'
 import PasswordInput from '@/components/forms/PasswordInput.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
-
-const roles = ['Administrador', 'Supervisor', 'Operador']
-const rolSeleccionado = ref('Administrador')
+const { login } = useAuth()
 
 const form = reactive({ email: '', password: '' })
 const loading = ref(false)
@@ -86,7 +71,7 @@ async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
-    await authStore.login(form.email, form.password)
+    await login(form.email, form.password)
     router.push('/dashboard')
   } catch {
     error.value = 'Correo o contraseña incorrectos'

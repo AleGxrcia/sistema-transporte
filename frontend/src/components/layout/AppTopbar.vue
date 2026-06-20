@@ -105,16 +105,13 @@ const title = computed(() => {
     '/vehicles':     'Vehículos',
     '/drivers':      'Conductores',
     '/requests':     'Solicitudes de transporte',
-    '/assignments':  'Asignaciones',
-    '/calendar':     'Agenda',
-    '/maintenance':  'Mantenimiento',
+    '/schedules':    'Agenda',
     '/fuel':         'Combustible',
-    '/trips':        'Historial de viajes',
     '/reports':      'Reportes y estadísticas',
     '/notifications':'Notificaciones',
     '/profile':      'Mi perfil',
-    '/admin/users':  'Usuarios',
-    '/admin/roles':  'Roles',
+    '/users':        'Usuarios',
+    '/roles':        'Roles y permisos',
   }
   return titles[route.path] || 'TransFleet'
 })
