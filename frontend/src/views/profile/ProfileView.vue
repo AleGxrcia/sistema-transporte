@@ -65,12 +65,7 @@
 
       <!-- Panel derecho -->
       <div class="right-panel">
-
-        <!-- Botón guardar topbar -->
-        <div class="right-header">
-          <button class="btn-save-top" @click="handleSave">Guardar cambios</button>
-        </div>
-
+        
         <!-- Tabs -->
         <div class="tabs-bar">
           <button
@@ -453,24 +448,6 @@ async function handleSavePreferences() {
   flex-direction: column;
   gap: 1rem;
 }
-
-.right-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-save-top {
-  padding: 0.5rem 1.1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #374151;
-  cursor: pointer;
-}
-
-.btn-save-top:hover { background: #f9fafb; }
 
 /* Tabs */
 .tabs-bar {
