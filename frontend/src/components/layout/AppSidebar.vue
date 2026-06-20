@@ -63,7 +63,7 @@
       <div class="nav-section">
         <span class="nav-section-title" v-if="!isCollapsed">OPERACIONES</span>
 
-        <router-link to="/calendar" class="nav-item">
+        <router-link to="/schedules" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -71,35 +71,6 @@
             <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           <span v-if="!isCollapsed">Agenda</span>
-        </router-link>
-
-        <router-link to="/assignments" class="nav-item">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="17 1 21 5 17 9"/>
-            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <polyline points="7 23 3 19 7 15"/>
-            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          </svg>
-          <span v-if="!isCollapsed">Asignaciones</span>
-        </router-link>
-
-        <router-link to="/trips" class="nav-item">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-          <span v-if="!isCollapsed">Historial de viajes</span>
-        </router-link>
-
-        <router-link to="/maintenance" class="nav-item">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77
-              a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91
-              a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-          <span v-if="!isCollapsed">Mantenimiento</span>
         </router-link>
 
         <router-link to="/fuel" class="nav-item">
@@ -125,7 +96,7 @@
 
       <div class="nav-section" v-if="isAdmin">
         <span class="nav-section-title" v-if="!isCollapsed">ADMINISTRACIÓN</span>
-        <router-link to="/admin/users" class="nav-item">
+        <router-link to="/users" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -135,17 +106,17 @@
           </svg>
           <span v-if="!isCollapsed">Usuarios</span>
         </router-link>
+
+        <router-link to="/roles" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span v-if="!isCollapsed">Roles y permisos</span>
+        </router-link>
       </div>
 
-
-            <router-link to="/admin/roles" class="nav-item">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span v-if="!isCollapsed">Roles y permisos</span>
-      </router-link>
     </nav>
 
     <!-- Usuario en la parte inferior -->
@@ -167,15 +138,15 @@ import { useAuthStore } from '@/stores/auth.store'
 const auth = useAuthStore()
 const isCollapsed = ref(false)
 
-// Badge de solicitudes pendientes 
+// Badge de solicitudes pendientes
 const pendingCount = ref(5)
 
-const isAdmin = computed(() => true) 
+const isAdmin = computed(() => auth.currentRole === 'Administrador')
 
-const userName = computed(() => auth.user?.name || 'Loreanny')
-const userRole = computed(() => auth.role || '')
+const userName = computed(() => auth.user?.fullName || 'Usuario')
+const userRole = computed(() => auth.currentRole || '')
 const userInitials = computed(() => {
-  const name = auth.user?.name || 'L'
+  const name = auth.user?.fullName || 'U'
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 })
 </script>
@@ -324,7 +295,6 @@ const userInitials = computed(() => {
 
 .sidebar-user:hover {
   background: #1e293b;
-
 }
 
 .user-avatar {
