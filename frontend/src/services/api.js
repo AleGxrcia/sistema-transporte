@@ -1,14 +1,19 @@
-const apliClient = axios.create({
-    baseURL : process.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+import axios from 'axios';
+
+const ACCESS_TOKEN_KEY = 'tf_access_token'
+const REFRESH_TOKEN_KEY = 'tf_refresh_token'
+
+const apiClient = axios.create({
+    baseURL : import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
     headers: {
         'Content-Type': 'application/json'
     },
     timeout: 15000,
 })
 
-apliClient.interceptors.request.use(
+apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken')
+        const token = localStorage.getItem(ACCESS_TOKEN_KEY)
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
         }
@@ -30,17 +35,17 @@ function processQueue(error, token = null) {
   failedQueue = []
 }
 
-apliClient.interceptors.response.use(
+apiClient.interceptors.response.use(
     (response) => {
-        return response    
+        return response
     },
     async (error) => {
         const originalRequest = error.config;
 
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             if (originalRequest.url?.includes('/auth/refresh')) {
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                localStorage.removeItem(ACCESS_TOKEN_KEY);
+                localStorage.removeItem(REFRESH_TOKEN_KEY);
                 window.location.href = '/login';
                 return Promise.reject(error);
             }
@@ -50,7 +55,7 @@ apliClient.interceptors.response.use(
                     failedQueue.push({ resolve, reject });
                 }).then((token) => {
                     originalRequest.headers.Authorization = `Bearer ${token}`;
-                    return apliClient(originalRequest);
+                    return apiClient(originalRequest);
                 })
             }
 
@@ -58,16 +63,15 @@ apliClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                const accessToken = localStorage.getItem('accessToken');
+                const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
                 const { data } = await axios.post(
                     `${apiClient.defaults.baseURL}/auth/refresh`,
-                    { accessToken, refreshToken }
+                    { refreshToken }
                 );
 
-                localStorage.setItem('accessToken', data.jwtToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem(ACCESS_TOKEN_KEY, data.jwtToken);
+                localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
 
                 apiClient.defaults.headers.common.Authorization = `Bearer ${data.jwtToken}`;
                 processQueue(null, data.jwtToken);
@@ -76,8 +80,8 @@ apliClient.interceptors.response.use(
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                localStorage.removeItem(ACCESS_TOKEN_KEY);
+                localStorage.removeItem(REFRESH_TOKEN_KEY);
                 window.location.href = '/login';
                 return Promise.reject(refreshError)
             } finally {
@@ -88,4 +92,4 @@ apliClient.interceptors.response.use(
     }
 )
 
-export default apliClient;
+export default apiClient;
