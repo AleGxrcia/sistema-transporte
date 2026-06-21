@@ -49,7 +49,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
             var schedule = await _scheduleRepository.GetByDateWithAssignmentsAsync(
                 request.RequestedTimeSlot.DepartureTime, cancellationToken);
 
-            if (schedule is null)
+            var isNewSchedule = schedule is null;
+            if (isNewSchedule)
             {
                 schedule = Schedule.CreateForDay(request.RequestedTimeSlot.DepartureTime);
                 await _scheduleRepository.AddAsync(schedule, cancellationToken);
@@ -91,7 +92,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
             _requestRepository.Update(request);
             _vehicleRepository.Update(vehicle);
             _driverRepository.Update(driver);
-            _scheduleRepository.Update(schedule);
+            if (!isNewSchedule)
+                _scheduleRepository.Update(schedule);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
