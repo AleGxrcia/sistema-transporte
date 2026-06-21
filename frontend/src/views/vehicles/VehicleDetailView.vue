@@ -13,7 +13,7 @@ import BaseBadge from '@/components/ui/AppBadge.vue'
 import VehicleForm from '@/components/forms/vehicles/VehicleForm.vue'
 import MaintenanceForm from '@/components/forms/vehicles/MaintenanceForm.vue'
 import FuelForm from '@/components/forms/vehicles/FuelForm.vue'
-import { ArrowLeft, Pencil, Wrench, Fuel, PowerOff, Trash2, CheckCircle } from '@lucide/vue'
+import { ArrowLeft, Pencil, Wrench, Fuel, PowerOff, Trash2, CheckCircle, RefreshCw } from '@lucide/vue'
 import { formatDate, formatKilometers, formatCurrency } from '@/utils/formatters'
 import { getVehicleTypeLabel, getMaintenanceTypeLabel } from '@/utils/enumLabels'
 
@@ -73,6 +73,16 @@ async function handleDeactivate() {
     toast.error('Error', getErrorMessage(err, 'No se pudo desactivar'))
   } finally {
     isDeactivating.value = false
+  }
+}
+
+async function handleReactivate() {
+  try {
+    await VehiclesService.reactivate(props.id)
+    toast.success('Vehículo reactivado', 'El vehículo vuelve a estar disponible.')
+    vehicleStore.fetchById(props.id)
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'No se pudo reactivar'))
   }
 }
 
@@ -149,7 +159,15 @@ function afterSaved(successMsg) {
           <Fuel :size="14" /> Combustible
         </button>
         <button
-          v-if="vehicle.status !== 'Inactive'"
+          v-if="vehicle.status === 'Inactive'"
+          class="btn"
+          style="border-color:#16a34a;color:#16a34a"
+          @click="handleReactivate"
+        >
+          <RefreshCw :size="14" /> Reactivar
+        </button>
+        <button
+          v-else
           class="btn"
           style="border-color:var(--amber-border);color:#b45309"
           @click="deactivateModal.open()"

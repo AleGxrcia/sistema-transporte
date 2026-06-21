@@ -125,6 +125,16 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
             Status = VehicleStatus.Inactive;
         }
 
+        public void Reactivate()
+        {
+            if (Status != VehicleStatus.Inactive)
+                throw new DomainException("VEHICLE_INVALID_TRANSITION",
+                    "Solo un vehículo inactivo puede reactivarse.");
+
+            Status = VehicleStatus.Available;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public MaintenanceRecord RegisterMaintenance(MaintenanceType type, string description, DateTime entryDate, string workshop, 
             Guid registeredByUserId, DateTime? estimatedExitDate = null, DateTime? nextMaintenanceDateScheduled = null,
             Mileage? nextMaintenanceKmScheduled = null)
@@ -165,7 +175,7 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
                 mileageAtRefuel, notes);
 
             _fuelRecords.Add(record);
-            CurrentMileage = mileageAtRefuel;
+            CurrentMileage = Mileage.Create(mileageAtRefuel.Value);
             UpdatedAt = DateTime.UtcNow;
 
             return record;

@@ -21,7 +21,8 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
 
         public void Update(Vehicle vehicle)
         {
-            _dbcontext.Vehicles.Update(vehicle);
+            if (_dbcontext.Entry(vehicle).State == EntityState.Detached)
+                _dbcontext.Vehicles.Update(vehicle);
         }
 
         public void Delete(Vehicle vehicle)

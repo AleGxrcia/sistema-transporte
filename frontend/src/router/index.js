@@ -58,6 +58,7 @@ const routes = [
         path: 'vehicles/:id',
         name: 'vehicle-detail',
         component: () => import('@/views/vehicles/VehicleDetailView.vue'),
+        props: true,
         meta: { title: 'Detalle de vehículo', module: 'vehicles' },
       },
 
