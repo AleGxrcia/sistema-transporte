@@ -1,0 +1,39 @@
+:root {
+  /* Marca */
+  --navy: #121a2d;
+  --navy-hover: #1c2640;
+  --navy-active: #243050;
+  --blue: #3b82f6;
+  --blue-hover: #2563d4;
+  --blue-light: #eff6ff;
+  --blue-mid: #bfdbfe;
+  --mint: #a7f3d0;
+  --mint-dark: #059669;
+  --mint-bg: #ecfdf5;
+
+  /* Superficies */
+  --bg: #f3f4f6;
+  --white: #ffffff;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --surface-hover: #f9fafb;
+
+  /* Tipografía */
+  --text: #111827;
+  --text-2: #4b5563;
+  --text-3: #9ca3af;
+
+  /* Semánticos */
+  --amber: #f59e0b;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #ef4444;
+  --red-bg: #fef2f2;
+  --red-border: #fecaca;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --purple-border: #ddd6fe;
+  --sky: #0ea5e9;
+  --sky-bg: #f0f9ff;
+  --sky-border: #bae6fd;
+}
