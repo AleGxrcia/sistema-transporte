@@ -4,6 +4,7 @@ using TransportSystem.Core.Application.Dtos.Vehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.CloseMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeactivateVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeleteVehicle;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.ReactivateVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterFuel;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterVehicle;
@@ -99,6 +100,17 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> Deactivate(Guid id, CancellationToken cancellationToken)
         {
             await Sender.Send(new DeactivateVehicleCommand(id), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/reactivate")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> Reactivate(Guid id, CancellationToken cancellationToken)
+        {
+            await Sender.Send(new ReactivateVehicleCommand(id), cancellationToken);
             return NoContent();
         }
 

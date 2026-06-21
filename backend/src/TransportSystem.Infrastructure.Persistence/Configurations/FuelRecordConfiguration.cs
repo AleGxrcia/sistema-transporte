@@ -10,6 +10,7 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
         {
             builder.ToTable("FuelRecords");
             builder.HasKey(f => f.Id);
+            builder.Property(f => f.Id).ValueGeneratedNever();
 
             builder.Property(f => f.VehicleId).IsRequired();
 
