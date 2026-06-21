@@ -13,13 +13,13 @@ const badge = computed(() => {
     Inactive:        { label: 'Inactivo',          cls: 'badge--gray'   },
     Suspended:       { label: 'Suspendido',        cls: 'badge--red'    },
 
-    Pendiente:       { label: 'Pendiente',         cls: 'badge--amber'  },
-    Aprobada:        { label: 'Aprobada',          cls: 'badge--green'  },
-    Rechazada:       { label: 'Rechazada',         cls: 'badge--red'    },
-    Asignada:        { label: 'Asignada',          cls: 'badge--blue'   },
-    EnCurso:         { label: 'En curso',          cls: 'badge--blue'   },
-    Completada:      { label: 'Completada',        cls: 'badge--green'  },
-    Cancelada:       { label: 'Cancelada',         cls: 'badge--gray'   },
+    Pending:         { label: 'Pendiente',         cls: 'badge--amber'  },
+    Approved:        { label: 'Aprobada',          cls: 'badge--green'  },
+    Rejected:        { label: 'Rechazada',         cls: 'badge--red'    },
+    Assigned:        { label: 'Asignada',          cls: 'badge--blue'   },
+    InProgress:      { label: 'En curso',          cls: 'badge--blue'   },
+    Completed:       { label: 'Completada',        cls: 'badge--green'  },
+    Cancelled:       { label: 'Cancelada',         cls: 'badge--gray'   },
   }
 
   return map[props.status] ?? { label: props.status, cls: 'badge--gray' }

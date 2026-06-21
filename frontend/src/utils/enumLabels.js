@@ -34,6 +34,16 @@ export const DRIVER_STATUSES = [
   { name: 'Inactive', label: 'Inactivo' },
 ]
 
+export const REQUEST_STATUSES = [
+  { name: 'Pending', label: 'Pendiente' },
+  { name: 'Approved', label: 'Aprobada' },
+  { name: 'Rejected', label: 'Rechazada' },
+  { name: 'Assigned', label: 'Asignada' },
+  { name: 'InProgress', label: 'En curso' },
+  { name: 'Completed', label: 'Completada' },
+  { name: 'Cancelled', label: 'Cancelada' },
+]
+
 function labelByName(list, name) {
   return list.find((i) => i.name === name)?.label ?? name
 }
@@ -51,6 +61,7 @@ export const getMaintenanceTypeLabel = (name) => labelByName(MAINTENANCE_TYPES, 
 export const getLicenseCategoryLabel = (name) => labelByName(LICENSE_CATEGORIES, name)
 export const getVehicleStatusLabel = (name) => labelByName(VEHICLE_STATUSES, name)
 export const getDriverStatusLabel = (name) => labelByName(DRIVER_STATUSES, name)
+export const getRequestStatusLabel = (name) => labelByName(REQUEST_STATUSES, name)
 
 export const vehicleTypeValueByName = (name) => valueByName(VEHICLE_TYPES, name)
 export const maintenanceTypeValueByName = (name) => valueByName(MAINTENANCE_TYPES, name)

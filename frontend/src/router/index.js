@@ -82,6 +82,23 @@ const routes = [
         component: () => import('@/views/requests/RequestsView.vue'),
         meta: { title: 'Solicitudes', module: 'requests' },
       },
+      {
+        path: 'requests/new',
+        name: 'request-new',
+        component: () => import('@/views/requests/RequestNewView.vue'),
+        meta: {
+          title: 'Nueva solicitud',
+          module: 'requests',
+          roles: ['Operador', 'Supervisor'],
+        },
+      },
+      {
+        path: 'requests/:id',
+        name: 'request-detail',
+        component: () => import('@/views/requests/RequestFlowView.vue'),
+        props: true,
+        meta: { title: 'Detalle de solicitud', module: 'requests' },
+      },
 
       {
         path: 'schedules',

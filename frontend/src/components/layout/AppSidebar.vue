@@ -142,9 +142,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAuth } from '@/composables/useAuth'
+import { useRequestsStore } from '@/stores/requests.store'
 
 const auth = useAuthStore()
 const { logout } = useAuth()
@@ -155,7 +156,9 @@ function handleLogout() {
 }
 
 // Badge de solicitudes pendientes
-const pendingCount = ref(5)
+const requestsStore = useRequestsStore()
+onMounted(() => requestsStore.fetchPending())
+const pendingCount = computed(() => requestsStore.pendingCount)
 
 const isAdmin = computed(() => auth.currentRole === 'Administrador')
 
