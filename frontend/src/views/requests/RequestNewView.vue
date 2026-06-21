@@ -1,114 +1,13 @@
-<template>
-  <div class="new-request">
-
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-      <router-link to="/requests" class="breadcrumb-link">← Solicitudes</router-link>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Nueva solicitud</span>
-    </div>
-
-    <h2 class="page-title">Solicitud de transporte</h2>
-    <p class="page-subtitle">Completa los datos del viaje. Será revisada por un supervisor antes de ser aprobada.</p>
-
-    <div class="form-card">
-      <div class="form-section-title">INFORMACIÓN DEL VIAJE</div>
-
-      <div class="form-grid">
-
-        <!-- Área solicitante -->
-        <div class="form-group">
-          <label class="form-label">Área solicitante</label>
-          <select v-model="form.area" class="form-select">
-            <option value="">Seleccionar área</option>
-            <option v-for="area in areas" :key="area" :value="area">{{ area }}</option>
-          </select>
-        </div>
-
-        <!-- Cantidad de colaboradores -->
-        <div class="form-group">
-          <label class="form-label">Cantidad de colaboradores</label>
-          <input v-model="form.passengers" type="number" min="1"
-            class="form-input" placeholder="0" />
-        </div>
-
-        <!-- Fecha del viaje -->
-        <div class="form-group">
-          <label class="form-label">Fecha del viaje</label>
-          <input v-model="form.date" type="date" class="form-input" />
-        </div>
-
-        <!-- Vehículo asignado -->
-        <div class="form-group">
-          <label class="form-label">Vehículo asignado</label>
-          <input type="text" class="form-input" placeholder="Pendiente de asignación" disabled />
-        </div>
-
-        <!-- Hora de salida -->
-        <div class="form-group">
-          <label class="form-label">Hora de salida</label>
-          <input v-model="form.departureTime" type="time" class="form-input" />
-        </div>
-
-        <!-- Hora de regreso -->
-        <div class="form-group">
-          <label class="form-label">Hora estimada de regreso</label>
-          <input v-model="form.returnTime" type="time" class="form-input" />
-        </div>
-
-        <!-- Destino -->
-        <div class="form-group full-width">
-          <label class="form-label">Destino</label>
-          <input v-model="form.destination" type="text"
-            class="form-input" placeholder="Ciudad / dirección de destino" />
-        </div>
-
-        <!-- Motivo -->
-        <div class="form-group full-width">
-          <label class="form-label">Motivo del viaje</label>
-          <textarea v-model="form.reason" class="form-textarea"
-            placeholder="Describe brevemente el propósito del viaje institucional..." />
-        </div>
-
-      </div>
-
-      <!-- Info -->
-      <div class="info-banner">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-          viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>
-          La solicitud quedará en estado <strong>Pendiente</strong> hasta ser aprobada por un supervisor.
-          Recibirás una notificación con el resultado.
-        </span>
-      </div>
-
-      <!-- Botones -->
-      <div class="form-actions">
-        <router-link to="/requests" class="btn-cancel">Cancelar</router-link>
-        <button class="btn-submit" @click="handleSubmit" :disabled="loading">
-          {{ loading ? 'Enviando...' : 'Enviar solicitud' }}
-        </button>
-      </div>
-
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { RequestsService } from '@/services/requests.service'
+import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/apiError'
+import { ArrowLeft } from '@lucide/vue'
 
 const router = useRouter()
-const loading = ref(false)
-
-const areas = [
-  'Ventas', 'Operaciones', 'RRHH', 'Finanzas',
-  'Legal', 'Marketing', 'Tecnología', 'Gerencia'
-]
+const toast = useToast()
 
 const form = reactive({
   area: '',
@@ -117,191 +16,148 @@ const form = reactive({
   departureTime: '08:00',
   returnTime: '17:00',
   destination: '',
-  reason: ''
+  reason: '',
 })
 
+const errors = ref({})
+const isSubmitting = ref(false)
+
+function validate() {
+  const errs = {}
+  if (!form.area.trim()) errs.area = 'El área solicitante es requerida'
+  else if (form.area.length > 150) errs.area = 'Máximo 150 caracteres'
+
+  if (!form.passengers || form.passengers <= 0) errs.passengers = 'Debe ser al menos 1 colaborador'
+  else if (form.passengers > 100) errs.passengers = 'No puede superar 100 personas'
+
+  if (!form.date) errs.date = 'La fecha es requerida'
+
+  if (!form.destination.trim()) errs.destination = 'El destino es requerido'
+  else if (form.destination.length > 300) errs.destination = 'Máximo 300 caracteres'
+
+  if (!form.reason.trim()) errs.reason = 'El motivo del viaje es requerido'
+  else if (form.reason.length > 500) errs.reason = 'Máximo 500 caracteres'
+
+  if (form.date && form.departureTime && form.returnTime) {
+    const departure = new Date(`${form.date}T${form.departureTime}`)
+    const returnAt = new Date(`${form.date}T${form.returnTime}`)
+    if (departure <= new Date()) errs.date = 'La fecha y hora de salida debe ser en el futuro'
+    if (returnAt <= departure) errs.returnTime = 'La hora de regreso debe ser posterior a la de salida'
+  }
+
+  errors.value = errs
+  return Object.keys(errs).length === 0
+}
+
 async function handleSubmit() {
-  loading.value = true
+  if (!validate()) return
   try {
-    await new Promise(r => setTimeout(r, 1000))
+    isSubmitting.value = true
+    await RequestsService.create({
+      requestingArea: form.area,
+      passengerCount: Number(form.passengers),
+      destination: form.destination,
+      departureDateTime: new Date(`${form.date}T${form.departureTime}`).toISOString(),
+      returnDateTime: new Date(`${form.date}T${form.returnTime}`).toISOString(),
+      tripPurpose: form.reason,
+    })
+    toast.success('Solicitud enviada', 'Quedará pendiente hasta ser revisada por un supervisor.')
     router.push('/requests')
+  } catch (err) {
+    errors.value.general = getErrorMessage(err, 'No se pudo enviar la solicitud')
   } finally {
-    loading.value = false
+    isSubmitting.value = false
   }
 }
 </script>
 
-<style scoped>
-.new-request {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  font-family: 'Inter', sans-serif;
-  max-width: 760px;
-}
+<template>
+  <div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="icon-btn" @click="router.push('/requests')">
+          <ArrowLeft :size="16" />
+        </button>
+        <h1>Nueva solicitud de transporte</h1>
+      </div>
+    </div>
 
-/* Breadcrumb */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-}
+    <div class="card" style="max-width:680px">
+      <div class="card-title">INFORMACIÓN DEL VIAJE</div>
 
-.breadcrumb-link {
-  color: #2563eb;
-  text-decoration: none;
-}
+      <form @submit.prevent="handleSubmit">
+        <div v-if="errors.general" class="alert red">{{ errors.general }}</div>
 
-.breadcrumb-link:hover { text-decoration: underline; }
-.breadcrumb-sep { color: #d1d5db; }
-.breadcrumb-current { color: #6b7280; }
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Área solicitante <span class="required">*</span></label>
+            <input v-model="form.area" placeholder="Ej. Ventas" :class="{ 'input-error': errors.area }" />
+            <span v-if="errors.area" class="field-error">{{ errors.area }}</span>
+          </div>
 
-.page-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
-}
+          <div class="form-group">
+            <label>Cantidad de colaboradores <span class="required">*</span></label>
+            <input
+              v-model.number="form.passengers"
+              type="number"
+              min="1"
+              max="100"
+              placeholder="0"
+              :class="{ 'input-error': errors.passengers }"
+            />
+            <span v-if="errors.passengers" class="field-error">{{ errors.passengers }}</span>
+          </div>
 
-.page-subtitle {
-  font-size: 0.82rem;
-  color: #6b7280;
-  margin-top: -0.5rem;
-}
+          <div class="form-group">
+            <label>Fecha del viaje <span class="required">*</span></label>
+            <input v-model="form.date" type="date" :class="{ 'input-error': errors.date }" />
+            <span v-if="errors.date" class="field-error">{{ errors.date }}</span>
+          </div>
 
-/* Card del formulario */
-.form-card {
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
+          <div class="form-group">
+            <label>Hora de salida <span class="required">*</span></label>
+            <input v-model="form.departureTime" type="time" />
+          </div>
 
-.form-section-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #9ca3af;
-  letter-spacing: 0.08em;
-  margin-bottom: 1.25rem;
-}
+          <div class="form-group">
+            <label>Hora estimada de regreso <span class="required">*</span></label>
+            <input v-model="form.returnTime" type="time" :class="{ 'input-error': errors.returnTime }" />
+            <span v-if="errors.returnTime" class="field-error">{{ errors.returnTime }}</span>
+          </div>
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
+          <div class="form-group full">
+            <label>Destino <span class="required">*</span></label>
+            <input
+              v-model="form.destination"
+              placeholder="Ciudad / dirección de destino"
+              :class="{ 'input-error': errors.destination }"
+            />
+            <span v-if="errors.destination" class="field-error">{{ errors.destination }}</span>
+          </div>
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
+          <div class="form-group full">
+            <label>Motivo del viaje <span class="required">*</span></label>
+            <textarea
+              v-model="form.reason"
+              placeholder="Describe brevemente el propósito del viaje institucional…"
+              maxlength="500"
+              :class="{ 'input-error': errors.reason }"
+            />
+            <span v-if="errors.reason" class="field-error">{{ errors.reason }}</span>
+          </div>
+        </div>
 
-.form-group.full-width { grid-column: 1 / -1; }
+        <div class="alert" style="background:var(--blue-light);border:1px solid var(--blue-mid);color:#1d4ed8">
+          La solicitud quedará en estado <strong>Pendiente</strong> hasta ser aprobada por un supervisor.
+        </div>
 
-.form-label {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.form-input,
-.form-select {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.2s;
-  background: #fff;
-}
-
-.form-input:focus,
-.form-select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-.form-input:disabled {
-  background: #f9fafb;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.form-textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #111827;
-  outline: none;
-  resize: vertical;
-  min-height: 100px;
-  transition: border-color 0.2s;
-}
-
-.form-textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-/* Info banner */
-.info-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  padding: 0.875rem 1rem;
-  font-size: 0.82rem;
-  color: #1e40af;
-  margin-bottom: 1.25rem;
-  line-height: 1.5;
-}
-
-/* Botones */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #374151;
-  cursor: pointer;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-.btn-cancel:hover { background: #f9fafb; }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: #1d4ed8; }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-</style>
+        <div class="form-actions">
+          <button type="button" class="btn" @click="router.push('/requests')">Cancelar</button>
+          <button type="submit" class="btn primary" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Enviando…' : 'Enviar solicitud' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
