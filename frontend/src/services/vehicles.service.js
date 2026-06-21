@@ -29,6 +29,10 @@ export const VehiclesService = {
         return apiClient.patch(`/vehicles/${id}/deactivate`)
     },
 
+    reactivate(id) {
+        return apiClient.patch(`/vehicles/${id}/reactivate`)
+    },
+
     registerMaintenance(id, data) {
         return apiClient.post(`/vehicles/${id}/maintenance`, data)
     },
