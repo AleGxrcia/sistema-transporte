@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Core.Application.Dtos.Auth;
 using TransportSystem.WebApi.Contracts.Auth;
+using TransportSystem.WebApi.Settings;
 
 namespace TransportSystem.WebApi.Controllers
 {
@@ -11,10 +13,12 @@ namespace TransportSystem.WebApi.Controllers
     public class AuthController : ApiControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly ClientSettings _clientSettings;
 
-        public AuthController(IAccountService accountService)
+        public AuthController(IAccountService accountService, IOptions<ClientSettings> clientSettings)
         {
             _accountService = accountService;
+            _clientSettings = clientSettings.Value;
         }
 
         [HttpPost("login")]
@@ -61,8 +65,7 @@ namespace TransportSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
         {
-            var origin = $"{Request.Scheme}://{Request.Host}";
-            await _accountService.SendForgotPasswordEmailAsync(request.Email, origin, cancellationToken);
+            await _accountService.SendForgotPasswordEmailAsync(request.Email, _clientSettings.BaseUrl, cancellationToken);
             return NoContent();
         }
 

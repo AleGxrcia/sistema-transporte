@@ -6,6 +6,8 @@ namespace TransportSystem.Core.Application.Dtos.Auth
         bool Succeeded,
         string? UserId,
         string? Email,
+        string? FirstName,
+        string? LastName,
         UserRole? Role,
         string? JwtToken,
         string? RefreshToken,

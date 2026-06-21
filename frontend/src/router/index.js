@@ -22,6 +22,18 @@ const routes = [
     component: () => import('@/views/auth/RecoverPasswordView.vue'),
     meta: { requiresAuth: false, title: 'Recuperar contraseña' },
   },
+  {
+    path: '/auth/confirm-email',
+    name: 'confirm-email',
+    component: () => import('@/views/auth/ConfirmEmailView.vue'),
+    meta: { requiresAuth: false, title: 'Confirmar cuenta' },
+  },
+  {
+    path: '/auth/reset-password',
+    name: 'reset-password',
+    component: () => import('@/views/auth/ResetPasswordView.vue'),
+    meta: { requiresAuth: false, title: 'Restablecer contraseña' },
+  },
 
   // App routes (with layout, auth required)
   {

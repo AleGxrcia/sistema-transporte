@@ -68,6 +68,8 @@ namespace TransportSystem.Infrastructure.Identity.Services
                 Succeeded: true,
                 UserId: user.Id,
                 Email: user.Email!,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
                 Role: role,
                 JwtToken: new JwtSecurityTokenHandler().WriteToken(jwt),
                 RefreshToken: refreshToken.Token
@@ -102,6 +104,8 @@ namespace TransportSystem.Infrastructure.Identity.Services
                 Succeeded: true,
                 UserId: user.Id,
                 Email: user.Email!,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
                 Role: role,
                 JwtToken: new JwtSecurityTokenHandler().WriteToken(jwt),
                 RefreshToken: newRefresh.Token
@@ -317,7 +321,8 @@ namespace TransportSystem.Infrastructure.Identity.Services
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var uri = new Uri($"{origin}/auth/reset-password");
-            return QueryHelpers.AddQueryString(uri.ToString(), "token", code);
+            var result = QueryHelpers.AddQueryString(uri.ToString(), "email", user.Email!);
+            return QueryHelpers.AddQueryString(result, "token", code);
         }
 
         private static UserResult ToUserResult(ApplicationUser user, UserRole role)

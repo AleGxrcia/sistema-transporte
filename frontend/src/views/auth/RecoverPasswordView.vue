@@ -52,8 +52,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store.js'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const email = ref('')
 const loading = ref(false)
 const enviado = ref(false)
@@ -63,7 +65,7 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    await new Promise(r => setTimeout(r, 1000))
+    await authStore.forgotPassword(email.value)
     enviado.value = true
   } catch {
     error.value = 'No pudimos procesar tu solicitud. Intenta de nuevo.'

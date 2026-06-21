@@ -35,7 +35,7 @@
           <label class="form-label">Contraseña</label>
           <PasswordInput v-model="form.password" />
           <div class="forgot-link">
-            <router-link to="/recover">Olvidé mi contraseña</router-link>
+            <router-link to="/forgot-password">Olvidé mi contraseña</router-link>
           </div>
         </div>
 
@@ -45,11 +45,6 @@
           {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
         </button>
       </form>
-
-      <p class="auth-footer">
-        ¿Aún no tienes cuenta?
-        <router-link to="/register">Regístrate aquí</router-link>
-      </p>
     </div>
   </div>
 </template>
@@ -249,17 +244,4 @@ async function handleLogin() {
 
 .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.auth-footer {
-  text-align: center;
-  font-size: 0.82rem;
-  color: #6b7280;
-  margin-top: 1.1rem;
-}
-
-.auth-footer a {
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 500;
-}
 </style>

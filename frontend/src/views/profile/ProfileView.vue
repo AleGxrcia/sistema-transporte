@@ -11,61 +11,17 @@
         <div class="avatar-card">
           <div class="avatar-wrapper">
             <div class="avatar">{{ userInitials }}</div>
-            <button class="avatar-edit-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
           </div>
-          <h3 class="profile-name">{{ user.name }}</h3>
+          <h3 class="profile-name">{{ fullName }}</h3>
           <span class="role-badge">{{ user.role }}</span>
           <p class="profile-email">{{ user.email }}</p>
-        </div>
-
-        <!-- Actividad reciente -->
-        <div class="side-card">
-          <div class="side-card-title">ACTIVIDAD RECIENTE</div>
-          <div class="activity-list">
-            <div v-for="item in recentActivity" :key="item.id" class="activity-item">
-              <span class="activity-dot" :style="{ background: item.color }"></span>
-              <div>
-                <p class="activity-text">{{ item.text }}</p>
-                <p class="activity-time">{{ item.time }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sesión activa -->
-        <div class="side-card">
-          <div class="side-card-title">SESIÓN ACTIVA</div>
-          <div class="session-list">
-            <div class="session-row">
-              <span class="session-label">Dispositivo</span>
-              <span class="session-value">Chrome / Windows</span>
-            </div>
-            <div class="session-row">
-              <span class="session-label">IP</span>
-              <span class="session-value">192.168.1.45</span>
-            </div>
-            <div class="session-row">
-              <span class="session-label">Inicio</span>
-              <span class="session-value">Hoy, 08:12</span>
-            </div>
-            <div class="session-row">
-              <span class="session-label">Token expira</span>
-              <span class="session-value green">En 45 min</span>
-            </div>
-          </div>
         </div>
 
       </div>
 
       <!-- Panel derecho -->
       <div class="right-panel">
-        
+
         <!-- Tabs -->
         <div class="tabs-bar">
           <button
@@ -106,30 +62,11 @@
 
           <div class="form-group full-width">
             <label class="form-label">Correo electrónico</label>
-            <div class="email-field">
-              <input v-model="form.email" type="email"
-                class="form-input" placeholder="correo@empresa.com" />
-              <span class="verified-badge">Verificado ✓</span>
-            </div>
+            <input v-model="form.email" type="email"
+              class="form-input" placeholder="correo@empresa.com" />
           </div>
 
-          <div class="form-grid-3">
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input v-model="form.phone" type="text"
-                class="form-input" placeholder="809-555-0001" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Departamento</label>
-              <input v-model="form.department" type="text"
-                class="form-input" placeholder="Tecnología" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cargo</label>
-              <input v-model="form.position" type="text"
-                class="form-input" placeholder="Administrador del Sistema" />
-            </div>
-          </div>
+          <p v-if="saveError" class="error-msg">{{ saveError }}</p>
 
           <div class="form-actions">
             <button class="btn-cancel" @click="resetForm">Descartar cambios</button>
@@ -151,52 +88,23 @@
           <div class="form-group">
             <label class="form-label">Nueva contraseña</label>
             <PasswordInput v-model="passwordForm.new"
-              placeholder="Mín. 8 caracteres" />
+              placeholder="Mín. 6 caracteres" />
           </div>
 
           <div class="form-group">
             <label class="form-label">Confirmar nueva contraseña</label>
             <PasswordInput v-model="passwordForm.confirm"
               placeholder="Repite la nueva contraseña" />
+            <p v-if="passwordMismatch" class="error-msg">Las contraseñas no coinciden</p>
           </div>
 
-          <div class="warning-banner">
-            ⚠️ Al cambiar tu contraseña,
-            <strong>todas las sesiones activas en otros dispositivos serán cerradas</strong>
-            por seguridad.
-          </div>
+          <p v-if="passwordError" class="error-msg">{{ passwordError }}</p>
+          <p v-if="passwordSuccess" class="success-msg">Contraseña actualizada correctamente.</p>
 
           <div class="form-actions">
             <button class="btn-cancel" @click="resetPasswordForm">Cancelar</button>
             <button class="btn-submit" @click="handlePasswordChange" :disabled="loadingPassword">
               {{ loadingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Tab: Preferencias -->
-        <div v-if="activeTab === 'preferences'" class="tab-card">
-          <div class="section-title">PREFERENCIAS DEL SISTEMA</div>
-
-          <div class="pref-list">
-            <div v-for="pref in preferences" :key="pref.key" class="pref-item">
-              <div class="pref-info">
-                <p class="pref-name">{{ pref.name }}</p>
-                <p class="pref-desc">{{ pref.description }}</p>
-              </div>
-              <button
-                class="toggle"
-                :class="{ active: pref.enabled }"
-                @click="pref.enabled = !pref.enabled"
-              >
-                <span class="toggle-thumb"></span>
-              </button>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button class="btn-submit" @click="handleSavePreferences">
-              Guardar preferencias
             </button>
           </div>
         </div>
@@ -208,91 +116,106 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
+import UsersService from '@/services/users.service'
 import PasswordInput from '@/components/forms/PasswordInput.vue'
 
-const auth = useAuthStore()
+const authStore = useAuthStore()
 const activeTab = ref('personal')
 const loading = ref(false)
 const loadingPassword = ref(false)
+const saveError = ref('')
+const passwordError = ref('')
+const passwordSuccess = ref(false)
 
 const tabs = [
-  { key: 'personal',    label: 'Datos personales'   },
-  { key: 'password',    label: 'Cambiar contraseña'  },
-  { key: 'preferences', label: 'Preferencias'         },
+  { key: 'personal', label: 'Datos personales'  },
+  { key: 'password', label: 'Cambiar contraseña' },
 ]
 
-const user = ref({
-  name: auth.user?.name || 'Michael Admin',
-  role: auth.role || 'Administrador',
-  email: 'michael@empresa.com',
-})
+const user = ref({ role: authStore.currentRole || '', email: '' })
+
+const fullName = computed(() => [form.firstName, form.lastName].filter(Boolean).join(' '))
 
 const userInitials = computed(() => {
-  return user.value.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+  const initials = [form.firstName?.[0], form.lastName?.[0]].filter(Boolean).join('')
+  return (initials || fullName.value.slice(0, 2)).toUpperCase()
 })
 
 const form = reactive({
-  firstName:  'Michael',
-  lastName:   'Admin',
-  email:      'michael@empresa.com',
-  phone:      '809-555-0001',
-  department: 'Tecnología',
-  position:   'Administrador del Sistema',
+  firstName: '', lastName: '', email: '',
 })
 
 const passwordForm = reactive({
   current: '', new: '', confirm: ''
 })
 
-const preferences = ref([
-  { key: 'emailNotif',    name: 'Notificaciones por correo',  description: 'Recibe alertas de mantenimiento y solicitudes',    enabled: true  },
-  { key: 'maintenance',   name: 'Alertas de mantenimiento',   description: 'Notificaciones 7 días antes del servicio',          enabled: true  },
-  { key: 'screenNotif',   name: 'Notificaciones en pantalla', description: 'Toasts al aprobar, rechazar o asignar',             enabled: true  },
-  { key: 'licenseExpiry', name: 'Vencimiento de licencias',   description: 'Alertas cuando licencia de conductor vence en 30 días', enabled: false },
-])
+const passwordMismatch = computed(() =>
+  passwordForm.confirm.length > 0 && passwordForm.new !== passwordForm.confirm
+)
 
-const recentActivity = ref([
-  { id: 1, text: 'Solicitud #001 aprobada',    time: 'Hoy, 09:15',      color: '#22c55e' },
-  { id: 2, text: 'Vehículo GHI-789 editado',   time: 'Ayer, 14:30',     color: '#3b82f6' },
-  { id: 3, text: 'Mantenimiento registrado',    time: '26/05/26, 11:00', color: '#f59e0b' },
-  { id: 4, text: 'Usuario Pedro creado',        time: '25/05/26, 09:15', color: '#8b5cf6' },
-])
+onMounted(async () => {
+  if (!authStore.user?.id) return
+  const data = await UsersService.getById(authStore.user.id)
+  user.value = data
+  Object.assign(form, {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+  })
+})
 
 function resetForm() {
   Object.assign(form, {
-    firstName: 'Michael', lastName: 'Admin',
-    email: 'michael@empresa.com', phone: '809-555-0001',
-    department: 'Tecnología', position: 'Administrador del Sistema',
+    firstName: user.value.firstName,
+    lastName: user.value.lastName,
+    email: user.value.email,
   })
+  saveError.value = ''
 }
 
 function resetPasswordForm() {
   Object.assign(passwordForm, { current: '', new: '', confirm: '' })
+  passwordError.value = ''
+  passwordSuccess.value = false
 }
 
 async function handleSave() {
   loading.value = true
+  saveError.value = ''
   try {
-    await new Promise(r => setTimeout(r, 800))
+    const updated = await UsersService.update(authStore.user.id, {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+    })
+    user.value = updated
+    authStore.updateUserInfo(updated)
+  } catch {
+    saveError.value = 'No se pudieron guardar los cambios. Intenta de nuevo.'
   } finally {
     loading.value = false
   }
 }
 
 async function handlePasswordChange() {
+  if (passwordMismatch.value) return
   loadingPassword.value = true
+  passwordError.value = ''
+  passwordSuccess.value = false
   try {
-    await new Promise(r => setTimeout(r, 800))
+    await UsersService.changePassword(authStore.user.id, {
+      currentPassword: passwordForm.current,
+      newPassword: passwordForm.new,
+    })
+    passwordSuccess.value = true
     resetPasswordForm()
+  } catch {
+    passwordError.value = 'No se pudo cambiar la contraseña. Verifica tu contraseña actual.'
   } finally {
     loadingPassword.value = false
   }
-}
-
-async function handleSavePreferences() {
-  await new Promise(r => setTimeout(r, 500))
 }
 </script>
 
@@ -345,22 +268,6 @@ async function handleSavePreferences() {
   color: #fff;
 }
 
-.avatar-edit-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #111827;
-  border: 2px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  cursor: pointer;
-}
-
 .profile-name {
   font-size: 1rem;
   font-weight: 700;
@@ -380,67 +287,6 @@ async function handleSavePreferences() {
   font-size: 0.78rem;
   color: #9ca3af;
 }
-
-/* Side cards */
-.side-card {
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f3f4f6;
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-}
-
-.side-card-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #9ca3af;
-  letter-spacing: 0.08em;
-}
-
-/* Activity */
-.activity-list { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.activity-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.activity-dot {
-  width: 8px;
-  height: 8px;
-  min-width: 8px;
-  border-radius: 50%;
-  margin-top: 4px;
-}
-
-.activity-text {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #111827;
-}
-
-.activity-time {
-  font-size: 0.72rem;
-  color: #9ca3af;
-  margin-top: 1px;
-}
-
-/* Session */
-.session-list { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.session-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.82rem;
-}
-
-.session-label { color: #9ca3af; }
-.session-value { color: #374151; font-weight: 500; }
-.session-value.green { color: #16a34a; }
 
 /* Panel derecho */
 .right-panel {
@@ -529,35 +375,14 @@ async function handleSavePreferences() {
   cursor: not-allowed;
 }
 
-.email-field {
-  position: relative;
-  display: flex;
-  align-items: center;
+.error-msg {
+  font-size: 0.78rem;
+  color: #dc2626;
 }
 
-.email-field .form-input { flex: 1; padding-right: 110px; }
-
-.verified-badge {
-  position: absolute;
-  right: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+.success-msg {
+  font-size: 0.78rem;
   color: #16a34a;
-  background: #f0fdf4;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid #bbf7d0;
-}
-
-/* Warning banner */
-.warning-banner {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 0.875rem 1rem;
-  font-size: 0.82rem;
-  color: #92400e;
-  line-height: 1.5;
 }
 
 /* Form actions */
@@ -596,60 +421,4 @@ async function handleSavePreferences() {
 
 .btn-submit:hover:not(:disabled) { background: #1d4ed8; }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* Preferences toggle */
-.pref-list { display: flex; flex-direction: column; gap: 0; }
-
-.pref-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.pref-item:last-child { border-bottom: none; }
-
-.pref-info { flex: 1; }
-
-.pref-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #111827;
-}
-
-.pref-desc {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  margin-top: 2px;
-}
-
-/* Toggle switch */
-.toggle {
-  width: 44px;
-  height: 24px;
-  border-radius: 999px;
-  background: #d1d5db;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-
-.toggle.active { background: #2563eb; }
-
-.toggle-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.toggle.active .toggle-thumb { transform: translateX(20px); }
 </style>

@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="page-header">
       <h2 class="page-title">Gestión de usuarios</h2>
-      <button class="btn-primary" @click="showModal = true">
+      <button class="btn-primary" @click="openCreate">
         + Nuevo usuario
       </button>
     </div>
@@ -22,7 +22,7 @@
             </svg>
           </div>
         </div>
-        <div class="kpi-value">12</div>
+        <div class="kpi-value">{{ users.length }}</div>
       </div>
 
       <div class="kpi-card">
@@ -35,7 +35,7 @@
             </svg>
           </div>
         </div>
-        <div class="kpi-value">10</div>
+        <div class="kpi-value">{{ activeCount }}</div>
       </div>
 
       <div class="kpi-card">
@@ -49,7 +49,7 @@
             </svg>
           </div>
         </div>
-        <div class="kpi-value">2</div>
+        <div class="kpi-value">{{ inactiveCount }}</div>
       </div>
 
       <div class="kpi-card">
@@ -63,7 +63,7 @@
             </svg>
           </div>
         </div>
-        <div class="kpi-value">2</div>
+        <div class="kpi-value">{{ adminCount }}</div>
       </div>
     </div>
 
@@ -91,6 +91,8 @@
       </select>
     </div>
 
+    <p v-if="loadError" class="error-banner">{{ loadError }}</p>
+
     <!-- Tabla -->
     <div class="table-wrapper">
       <table class="table">
@@ -99,50 +101,64 @@
             <th>USUARIO</th>
             <th>CORREO ELECTRÓNICO</th>
             <th>ROL</th>
-            <th>ÚLTIMO ACCESO</th>
             <th>ESTADO</th>
             <th>ACCIONES</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in filteredUsers" :key="user.id">
+          <tr v-for="u in filteredUsers" :key="u.id">
             <td>
               <div class="user-cell">
-                <div class="user-avatar" :style="{ background: user.avatarColor }">
-                  {{ user.initials }}
+                <div class="user-avatar">
+                  {{ initialsOf(u) }}
                 </div>
-                <div>
-                  <p class="user-name">{{ user.name }}</p>
-                  <p class="user-role-label">{{ user.position }}</p>
-                </div>
+                <p class="user-name">{{ u.firstName }} {{ u.lastName }}</p>
               </div>
             </td>
-            <td class="td-gray">{{ user.email }}</td>
+            <td class="td-gray">{{ u.email }}</td>
             <td>
-              <span class="role-badge" :class="user.role.toLowerCase()">
-                {{ user.role }}
+              <span class="role-badge" :class="u.role.toLowerCase()">
+                {{ u.role }}
               </span>
             </td>
-            <td class="td-gray">{{ user.lastAccess }}</td>
             <td>
-              <span class="badge" :class="user.status === 'Activo' ? 'activo' : 'inactivo'">
-                • {{ user.status }}
+              <span class="badge" :class="u.isActive ? 'activo' : 'inactivo'">
+                • {{ u.isActive ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
             <td>
               <div class="actions">
-                <button class="action-btn" title="Editar" @click="openEdit(user)">
+                <button class="action-btn" title="Editar" @click="openEdit(u)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button class="action-btn" title="Cambiar contraseña">
+                <button class="action-btn" title="Enviar enlace para restablecer contraseña"
+                  @click="handleSendReset(u)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </button>
+                <button class="action-btn" :title="u.isActive ? 'Desactivar' : 'Activar'"
+                  @click="handleToggleActive(u)">
+                  <svg v-if="u.isActive" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </button>
+                <button class="action-btn danger" title="Eliminar" @click="confirmDelete(u)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
                 </button>
               </div>
@@ -152,18 +168,7 @@
       </table>
     </div>
 
-    <!-- Paginación -->
-    <div class="pagination">
-      <span class="pagination-info">
-        Mostrando 1-{{ filteredUsers.length }} de {{ users.length }} usuarios
-      </span>
-      <div class="pagination-btns">
-        <button class="page-btn" disabled>← Anterior</button>
-        <button class="page-btn">Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- editar usuario -->
+    <!-- crear/editar usuario -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal">
         <div class="modal-header">
@@ -190,7 +195,7 @@
 
             <div class="form-group">
               <label class="form-label">Rol</label>
-              <select v-model="form.role" class="form-input">
+              <select v-model="form.role" class="form-input" :disabled="!!editingUser">
                 <option value="">Seleccionar rol</option>
                 <option value="Administrador">Administrador</option>
                 <option value="Supervisor">Supervisor</option>
@@ -204,25 +209,15 @@
                 class="form-input" placeholder="ej: usuario@empresa.com" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input v-model="form.phone" type="text"
-                class="form-input" placeholder="ej: 809-555-0001" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Departamento</label>
-              <input v-model="form.department" type="text"
-                class="form-input" placeholder="ej: Tecnología" />
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Cargo</label>
-              <input v-model="form.position" type="text"
-                class="form-input" placeholder="ej: Administrador del Sistema" />
+            <div v-if="!editingUser" class="form-group full-width">
+              <label class="form-label">Contraseña temporal</label>
+              <input v-model="form.password" type="password"
+                class="form-input" placeholder="Mín. 6 caracteres" />
             </div>
 
           </div>
+
+          <p v-if="modalError" class="error-msg">{{ modalError }}</p>
         </div>
 
         <div class="modal-footer">
@@ -234,11 +229,24 @@
       </div>
     </div>
 
+    <ModalConfirm
+      v-model="showDeleteConfirm"
+      title="Eliminar usuario"
+      :message="`¿Seguro que deseas eliminar a ${deleteTarget?.firstName} ${deleteTarget?.lastName}? Esta acción no se puede deshacer.`"
+      confirm-text="Eliminar"
+      variant="danger"
+      :is-loading="deleting"
+      @confirm="handleDelete"
+    />
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import UsersService from '@/services/users.service.js'
+import AuthService from '@/services/auth.service.js'
+import ModalConfirm from '@/components/modals/ModalConfirm.vue'
 
 const search = ref('')
 const roleFilter = ref('')
@@ -246,61 +254,133 @@ const statusFilter = ref('')
 const showModal = ref(false)
 const editingUser = ref(null)
 const loading = ref(false)
+const modalError = ref('')
+const loadError = ref('')
+
+const users = ref([])
 
 const form = reactive({
-  firstName: '', lastName: '', role: '',
-  email: '', phone: '', department: '', position: ''
+  firstName: '', lastName: '', role: '', email: '', password: '',
 })
 
-const users = ref([
-  { id: 1, name: 'Michael Admin',    initials: 'MA', avatarColor: '#3b82f6', position: 'Administrador del sistema', email: 'michael@empresa.com', role: 'Administrador', lastAccess: 'Hoy, 09:42',      status: 'Activo'   },
-  { id: 2, name: 'Laura Administradora', initials: 'LA', avatarColor: '#22c55e', position: 'Administradora',        email: 'laura@empresa.com',   role: 'Administrador', lastAccess: 'Ayer, 17:15',      status: 'Activo'   },
-  { id: 3, name: 'Carlos Supervisor', initials: 'CS', avatarColor: '#06b6d4', position: 'Supervisor',               email: 'carlos@empresa.com',  role: 'Supervisor',    lastAccess: 'Hoy, 08:30',       status: 'Activo'   },
-  { id: 4, name: 'Pedro Operador',    initials: 'PO', avatarColor: '#f59e0b', position: 'Operador',                 email: 'pedro@empresa.com',   role: 'Operador',      lastAccess: '26/05/26, 14:00',  status: 'Activo'   },
-  { id: 5, name: 'Roberto Inactivo',  initials: 'RI', avatarColor: '#9ca3af', position: 'Operador',                 email: 'roberto@empresa.com', role: 'Operador',      lastAccess: '10/03/26, 11:22',  status: 'Inactivo' },
-])
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref(null)
+const deleting = ref(false)
+
+const activeCount = computed(() => users.value.filter(u => u.isActive).length)
+const inactiveCount = computed(() => users.value.filter(u => !u.isActive).length)
+const adminCount = computed(() => users.value.filter(u => u.role === 'Administrador').length)
 
 const filteredUsers = computed(() => {
   let result = users.value
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter(u =>
-      u.name.toLowerCase().includes(q) ||
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q)
     )
   }
-  if (roleFilter.value)   result = result.filter(u => u.role === roleFilter.value)
-  if (statusFilter.value) result = result.filter(u => u.status === statusFilter.value)
+  if (roleFilter.value) result = result.filter(u => u.role === roleFilter.value)
+  if (statusFilter.value) {
+    result = result.filter(u => (statusFilter.value === 'Activo') === u.isActive)
+  }
   return result
 })
 
-function openEdit(user) {
-  editingUser.value = user
-  const [firstName, ...rest] = user.name.split(' ')
+function initialsOf(u) {
+  return [u.firstName?.[0], u.lastName?.[0]].filter(Boolean).join('').toUpperCase()
+}
+
+async function loadUsers() {
+  loadError.value = ''
+  try {
+    users.value = await UsersService.getAll()
+  } catch {
+    loadError.value = 'No se pudieron cargar los usuarios.'
+  }
+}
+
+onMounted(loadUsers)
+
+function openCreate() {
+  editingUser.value = null
+  Object.assign(form, { firstName: '', lastName: '', role: '', email: '', password: '' })
+  modalError.value = ''
+  showModal.value = true
+}
+
+function openEdit(u) {
+  editingUser.value = u
   Object.assign(form, {
-    firstName, lastName: rest.join(' '),
-    role: user.role, email: user.email,
-    phone: '', department: '', position: user.position
+    firstName: u.firstName, lastName: u.lastName,
+    role: u.role, email: u.email, password: '',
   })
+  modalError.value = ''
   showModal.value = true
 }
 
 function closeModal() {
   showModal.value = false
   editingUser.value = null
-  Object.assign(form, {
-    firstName: '', lastName: '', role: '',
-    email: '', phone: '', department: '', position: ''
-  })
 }
 
 async function handleSave() {
   loading.value = true
+  modalError.value = ''
   try {
-    await new Promise(r => setTimeout(r, 800))
+    if (editingUser.value) {
+      await UsersService.update(editingUser.value.id, {
+        firstName: form.firstName, lastName: form.lastName, email: form.email,
+      })
+    } else {
+      await UsersService.create({
+        firstName: form.firstName, lastName: form.lastName,
+        email: form.email, password: form.password, role: form.role,
+      })
+    }
+    await loadUsers()
     closeModal()
+  } catch {
+    modalError.value = 'No se pudo guardar el usuario. Verifica los datos e intenta de nuevo.'
   } finally {
     loading.value = false
+  }
+}
+
+async function handleSendReset(u) {
+  try {
+    await AuthService.forgotPassword(u.email)
+  } catch {
+    loadError.value = 'No se pudo enviar el enlace de restablecimiento.'
+  }
+}
+
+async function handleToggleActive(u) {
+  try {
+    if (u.isActive) await UsersService.deactivate(u.id)
+    else await UsersService.activate(u.id)
+    await loadUsers()
+  } catch {
+    loadError.value = 'No se pudo actualizar el estado del usuario.'
+  }
+}
+
+function confirmDelete(u) {
+  deleteTarget.value = u
+  showDeleteConfirm.value = true
+}
+
+async function handleDelete() {
+  if (!deleteTarget.value) return
+  deleting.value = true
+  try {
+    await UsersService.remove(deleteTarget.value.id)
+    await loadUsers()
+    showDeleteConfirm.value = false
+  } catch {
+    loadError.value = 'No se pudo eliminar el usuario.'
+  } finally {
+    deleting.value = false
   }
 }
 </script>
@@ -428,6 +508,15 @@ async function handleSave() {
   min-width: 160px;
 }
 
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.82rem;
+}
+
 /* Tabla */
 .table-wrapper {
   background: #fff;
@@ -473,6 +562,7 @@ async function handleSave() {
   height: 36px;
   min-width: 36px;
   border-radius: 50%;
+  background: #3b82f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -485,12 +575,6 @@ async function handleSave() {
   font-size: 0.875rem;
   font-weight: 600;
   color: #111827;
-}
-
-.user-role-label {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  margin-top: 1px;
 }
 
 /* Role badges */
@@ -539,30 +623,7 @@ async function handleSave() {
 }
 
 .action-btn:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
-
-/* Paginación */
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pagination-info { font-size: 0.8rem; color: #9ca3af; }
-.pagination-btns { display: flex; gap: 0.5rem; }
-
-.page-btn {
-  padding: 0.4rem 0.875rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.8rem;
-  font-family: 'Inter', sans-serif;
-  color: #374151;
-  cursor: pointer;
-}
-
-.page-btn:hover:not(:disabled) { background: #f9fafb; }
-.page-btn:disabled { color: #d1d5db; cursor: not-allowed; }
+.action-btn.danger:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
 
 /* Modal */
 .modal-overlay {
@@ -607,7 +668,7 @@ async function handleSave() {
   cursor: pointer;
 }
 
-.modal-body { padding: 1.5rem; }
+.modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
 
 .form-grid {
   display: grid;
@@ -639,6 +700,17 @@ async function handleSave() {
 .form-input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.form-input:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  font-size: 0.78rem;
+  color: #dc2626;
 }
 
 .modal-footer {
