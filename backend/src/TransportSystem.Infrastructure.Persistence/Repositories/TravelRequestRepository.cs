@@ -42,9 +42,22 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
                 FirstOrDefaultAsync(tr => tr.Id == id, cancellationToken);
         }
 
-        public Task<int> GetNextSequenceAsync(int year, CancellationToken cancellationToken = default)
+        public async Task<int> GetNextSequenceAsync(int year, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var prefix = $"TR-{year}-";
+
+            var lastNumber = await _dbcontext.TravelRequests
+                .AsNoTracking()
+                .Where(tr => tr.RequestNumber.Value.StartsWith(prefix))
+                .OrderByDescending(tr => tr.RequestNumber.Value)
+                .Select(tr => tr.RequestNumber.Value)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (lastNumber is null)
+                return 1;
+
+            var sequencePart = lastNumber[prefix.Length..];
+            return int.Parse(sequencePart) + 1;
         }
     }
 }

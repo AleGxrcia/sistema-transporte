@@ -48,5 +48,30 @@ namespace TransportSystem.WebApi.Controllers
             await _accountService.RevokeTokenAsync(request.RefreshToken, cancellationToken);
             return NoContent();
         }
+
+        [HttpPost("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _accountService.ConfirmEmailAsync(request.UserId, request.Token, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+        {
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            await _accountService.SendForgotPasswordEmailAsync(request.Email, origin, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
+        {
+            await _accountService.ResetPasswordAsync(request.Email, request.Token, request.NewPassword, cancellationToken);
+            return NoContent();
+        }
     }
 }
