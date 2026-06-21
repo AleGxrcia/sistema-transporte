@@ -120,12 +120,22 @@
     </nav>
 
     <!-- Usuario en la parte inferior -->
-    <div class="sidebar-user" @click="$router.push('/profile')" style="cursor:pointer">
-      <div class="user-avatar">{{ userInitials }}</div>
-      <div class="user-info" v-if="!isCollapsed">
-        <span class="user-name">{{ userName }}</span>
-        <span class="user-role">{{ userRole }}</span>
+    <div class="sidebar-user">
+      <div class="sidebar-user-info" @click="$router.push('/profile')">
+        <div class="user-avatar">{{ userInitials }}</div>
+        <div class="user-info" v-if="!isCollapsed">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">{{ userRole }}</span>
+        </div>
       </div>
+      <button v-if="!isCollapsed" class="logout-btn" title="Cerrar sesión" @click="handleLogout">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
     </div>
 
   </aside>
@@ -134,9 +144,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/composables/useAuth'
 
 const auth = useAuthStore()
+const { logout } = useAuth()
 const isCollapsed = ref(false)
+
+function handleLogout() {
+  logout()
+}
 
 // Badge de solicitudes pendientes
 const pendingCount = ref(5)
@@ -285,16 +301,46 @@ const userInitials = computed(() => {
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
   border-top: 1px solid #1e293b;
   margin-top: auto;
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.sidebar-user:hover {
+.sidebar-user-info:hover {
   background: #1e293b;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.logout-btn:hover {
+  background: #1e293b;
+  color: #ef4444;
 }
 
 .user-avatar {

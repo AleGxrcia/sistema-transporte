@@ -51,6 +51,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/approve")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -62,6 +63,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/reject")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,6 +76,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/assign")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +89,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/start")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -97,6 +101,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/complete")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -109,6 +114,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/cancel")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

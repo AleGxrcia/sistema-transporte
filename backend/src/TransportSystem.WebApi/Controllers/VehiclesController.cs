@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Dtos.Vehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.CloseMaintenance;
@@ -14,6 +15,7 @@ using TransportSystem.WebApi.Contracts.Vehicles;
 
 namespace TransportSystem.WebApi.Controllers
 {
+    [Authorize]
     [Route("api/vehicles")]
     public class VehiclesController : ApiControllerBase
     {
@@ -52,6 +54,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -64,6 +67,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -78,6 +82,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
@@ -87,6 +92,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/deactivate")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -97,6 +103,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPost("{id:guid}/maintenance")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -114,6 +121,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/maintenance/{recordId:guid}/close")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -129,6 +137,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPost("{id:guid}/fuel")]
+        [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]

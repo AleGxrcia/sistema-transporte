@@ -63,9 +63,10 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
 
         public async Task<Vehicle?> GetByLicensePlateAsync(string licensePlate, CancellationToken cancellationToken = default)
         {
-            return await _dbcontext.Vehicles.
-                FirstOrDefaultAsync(v => v.LicensePlate.Value.Equals(
-                    licensePlate, StringComparison.InvariantCultureIgnoreCase), cancellationToken);
+            var normalized = licensePlate.Trim().ToUpperInvariant().Replace("-", "").Replace(" ", "");
+
+            return await _dbcontext.Vehicles
+                .FirstOrDefaultAsync(v => v.LicensePlate.Value == normalized, cancellationToken);
         }
 
         public async Task<IReadOnlyList<Vehicle>> GetWithUpcomingMaintenanceAsync(

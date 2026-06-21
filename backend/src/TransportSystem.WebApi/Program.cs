@@ -9,10 +9,12 @@ using TransportSystem.Infrastructure.Shared;
 using TransportSystem.WebApi.Extensions;
 using TransportSystem.WebApi.Middlewares;
 using TransportSystem.WebApi.Services;
+using TransportSystem.WebApi.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("Client"));
 
 // Add services to the container.
 builder.Services.AddApplicationLayer();

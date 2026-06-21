@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Dtos.Driver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.DeleteDriver;
@@ -13,6 +14,7 @@ using TransportSystem.WebApi.Contracts.Drivers;
 
 namespace TransportSystem.WebApi.Controllers
 {
+    [Authorize]
     [Route("api/drivers")]
     public class DriversController : ApiControllerBase
     {
@@ -48,6 +50,7 @@ namespace TransportSystem.WebApi.Controllers
         }
         
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -59,6 +62,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -70,6 +74,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
@@ -79,6 +84,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/suspend")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -90,6 +96,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/reactivate")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -100,6 +107,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPatch("{id:guid}/license")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]

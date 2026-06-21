@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import AuthService from '@/services/auth.service.js'
+import { roleLabel } from '@/utils/roles.js'
 
 const KEYS = {
   ACCESS_TOKEN:  'tf_access_token',
@@ -43,6 +44,24 @@ export const useAuthStore = defineStore('auth', () => {
     _clearAuth()
   }
 
+  async function forgotPassword(email) {
+    await AuthService.forgotPassword(email)
+  }
+
+  async function resetPassword(email, token, newPassword) {
+    await AuthService.resetPassword(email, token, newPassword)
+  }
+
+  function updateUserInfo({ firstName, lastName, email }) {
+    if (!user.value) return
+    user.value = {
+      ...user.value,
+      email:    email ?? user.value.email,
+      fullName: [firstName, lastName].filter(Boolean).join(' ') || user.value.fullName,
+    }
+    localStorage.setItem(KEYS.USER, JSON.stringify(user.value))
+  }
+
   function restoreSession() {
     const storedToken = localStorage.getItem(KEYS.ACCESS_TOKEN)
     const storedUser  = _loadUser()
@@ -57,15 +76,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function _applyAuthResult(result) {
-    const ROLE_MAP = { 0: 'Administrador', 1: 'Supervisor', 2: 'Operador' }
-
     accessToken.value  = result.jwtToken
     refreshToken.value = result.refreshToken
     user.value = {
       id:       result.userId,
       email:    result.email,
-      role:     ROLE_MAP[result.role] ?? 'Operador',
-      fullName: result.fullName ?? result.email,
+      role:     roleLabel(result.role),
+      fullName: [result.firstName, result.lastName].filter(Boolean).join(' ') || result.email,
     }
 
     localStorage.setItem(KEYS.ACCESS_TOKEN,  result.jwtToken)
@@ -102,6 +119,9 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     login,
     logout,
+    forgotPassword,
+    resetPassword,
+    updateUserInfo,
     refreshAccessToken,
     restoreSession,
   }
