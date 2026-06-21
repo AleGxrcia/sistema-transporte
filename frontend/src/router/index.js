@@ -59,6 +59,7 @@ const routes = [
         path: 'drivers/:id',
         name: 'driver-detail',
         component: () => import('@/views/drivers/DriversDetailView.vue'),
+        props: true,
         meta: { title: 'Detalle de conductor', module: 'drivers' },
       },
 

@@ -72,7 +72,6 @@ async function handleLogin() {
   loading.value = true
   try {
     await login(form.email, form.password)
-    router.push('/dashboard')
   } catch {
     error.value = 'Correo o contraseña incorrectos'
   } finally {
