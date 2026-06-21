@@ -2,6 +2,7 @@
 using TransportSystem.Core.Application.Common.Enums;
 using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Core.Application.Dtos.TravelRequest;
+using TransportSystem.Core.Domain.Transportation.Enums;
 using TransportSystem.Core.Domain.Transportation.Repositories;
 
 namespace TransportSystem.Core.Application.Features.Transportation.Queries.GetPendingRequests
@@ -22,9 +23,13 @@ namespace TransportSystem.Core.Application.Features.Transportation.Queries.GetPe
             var isSupervisorOrAdmin =
                 _currentUser.IsInRole(UserRole.Supervisor) || _currentUser.IsInRole(UserRole.Admin);
 
-            // TODO: Si el usuario es admin o supervisor, debería poder ver todas las solicitudes pendientes, no solo las suyas
+            var all = await _repository.GetAllAsync(cancellationToken);
 
-            var result = await _repository.GetAllAsync(cancellationToken);
+            var pending = all.Where(r => r.Status == RequestStatus.Pending);
+
+            var result = isSupervisorOrAdmin
+                ? pending
+                : pending.Where(r => r.RequestedByUserId == _currentUser.Id);
 
             return result.Select(r => new TravelRequestDto(
                 r.Id,

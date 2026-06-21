@@ -63,7 +63,13 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
                 throw new DomainException("VEHICLE_UNAVAILABLE",
                     "El vehículo no está disponible para asignación.");
 
-            //TODO: Razones de indisponibilidad del conductor
+            if (driver.License.IsExpired())
+                throw new DomainException("DRIVER_LICENSE_EXPIRED",
+                    "El conductor no puede ser asignado porque su licencia está vencida.");
+
+            if (!driver.IsAvailableForAssignment())
+                throw new DomainException("DRIVER_UNAVAILABLE",
+                    $"El conductor no está disponible para asignación. Estado actual: '{driver.Status}'.");
 
             if (!vehicle.Capacity.CanAccommodate(request.PassengerCount))
                 throw new DomainException("VEHICLE_CAPACITY_INSUFFICIENT",
