@@ -1,587 +1,267 @@
-<template>
-  <div class="drivers">
-
-    <!-- Header -->
-    <div class="page-header">
-      <h2 class="page-title">Gestión de conductores</h2>
-      <button class="btn-primary" @click="showModal = true">
-        + Nuevo conductor
-      </button>
-    </div>
-
-    <!-- Filtros -->
-    <div class="filters">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input v-model="search" type="text"
-          placeholder="Buscar..." class="search-input" />
-      </div>
-      <select v-model="statusFilter" class="filter-select">
-        <option value="">Todos los estados</option>
-        <option value="Disponible">Disponible</option>
-        <option value="En viaje">En viaje</option>
-        <option value="Suspendido">Suspendido</option>
-        <option value="Inactivo">Inactivo</option>
-      </select>
-    </div>
-
-    <!-- Grid de tarjetas -->
-    <div class="drivers-grid">
-      <div
-        v-for="driver in filteredDrivers"
-        :key="driver.id"
-        class="driver-card"
-        @click="$router.push('/drivers/' + driver.id)"
-      >
-        <div class="card-top">
-          <div class="driver-avatar" :style="{ background: driver.avatarColor }">
-            {{ driver.initials }}
-          </div>
-          <div class="driver-info">
-            <h3 class="driver-name">{{ driver.name }}</h3>
-            <p class="driver-cedula">Cédula: {{ driver.cedula }}</p>
-            <p class="driver-phone">Tel: {{ driver.phone }}</p>
-          </div>
-          <button
-            v-if="driver.status !== 'En viaje' && driver.status !== 'Suspendido'"
-            class="edit-btn"
-            @click.stop="openEdit(driver)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="card-bottom">
-          <span class="badge" :class="statusClass(driver.status)">
-            • {{ driver.status }}
-          </span>
-          <span
-            class="license-badge"
-            :class="driver.licenseExpired ? 'expired' : driver.licenseWarning ? 'warning' : 'normal'"
-          >
-            <span v-if="driver.licenseExpired">⚠️</span>
-            Lic. {{ driver.licenseType }} —
-            {{ driver.licenseExpired ? 'VENCIDA' : driver.licenseWarning ? 'Vence en ' + driver.daysToExpiry + ' días' : 'Vence ' + driver.licenseExpiry }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Tarjeta agregar -->
-      <div class="driver-card add-card" @click="showModal = true">
-        <div class="add-icon">+</div>
-        <p class="add-label">Agregar conductor</p>
-      </div>
-    </div>
-
-    <!-- Modal nuevo / editar conductor -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 class="modal-title">
-            {{ editingDriver ? 'Editar conductor' : 'Nuevo conductor' }}
-          </h3>
-          <button class="modal-close" @click="closeModal">✕</button>
-        </div>
-
-        <div class="modal-body">
-          <div class="form-grid">
-
-            <div class="form-group">
-              <label class="form-label">Nombre completo</label>
-              <input v-model="form.name" type="text"
-                class="form-input" placeholder="ej: Juan Pérez" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Cédula</label>
-              <input v-model="form.cedula" type="text"
-                class="form-input" placeholder="ej: 001-2345678-9" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input v-model="form.phone" type="text"
-                class="form-input" placeholder="ej: 809-555-0101" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Número de licencia</label>
-              <input v-model="form.license" type="text"
-                class="form-input" placeholder="ej: LIC-009-2023" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Tipo de licencia</label>
-              <select v-model="form.licenseType" class="form-input">
-                <option value="">Seleccionar tipo</option>
-                <option value="A">Clase A</option>
-                <option value="B">Clase B</option>
-                <option value="C">Clase C</option>
-                <option value="D">Clase D</option>
-                <option value="E">Clase E</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Fecha de vencimiento licencia</label>
-              <input v-model="form.licenseExpiry" type="date" class="form-input" />
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Dirección</label>
-              <input v-model="form.address" type="text"
-                class="form-input"
-                placeholder="ej: Av. Luperón 45, Los Jardines, Santo Domingo" />
-            </div>
-
-            <div class="form-group full-width">
-              <label class="form-label">Supervisor asignado</label>
-              <select v-model="form.supervisor" class="form-input">
-                <option value="">Seleccionar supervisor</option>
-                <option value="Carlos Méndez">Carlos Méndez</option>
-                <option value="Ana Gómez">Ana Gómez</option>
-                <option value="Pedro Ruiz">Pedro Ruiz</option>
-              </select>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="closeModal">Cancelar</button>
-          <button class="btn-submit" @click="handleSave" :disabled="loading">
-            {{ loading ? 'Guardando...' : editingDriver ? 'Guardar cambios' : 'Registrar conductor' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</template>
-
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { driverApi } from '@/services/drivers.service'
+import { useDriverStore } from '@/stores/drivers.store'
+import { useModal } from '@/composables/useModal'
+import { useAuthStore } from '@/stores/auth.store'
+import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/apiError'
+import BaseModal from '@/components/ui/AppBaseModal.vue'
+import ConfirmModal from '@/components/modals/ModalConfirm.vue'
+import DriverForm from '@/components/forms/drivers/DriverForm.vue'
+import AppBadge from '@/components/ui/AppBadge.vue'
+import { Eye, Pencil, Trash2, Plus } from '@lucide/vue'
+import { formatDate, getInitials } from '@/utils/formatters'
+import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
 
-const search = ref('')
+const router = useRouter()
+const auth   = useAuthStore()
+const toast  = useToast()
+const driverStore = useDriverStore()
+
+const search       = ref('')
 const statusFilter = ref('')
-const showModal = ref(false)
-const editingDriver = ref(null)
-const loading = ref(false)
 
-const form = reactive({
-  name: '', cedula: '', phone: '', license: '',
-  licenseType: '', licenseExpiry: '', address: '', supervisor: ''
-})
+onMounted(() => driverStore.fetchAll())
 
-const drivers = ref([
-  { id: 1, name: 'Juan Pérez',      initials: 'JP', avatarColor: '#3b82f6', cedula: '001-2345678-9', phone: '809-555-0101', status: 'Disponible', licenseType: 'B', licenseExpiry: '15/08/2026', licenseWarning: false, licenseExpired: false, daysToExpiry: 79  },
-  { id: 2, name: 'Carlos López',    initials: 'CL', avatarColor: '#22c55e', cedula: '001-3456789-0', phone: '849-555-0202', status: 'En viaje',   licenseType: 'C', licenseExpiry: '30/11/2026', licenseWarning: false, licenseExpired: false, daysToExpiry: 170 },
-  { id: 3, name: 'Roberto Díaz',    initials: 'RD', avatarColor: '#ef4444', cedula: '001-4567890-1', phone: '829-555-0303', status: 'Suspendido', licenseType: 'B', licenseExpiry: '10/03/2026', licenseWarning: false, licenseExpired: true,  daysToExpiry: 0   },
-  { id: 4, name: 'Miguel Fernández',initials: 'MF', avatarColor: '#f59e0b', cedula: '001-5678901-2', phone: '809-555-0404', status: 'Disponible', licenseType: 'C', licenseExpiry: '15/06/2026', licenseWarning: true,  licenseExpired: false, daysToExpiry: 12  },
-  { id: 5, name: 'Ana Martínez',    initials: 'AM', avatarColor: '#8b5cf6', cedula: '001-6789012-3', phone: '849-555-0505', status: 'Disponible', licenseType: 'B', licenseExpiry: '22/01/2027', licenseWarning: false, licenseExpired: false, daysToExpiry: 225 },
-])
+const drivers   = computed(() => driverStore.drivers)
+const isLoading = computed(() => driverStore.isLoadingList)
 
 const filteredDrivers = computed(() => {
   let result = drivers.value
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    result = result.filter(d =>
-      d.name.toLowerCase().includes(q) ||
-      d.cedula.includes(q)
+  if (search.value.trim()) {
+    const q = search.value.trim().toLowerCase()
+    result = result.filter((d) =>
+      d.firstName?.toLowerCase().includes(q) ||
+      d.lastName?.toLowerCase().includes(q) ||
+      d.nationalId?.includes(q)
     )
   }
-  if (statusFilter.value) result = result.filter(d => d.status === statusFilter.value)
+  if (statusFilter.value) result = result.filter((d) => d.status === statusFilter.value)
   return result
 })
 
-function statusClass(status) {
-  const map = {
-    'Disponible': 'disponible',
-    'En viaje':   'en-viaje',
-    'Suspendido': 'suspendido',
-    'Inactivo':   'inactivo',
-  }
-  return map[status] || ''
+const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
+
+const createModal = useModal()
+const deleteModal  = useModal()
+const isDeleting   = ref(false)
+
+function refresh() {
+  driverStore.fetchAll()
 }
 
-function openEdit(driver) {
-  editingDriver.value = driver
-  Object.assign(form, {
-    name: driver.name, cedula: driver.cedula,
-    phone: driver.phone, license: '', licenseType: driver.licenseType,
-    licenseExpiry: '', address: '', supervisor: ''
-  })
-  showModal.value = true
-}
-
-function closeModal() {
-  showModal.value = false
-  editingDriver.value = null
-  Object.assign(form, {
-    name: '', cedula: '', phone: '', license: '',
-    licenseType: '', licenseExpiry: '', address: '', supervisor: ''
-  })
-}
-
-async function handleSave() {
-  loading.value = true
+async function confirmDelete() {
   try {
-    await new Promise(r => setTimeout(r, 800))
-    closeModal()
+    isDeleting.value = true
+    await driverApi.delete(deleteModal.payload.value.id)
+    deleteModal.close()
+    toast.success('Conductor eliminado', `${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} fue eliminado correctamente.`)
+    refresh()
+  } catch (err) {
+    deleteModal.close()
+    toast.error('No se pudo eliminar', getErrorMessage(err, 'Error al eliminar'))
   } finally {
-    loading.value = false
+    isDeleting.value = false
   }
 }
 </script>
 
+<template>
+  <div>
+    <!-- Header -->
+    <div class="page-header">
+      <h1>Gestión de conductores</h1>
+      <button v-if="auth.isAdmin" class="btn primary" @click="createModal.open()">
+        <Plus :size="14" /> Nuevo conductor
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="search-row">
+      <input
+        v-model="search"
+        class="search-input"
+        placeholder="Buscar por nombre o cédula…"
+      />
+      <select v-model="statusFilter">
+        <option value="">Todos los estados</option>
+        <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
+      </select>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="isLoading" class="loading-placeholder">Cargando conductores…</div>
+
+    <!-- Empty state -->
+    <div v-else-if="filteredDrivers.length === 0" class="empty-state">
+      <div class="empty-icon empty-icon--blue">
+        <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
+        </svg>
+      </div>
+      <p class="empty-title">Aún no hay conductores</p>
+      <p class="empty-sub">
+        {{
+          hasActiveFilters
+            ? 'No se encontraron conductores con los filtros aplicados.'
+            : 'Registra el primer conductor para comenzar a asignar viajes.'
+        }}
+      </p>
+      <button
+        v-if="auth.isAdmin && !hasActiveFilters"
+        class="btn primary"
+        @click="createModal.open()"
+      >
+        <Plus :size="14" /> Registrar primer conductor
+      </button>
+    </div>
+
+    <!-- Tabla -->
+    <template v-else>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Conductor</th>
+              <th>Cédula</th>
+              <th>Teléfono</th>
+              <th>Licencia</th>
+              <th>Vencimiento</th>
+              <th>Estado</th>
+              <th style="text-align:center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="driver in filteredDrivers" :key="driver.id">
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="avatar-sm">{{ getInitials(driver.firstName, driver.lastName) }}</span>
+                  {{ driver.firstName }} {{ driver.lastName }}
+                </div>
+              </td>
+              <td class="muted">{{ driver.nationalId }}</td>
+              <td class="muted">{{ driver.phone }}</td>
+              <td><span class="tag">{{ getLicenseCategoryLabel(driver.licenseType) }}</span></td>
+              <td :class="{ 'text-red': driver.licenseExpired, 'text-amber': !driver.licenseExpired && driver.licenseExpiringSoon }">
+                {{ formatDate(driver.licenseExpirationDate) }}
+              </td>
+              <td><AppBadge :status="driver.status" /></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="icon-btn" title="Ver detalle" @click="router.push(`/drivers/${driver.id}`)">
+                    <Eye :size="13" />
+                  </button>
+                  <button
+                    v-if="auth.isAdmin && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
+                    class="icon-btn edit"
+                    title="Editar"
+                    @click="router.push(`/drivers/${driver.id}?edit=true`)"
+                  >
+                    <Pencil :size="13" />
+                  </button>
+                  <button
+                    v-if="auth.isAdmin"
+                    class="icon-btn reject"
+                    title="Eliminar"
+                    @click="deleteModal.open(driver)"
+                  >
+                    <Trash2 :size="13" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </template>
+
+    <!-- ── BaseModal: Crear conductor ────────────────────────────────────── -->
+    <BaseModal
+      :model-value="createModal.isOpen.value"
+      @update:model-value="createModal.close()"
+    >
+      <template #header><h3>Nuevo conductor</h3></template>
+      <DriverForm
+        @saved="createModal.close(); toast.success('Conductor registrado', 'El conductor fue agregado al sistema.'); refresh()"
+        @cancel="createModal.close()"
+      />
+    </BaseModal>
+
+    <!-- ── ConfirmModal: Eliminar ─────────────────────────────────────────── -->
+    <ConfirmModal
+      :model-value="deleteModal.isOpen.value"
+      title="¿Eliminar conductor?"
+      :message="`Esta acción eliminará permanentemente a ${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} del sistema.`"
+      confirm-text="Eliminar"
+      variant="danger"
+      :is-loading="isDeleting"
+      @update:model-value="deleteModal.close()"
+      @confirm="confirmDelete"
+    />
+  </div>
+</template>
+
 <style scoped>
-.drivers {
+.loading-placeholder {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-3);
+}
+
+.empty-state {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  font-family: 'Inter', sans-serif;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  text-align: center;
+  padding: 64px 24px;
+  gap: 10px;
 }
 
-.page-title {
-  font-size: 1.25rem;
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.empty-icon--blue {
+  background: var(--blue-light);
+  border: 1px solid var(--blue-mid, #93c5fd);
+}
+
+.empty-title {
+  font-size: 15px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
+  margin: 0;
+}
+.empty-sub {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.6;
+  max-width: 360px;
+  margin: 0 0 8px;
 }
 
-.btn-primary {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover { background: #1d4ed8; }
-
-/* Filtros */
-.filters {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  background: #fff;
-  color: #9ca3af;
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #111827;
-  width: 180px;
-}
-
-.filter-select {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #374151;
-  background: #fff;
-  outline: none;
-  min-width: 180px;
-}
-
-/* Grid de tarjetas */
-.drivers-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.driver-card {
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f3f4f6;
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: box-shadow 0.2s, border-color 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.driver-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: #e5e7eb;
-}
-
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.875rem;
-  position: relative;
-}
-
-.driver-avatar {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
+.avatar-sm {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
+  background: var(--blue-light, #dbeafe);
+  color: var(--blue, #2563eb);
+  font-size: 10px;
   font-weight: 700;
-  color: #fff;
-}
-
-.driver-info { flex: 1; }
-
-.driver-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 2px;
-}
-
-.driver-cedula,
-.driver-phone {
-  font-size: 0.78rem;
-  color: #6b7280;
-  margin-top: 1px;
-}
-
-.edit-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.15s;
+  flex-shrink: 0;
 }
 
-.edit-btn:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
-
-.card-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-/* Badges estado */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid transparent;
-  width: fit-content;
-}
-
-.badge.disponible { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
-.badge.en-viaje   { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
-.badge.suspendido { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-.badge.inactivo   { background: #f9fafb; color: #6b7280; border-color: #e5e7eb; }
-
-/* License badge */
-.license-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  width: fit-content;
-}
-
-.license-badge.normal  { background: #f3f4f6; color: #374151; }
-.license-badge.warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-.license-badge.expired { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-
-/* Tarjeta agregar */
-.add-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 2px dashed #e5e7eb;
-  background: #f9fafb;
-  min-height: 140px;
-}
-
-.add-card:hover { border-color: #2563eb; background: #eff6ff; }
-
-.add-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px dashed #d1d5db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: #9ca3af;
-}
-
-.add-card:hover .add-icon { border-color: #2563eb; color: #2563eb; }
-
-.add-label {
-  font-size: 0.82rem;
-  color: #9ca3af;
-}
-
-.add-card:hover .add-label { color: #2563eb; }
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.modal-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #9ca3af;
-  cursor: pointer;
-}
-
-.modal-body { padding: 1.5rem; }
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-group { display: flex; flex-direction: column; gap: 0.3rem; }
-.form-group.full-width { grid-column: 1 / -1; }
-
-.form-label {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.form-input {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.2s;
-  background: #fff;
-}
-
-.form-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #f3f4f6;
-}
-
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: #374151;
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: #f9fafb; }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: #1d4ed8; }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.text-red   { color: var(--red); font-weight: 600; }
+.text-amber { color: #b45309; font-weight: 600; }
 </style>

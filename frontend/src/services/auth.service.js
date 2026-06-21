@@ -1,4 +1,4 @@
-import apiClient from './api'
+import apiClient from '@/services/api.js'
 
 const AuthService = {
   async login(email, password) {

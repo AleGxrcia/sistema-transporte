@@ -16,6 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!accessToken.value)
   const currentRole = computed(() => user.value?.role ?? null)
   const currentUser     = computed(() => user.value)
+  const isAdmin = computed(() => currentRole.value === 'Administrador')
 
   async function login(email, password) {
     const result = await AuthService.login(email, password)
@@ -57,6 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function _applyAuthResult(result) {
     const ROLE_MAP = { 0: 'Administrador', 1: 'Supervisor', 2: 'Operador' }
+
     accessToken.value  = result.jwtToken
     refreshToken.value = result.refreshToken
     user.value = {
@@ -97,6 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     currentRole,
     currentUser,
+    isAdmin,
     login,
     logout,
     refreshAccessToken,

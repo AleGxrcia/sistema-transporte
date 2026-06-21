@@ -1,0 +1,39 @@
+import apiClient from './api';
+
+export const driverApi = {
+  list(params = {}) {
+    return apiClient.get('/drivers', { params })
+  },
+
+  available() {
+    return apiClient.get('/drivers/available')
+  },
+
+  getById(id) {
+    return apiClient.get(`/drivers/${id}`)
+  },
+
+  create(data) {
+    return apiClient.post('/drivers', data)
+  },
+
+  update(id, data) {
+    return apiClient.put(`/drivers/${id}`, data)
+  },
+
+  delete(id) {
+    return apiClient.delete(`/drivers/${id}`)
+  },
+
+  suspend(id, reason) {
+    return apiClient.patch(`/drivers/${id}/suspend`, { reason })
+  },
+
+  reactivate(id) {
+    return apiClient.patch(`/drivers/${id}/reactivate`)
+  },
+
+  renewLicense(id, data) {
+    return apiClient.patch(`/drivers/${id}/license`, data)
+  },
+}

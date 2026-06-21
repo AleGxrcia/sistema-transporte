@@ -121,7 +121,7 @@ const fechaHoy = computed(() =>
 )
 
 const userInitials = computed(() => {
-  const name = auth.user?.name || 'L'
+  const name = auth.user?.fullName || 'U'
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 })
 

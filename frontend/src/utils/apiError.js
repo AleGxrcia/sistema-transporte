@@ -1,0 +1,11 @@
+export function getErrorMessage(err, fallback = 'Ocurrió un error inesperado') {
+  const data = err?.response?.data
+  if (!data) return fallback
+
+  if (data.errors) {
+    const firstField = Object.values(data.errors)[0]
+    if (Array.isArray(firstField) && firstField.length) return firstField[0]
+  }
+
+  return data.detail || data.title || fallback
+}
