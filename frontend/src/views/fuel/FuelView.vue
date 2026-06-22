@@ -108,7 +108,7 @@
         </div>
 
         <!-- Formulario registro -->
-        <div class="card">
+        <div v-if="can('create', 'fuel')" class="card">
           <div class="card-section-title">REGISTRAR CONSUMO</div>
 
           <div class="form-group">
@@ -214,12 +214,14 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useFuelStore } from '@/stores/fuel.store'
 import { useVehicleStore } from '@/stores/vehicles.store'
+import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
 import { getErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatDate, formatKilometers, formatNumber } from '@/utils/formatters'
 
 const fuelStore = useFuelStore()
 const vehicleStore = useVehicleStore()
+const { can } = useAuth()
 const toast = useToast()
 
 const palette = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#d1d5db', '#ec4899']

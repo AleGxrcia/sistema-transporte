@@ -91,7 +91,7 @@
           <span v-if="!isCollapsed">Combustible</span>
         </router-link>
 
-        <router-link to="/maintenance" class="nav-item">
+        <router-link v-if="can('view', 'maintenance')" to="/maintenance" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
@@ -99,7 +99,7 @@
           <span v-if="!isCollapsed">Mantenimiento</span>
         </router-link>
 
-        <router-link to="/reports" class="nav-item">
+        <router-link v-if="can('view', 'reports')" to="/reports" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="20" x2="18" y2="10"/>
@@ -110,7 +110,7 @@
         </router-link>
       </div>
 
-      <div class="nav-section" v-if="isAdmin">
+      <div class="nav-section" v-if="can('view', 'users')">
         <span class="nav-section-title" v-if="!isCollapsed">ADMINISTRACIÓN</span>
         <router-link to="/users" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
@@ -164,7 +164,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useRequestsStore } from '@/stores/requests.store'
 
 const auth = useAuthStore()
-const { logout } = useAuth()
+const { logout, can } = useAuth()
 const isCollapsed = ref(false)
 
 function handleLogout() {
@@ -175,8 +175,6 @@ function handleLogout() {
 const requestsStore = useRequestsStore()
 onMounted(() => requestsStore.fetchPending())
 const pendingCount = computed(() => requestsStore.pendingCount)
-
-const isAdmin = computed(() => auth.currentRole === 'Administrador')
 
 const userName = computed(() => auth.user?.fullName || 'Usuario')
 const userRole = computed(() => auth.currentRole || '')

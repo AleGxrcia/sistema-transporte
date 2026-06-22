@@ -4,19 +4,19 @@ import { useRouter } from 'vue-router'
 import { VehiclesService } from '@/services/vehicles.service'
 import { useVehicleStore } from '@/stores/vehicles.store'
 import { useModal } from '@/composables/useModal'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
 import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import VehicleForm from '@/components/forms/vehicles/VehicleForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
-import { Eye, Pencil, Trash2, Plus } from '@lucide/vue'
+import { Eye, Pencil, Trash2, Plus, Truck, CheckCircle2, Wrench, Ban } from '@lucide/vue'
 import { formatKilometers } from '@/utils/formatters'
 import { VEHICLE_STATUSES, VEHICLE_TYPES, getVehicleTypeLabel } from '@/utils/enumLabels'
 
 const router = useRouter()
-const auth   = useAuthStore()
+const { can } = useAuth()
 const toast  = useToast()
 const vehicleStore = useVehicleStore()
 
@@ -45,6 +45,13 @@ const filteredVehicles = computed(() => {
 })
 
 const hasActiveFilters = computed(() => !!(search.value || statusFilter.value || typeFilter.value))
+
+const fleetStats = computed(() => ({
+  total: vehicles.value.length,
+  available: vehicles.value.filter((v) => v.status === 'Available').length,
+  maintenance: vehicles.value.filter((v) => v.status === 'InMaintenance').length,
+  outOfService: vehicles.value.filter((v) => v.status === 'Inactive').length,
+}))
 
 const createModal = useModal()
 const deleteModal  = useModal()
@@ -78,9 +85,37 @@ async function confirmDelete() {
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de vehículos</h1>
-      <button v-if="auth.isAdmin" class="btn primary" @click="createModal.open()">
+      <button v-if="can('create', 'vehicles')" class="btn primary" @click="createModal.open()">
         <Plus :size="14" /> Nuevo vehículo
       </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-val">{{ fleetStats.total }}</div>
+        <div class="kpi-sub">Vehículos en la flota</div>
+        <div class="kpi-icon blue"><Truck :size="16" /></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Disponibles</div>
+        <div class="kpi-val" style="color:var(--mint-dark)">{{ fleetStats.available }}</div>
+        <div class="kpi-sub">Listos para asignar</div>
+        <div class="kpi-icon green"><CheckCircle2 :size="16" /></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Mantenimiento</div>
+        <div class="kpi-val" style="color:var(--amber)">{{ fleetStats.maintenance }}</div>
+        <div class="kpi-sub">En taller actualmente</div>
+        <div class="kpi-icon amber"><Wrench :size="16" /></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Fuera de servicio</div>
+        <div class="kpi-val" style="color:var(--red)">{{ fleetStats.outOfService }}</div>
+        <div class="kpi-sub">Inactivos</div>
+        <div class="kpi-icon red"><Ban :size="16" /></div>
+      </div>
     </div>
 
     <!-- Filtros -->
@@ -121,7 +156,7 @@ async function confirmDelete() {
         }}
       </p>
       <button
-        v-if="auth.isAdmin && !hasActiveFilters"
+        v-if="can('create', 'vehicles') && !hasActiveFilters"
         class="btn primary"
         @click="createModal.open()"
       >
@@ -156,24 +191,24 @@ async function confirmDelete() {
               <td><AppBadge :status="vehicle.status" /></td>
               <td>
                 <div class="action-buttons">
-                  <button class="icon-btn" title="Ver detalle" @click="router.push(`/vehicles/${vehicle.id}`)">
-                    <Eye :size="13" />
+                  <button class="icon-btn view" title="Ver detalle" @click="router.push(`/vehicles/${vehicle.id}`)">
+                    <Eye :size="14" />
                   </button>
                   <button
-                    v-if="auth.isAdmin && vehicle.status !== 'OnTrip'"
+                    v-if="can('edit', 'vehicles') && vehicle.status !== 'OnTrip'"
                     class="icon-btn edit"
                     title="Editar"
                     @click="router.push(`/vehicles/${vehicle.id}?edit=true`)"
                   >
-                    <Pencil :size="13" />
+                    <Pencil :size="14" />
                   </button>
                   <button
-                    v-if="auth.isAdmin"
+                    v-if="can('delete', 'vehicles')"
                     class="icon-btn reject"
                     title="Eliminar"
                     @click="deleteModal.open(vehicle)"
                   >
-                    <Trash2 :size="13" />
+                    <Trash2 :size="14" />
                   </button>
                 </div>
               </td>

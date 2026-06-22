@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDriverStore } from '@/stores/drivers.store'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/composables/useAuth'
 import { useModal } from '@/composables/useModal'
 import { useToast } from '@/composables/useToast'
 import { driverApi } from '@/services/drivers.service'
@@ -21,11 +21,14 @@ const props = defineProps({ id: { type: String, required: true } })
 const route        = useRoute()
 const router       = useRouter()
 const driverStore  = useDriverStore()
-const auth         = useAuthStore()
+const { can }      = useAuth()
 const toast        = useToast()
 
 const driver    = computed(() => driverStore.currentDriver)
 const isLoading = computed(() => driverStore.isLoadingDetail)
+
+const canEditDriver   = computed(() => can('edit', 'drivers'))
+const canDeleteDriver = computed(() => can('delete', 'drivers'))
 
 const initials = computed(() =>
   driver.value ? getInitials(driver.value.firstName, driver.value.lastName) : ''
@@ -128,30 +131,32 @@ function afterSaved(msg) {
         <h1 v-else>Detalle de conductor</h1>
       </div>
 
-      <div v-if="driver && auth.isAdmin" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" @click="editModal.open(driver)">
-          <Pencil :size="14" /> Editar
-        </button>
-        <button class="btn" @click="renewModal.open(driver)">
-          <RefreshCw :size="14" /> Renovar licencia
-        </button>
-        <button
-          v-if="driver.status === 'Suspended' || driver.status === 'Inactive'"
-          class="btn"
-          style="border-color:var(--mint-dark);color:var(--mint-dark)"
-          @click="handleReactivate"
-        >
-          <CheckCircle :size="14" /> Reactivar
-        </button>
-        <button
-          v-else-if="driver.status === 'Available'"
-          class="btn"
-          style="border-color:var(--amber-border);color:var(--amber-text)"
-          @click="suspendModal.open()"
-        >
-          <Ban :size="14" /> Suspender
-        </button>
-        <button class="btn danger" @click="deleteModal.open()">
+      <div v-if="driver && (canEditDriver || canDeleteDriver)" style="display:flex;gap:8px;flex-wrap:wrap">
+        <template v-if="canEditDriver">
+          <button class="btn" @click="editModal.open(driver)">
+            <Pencil :size="14" /> Editar
+          </button>
+          <button class="btn" @click="renewModal.open(driver)">
+            <RefreshCw :size="14" /> Renovar licencia
+          </button>
+          <button
+            v-if="driver.status === 'Suspended' || driver.status === 'Inactive'"
+            class="btn"
+            style="border-color:var(--mint-dark);color:var(--mint-dark)"
+            @click="handleReactivate"
+          >
+            <CheckCircle :size="14" /> Reactivar
+          </button>
+          <button
+            v-else-if="driver.status === 'Available'"
+            class="btn"
+            style="border-color:var(--amber-border);color:var(--amber-text)"
+            @click="suspendModal.open()"
+          >
+            <Ban :size="14" /> Suspender
+          </button>
+        </template>
+        <button v-if="canDeleteDriver" class="btn danger" @click="deleteModal.open()">
           <Trash2 :size="14" /> Eliminar
         </button>
       </div>

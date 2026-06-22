@@ -89,7 +89,7 @@ const routes = [
         meta: {
           title: 'Nueva solicitud',
           module: 'requests',
-          roles: ['Operador', 'Supervisor'],
+          roles: ['Administrador', 'Operador'],
         },
       },
       {
