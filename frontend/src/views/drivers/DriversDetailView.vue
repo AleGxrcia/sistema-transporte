@@ -138,7 +138,7 @@ function afterSaved(msg) {
         <button
           v-if="driver.status === 'Suspended' || driver.status === 'Inactive'"
           class="btn"
-          style="border-color:#16a34a;color:#16a34a"
+          style="border-color:var(--mint-dark);color:var(--mint-dark)"
           @click="handleReactivate"
         >
           <CheckCircle :size="14" /> Reactivar
@@ -146,7 +146,7 @@ function afterSaved(msg) {
         <button
           v-else-if="driver.status === 'Available'"
           class="btn"
-          style="border-color:var(--amber-border);color:#b45309"
+          style="border-color:var(--amber-border);color:var(--amber-text)"
           @click="suspendModal.open()"
         >
           <Ban :size="14" /> Suspender
@@ -301,7 +301,7 @@ function afterSaved(msg) {
 .profile-card { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .profile-avatar {
   width: 64px; height: 64px; border-radius: 50%;
-  background: var(--blue-light, #dbeafe); color: var(--blue, #2563eb);
+  background: var(--blue-light); color: var(--blue-hover);
   font-size: 22px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
@@ -313,7 +313,7 @@ function afterSaved(msg) {
 .info-row dd { font-weight: 500; }
 
 .text-red   { color: var(--red); font-weight: 600; }
-.text-amber { color: #b45309; font-weight: 600; }
+.text-amber { color: var(--amber-text); font-weight: 600; }
 
 .license-banner {
   display: flex; align-items: center; gap: 8px;
@@ -321,7 +321,7 @@ function afterSaved(msg) {
   font-size: 13px; font-weight: 600;
   margin-bottom: 16px;
 }
-.banner--warning { background: var(--amber-bg); color: #b45309; border: 1px solid var(--amber-border); }
+.banner--warning { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border); }
 .banner--expired { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
 
 .trip-list { display: flex; flex-direction: column; gap: 6px; }

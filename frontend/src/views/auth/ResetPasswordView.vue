@@ -87,11 +87,11 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: var(--bg);
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 16px;
   padding: 2rem;
   width: 100%;
@@ -115,7 +115,7 @@ async function handleSubmit() {
 .auth-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -135,18 +135,18 @@ async function handleSubmit() {
 .form-label {
   font-size: 0.82rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-2);
 }
 
 .success-msg {
   font-size: 0.875rem;
-  color: #16a34a;
+  color: var(--mint-dark);
   text-align: center;
 }
 
 .error-msg {
   font-size: 0.78rem;
-  color: #dc2626;
+  color: var(--red);
   text-align: center;
 }
 
@@ -154,8 +154,8 @@ async function handleSubmit() {
   width: 50%;
   margin: 0 auto;
   padding: 0.75rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -165,6 +165,6 @@ async function handleSubmit() {
   transition: background 0.2s;
 }
 
-.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-hover); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

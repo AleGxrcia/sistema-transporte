@@ -147,7 +147,7 @@ async function handleSubmit() {
           </div>
         </div>
 
-        <div class="alert" style="background:var(--blue-light);border:1px solid var(--blue-mid);color:#1d4ed8">
+        <div class="alert" style="background:var(--blue-light);border:1px solid var(--blue-mid);color:var(--blue-hover)">
           La solicitud quedará en estado <strong>Pendiente</strong> hasta ser aprobada por un supervisor.
         </div>
 

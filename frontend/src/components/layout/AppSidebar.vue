@@ -73,6 +73,14 @@
           <span v-if="!isCollapsed">Agenda</span>
         </router-link>
 
+        <router-link to="/trips" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span v-if="!isCollapsed">Historial de viajes</span>
+        </router-link>
+
         <router-link to="/fuel" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

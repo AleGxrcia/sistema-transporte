@@ -105,7 +105,7 @@
                   class="bar-fill"
                   :style="{
                     height: (mes.count / maxMonthly * 100) + '%',
-                    background: isCurrentMonth(mes) ? '#2563eb' : '#bfdbfe'
+                    background: isCurrentMonth(mes) ? 'var(--blue-hover)' : 'var(--blue-mid)'
                   }"
                 ></div>
               </div>
@@ -171,7 +171,7 @@
                   class="bar-fill"
                   :style="{
                     height: (mes.gallons / maxFuel * 100) + '%',
-                    background: isCurrentMonth(mes) ? '#d97706' : '#fed7aa'
+                    background: isCurrentMonth(mes) ? 'var(--amber)' : 'var(--amber-border)'
                   }"
                 ></div>
               </div>
@@ -322,12 +322,12 @@ async function handleExportPdf() {
 }
 
 .month-input {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #374151;
+  color: var(--text-2);
   outline: none;
 }
 
@@ -338,22 +338,22 @@ async function handleExportPdf() {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--white);
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #374151;
+  color: var(--text-2);
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-export:hover:not(:disabled) { background: #f9fafb; }
+.btn-export:hover:not(:disabled) { background: var(--surface-hover); }
 .btn-export:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .empty-state {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: var(--text-3);
   padding: 1.5rem 0;
   text-align: center;
 }
@@ -366,11 +366,17 @@ async function handleExportPdf() {
 }
 
 .kpi-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
   padding: 1.1rem;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow .15s, transform .15s;
+}
+
+.kpi-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .kpi-top {
@@ -383,7 +389,7 @@ async function handleExportPdf() {
 .kpi-label {
   font-size: 0.65rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.05em;
 }
 
@@ -396,21 +402,21 @@ async function handleExportPdf() {
   justify-content: center;
 }
 
-.kpi-icon.blue   { background: #eff6ff; color: #2563eb; }
-.kpi-icon.green  { background: #f0fdf4; color: #16a34a; }
-.kpi-icon.orange { background: #fff7ed; color: #d97706; }
-.kpi-icon.purple { background: #f5f3ff; color: #7c3aed; }
+.kpi-icon.blue   { background: var(--blue-light); color: var(--blue-hover); }
+.kpi-icon.green  { background: var(--mint-bg); color: var(--mint-dark); }
+.kpi-icon.orange { background: var(--amber-bg); color: var(--amber); }
+.kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
 
 .kpi-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .kpi-sub { font-size: 0.75rem; }
-.kpi-sub.green { color: #16a34a; }
-.kpi-sub.gray  { color: #6b7280; }
+.kpi-sub.green { color: var(--mint-dark); }
+.kpi-sub.gray  { color: var(--text-2); }
 
 /* Charts grid */
 .charts-grid {
@@ -421,17 +427,17 @@ async function handleExportPdf() {
 
 /* Card */
 .card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .card-title {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.08em;
   margin-bottom: 1.25rem;
 }
@@ -439,7 +445,7 @@ async function handleExportPdf() {
 .section-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin-bottom: 1rem;
 }
 
@@ -476,17 +482,17 @@ async function handleExportPdf() {
 
 .bar-label {
   font-size: 0.7rem;
-  color: #9ca3af;
+  color: var(--text-3);
   margin-top: 0.4rem;
 }
 
-.bar-label.active { color: #2563eb; font-weight: 600; }
+.bar-label.active { color: var(--blue-hover); font-weight: 600; }
 
 /* Valores debajo */
 .bar-values {
   display: flex;
   gap: 0.75rem;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--border);
   padding-top: 0.75rem;
   margin-top: 0.25rem;
 }
@@ -502,10 +508,10 @@ async function handleExportPdf() {
 .bar-value {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
 }
 
-.bar-value.active { color: #2563eb; }
+.bar-value.active { color: var(--blue-hover); }
 
 /* Horizontal bars */
 .hbar-list {
@@ -523,7 +529,7 @@ async function handleExportPdf() {
 .hbar-label {
   width: 80px;
   font-size: 0.82rem;
-  color: #374151;
+  color: var(--text-2);
   text-align: right;
   flex-shrink: 0;
 }
@@ -531,7 +537,7 @@ async function handleExportPdf() {
 .hbar-track {
   flex: 1;
   height: 10px;
-  background: #f3f4f6;
+  background: var(--border);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -545,7 +551,7 @@ async function handleExportPdf() {
 .hbar-value {
   width: 24px;
   font-size: 0.82rem;
-  color: #374151;
+  color: var(--text-2);
   font-weight: 600;
   text-align: right;
   flex-shrink: 0;
@@ -554,7 +560,7 @@ async function handleExportPdf() {
 /* Tabla */
 .table-wrapper {
   border-radius: 8px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -564,24 +570,24 @@ async function handleExportPdf() {
   text-align: left;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.05em;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border);
 }
 
 .table td {
   padding: 0.875rem 1rem;
   font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #f9fafb;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--surface-hover);
 }
 
 .table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: #f9fafb; }
+.table tbody tr:hover { background: var(--surface-hover); }
 
-.td-bold { font-weight: 600; color: #111827; }
-.td-gray { color: #6b7280; }
+.td-bold { font-weight: 600; color: var(--text); }
+.td-gray { color: var(--text-2); }
 
 /* Trips cell con mini barra */
 .trips-cell {
@@ -593,14 +599,14 @@ async function handleExportPdf() {
 .mini-bar-track {
   width: 80px;
   height: 6px;
-  background: #f3f4f6;
+  background: var(--border);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .mini-bar-fill {
   height: 100%;
-  background: #2563eb;
+  background: var(--blue-hover);
   border-radius: 999px;
 }
 </style>

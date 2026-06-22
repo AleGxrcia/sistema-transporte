@@ -106,6 +106,7 @@ const title = computed(() => {
     '/drivers':      'Conductores',
     '/requests':     'Solicitudes de transporte',
     '/schedules':    'Agenda',
+    '/trips':        'Historial de viajes',
     '/fuel':         'Combustible',
     '/reports':      'Reportes y estadísticas',
     '/notifications':'Notificaciones',

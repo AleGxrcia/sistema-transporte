@@ -157,15 +157,15 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 
 /* Alerta */
 .alert-banner {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
   border-radius: 8px;
   padding: 0.875rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-size: 0.875rem;
-  color: #92400e;
+  color: var(--amber-text);
 }
 
 /* Roles grid */
@@ -176,8 +176,8 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 }
 
 .role-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--white);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1.5rem;
   display: flex;
@@ -188,12 +188,12 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
   transition: all 0.2s;
 }
 
-.role-card:hover { border-color: #2563eb; }
+.role-card:hover { border-color: var(--blue-hover); }
 
 .role-card.active {
-  border-color: #8b5cf6;
-  background: #f5f3ff;
-  box-shadow: 0 0 0 1px #8b5cf6;
+  border-color: var(--purple);
+  background: var(--purple-bg);
+  box-shadow: 0 0 0 1px var(--purple);
 }
 
 .role-emoji { font-size: 1.75rem; }
@@ -201,23 +201,23 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 .role-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-2);
 }
 
-.role-name.active { color: #7c3aed; }
+.role-name.active { color: var(--purple); }
 
 .role-count {
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: var(--text-3);
 }
 
 /* Permisos */
 .permissions-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .permissions-header {
@@ -225,34 +225,34 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border);
 }
 
 .permissions-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.08em;
   margin-bottom: 0.25rem;
 }
 
-.permissions-title .purple { color: #7c3aed; }
-.permissions-title .blue   { color: #2563eb; }
-.permissions-title .gray   { color: #6b7280; }
+.permissions-title .purple { color: var(--purple); }
+.permissions-title .blue   { color: var(--blue-hover); }
+.permissions-title .gray   { color: var(--text-2); }
 
 .permissions-subtitle {
   font-size: 0.82rem;
-  color: #6b7280;
+  color: var(--text-2);
 }
 
 .restricted-badge {
-  background: #f5f3ff;
-  color: #7c3aed;
+  background: var(--purple-bg);
+  color: var(--purple);
   font-size: 0.75rem;
   font-weight: 500;
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid #ddd6fe;
+  border: 1px solid var(--purple-border);
   white-space: nowrap;
 }
 
@@ -265,10 +265,10 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
   text-align: center;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.05em;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border);
 }
 
 .table th:first-child { text-align: left; }
@@ -276,18 +276,18 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 .table td {
   padding: 0.875rem 1rem;
   font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #f9fafb;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--surface-hover);
   text-align: center;
 }
 
 .table td:first-child { text-align: left; }
 .table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: #f9fafb; }
+.table tbody tr:hover { background: var(--surface-hover); }
 
 .td-module {
   font-weight: 500;
-  color: #111827;
+  color: var(--text);
   text-align: left;
 }
 
@@ -295,7 +295,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 :deep(.perm-check) {
   width: 22px;
   height: 22px;
-  background: #16a34a;
+  background: var(--mint-dark);
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -304,7 +304,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 }
 
 :deep(.perm-dash) {
-  color: #d1d5db;
+  color: var(--border-strong);
   font-size: 1rem;
   display: block;
   text-align: center;

@@ -108,6 +108,13 @@ const routes = [
       },
 
       {
+        path: 'trips',
+        name: 'trips',
+        component: () => import('@/views/trips/TripHistoryView.vue'),
+        meta: { title: 'Historial de viajes', module: 'trips' },
+      },
+
+      {
         path: 'fuel',
         name: 'fuel',
         component: () => import('@/views/fuel/FuelView.vue'),

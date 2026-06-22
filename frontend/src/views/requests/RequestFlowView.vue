@@ -299,7 +299,7 @@ async function loadAssignedResources() {
 
       <!-- Asignación de recursos -->
       <div v-if="request.status === 'Approved' && canManage">
-        <div class="alert" style="background:var(--mint-bg);border:1px solid #6ee7b7;color:var(--mint-dark)">
+        <div class="alert" style="background:var(--mint-bg);border:1px solid var(--mint-border);color:var(--mint-dark)">
           ✓ Solicitud aprobada — ahora asigna los recursos para el viaje.
         </div>
 
@@ -441,7 +441,7 @@ async function loadAssignedResources() {
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
 }
 .step-circle.completed { background: var(--mint-dark); }
 .step-circle.active { background: var(--blue); }

@@ -85,11 +85,11 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: var(--bg);
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 16px;
   padding: 2rem;
   width: 100%;
@@ -113,7 +113,7 @@ async function handleSubmit() {
 .auth-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -133,20 +133,20 @@ async function handleSubmit() {
 .form-label {
   font-size: 0.82rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-2);
 }
 
 .input-field {
   display: flex;
   align-items: center;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   overflow: hidden;
   transition: border-color 0.2s;
 }
 
 .input-field:focus-within {
-  border-color: #2563eb;
+  border-color: var(--blue-hover);
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
 }
 
@@ -157,8 +157,8 @@ async function handleSubmit() {
   width: 42px;
   min-width: 42px;
   height: 42px;
-  color: #9ca3af;
-  border-right: 1px solid #e5e7eb;
+  color: var(--text-3);
+  border-right: 1px solid var(--border);
 }
 
 .field-input {
@@ -168,18 +168,18 @@ async function handleSubmit() {
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #111827;
+  color: var(--text);
   background: transparent;
 }
 
-.field-input::placeholder { color: #9ca3af; }
+.field-input::placeholder { color: var(--text-3); }
 
 .btn-primary {
   width: 50%;
   margin: 0 auto;
   padding: 0.75rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -189,13 +189,13 @@ async function handleSubmit() {
   transition: background 0.2s;
 }
 
-.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-hover); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-link {
   background: none;
   border: none;
-  color: #2563eb;
+  color: var(--blue-hover);
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -205,13 +205,13 @@ async function handleSubmit() {
 
 .success-msg {
   font-size: 0.875rem;
-  color: #16a34a;
+  color: var(--mint-dark);
   text-align: center;
 }
 
 .error-msg {
   font-size: 0.78rem;
-  color: #dc2626;
+  color: var(--red);
   text-align: center;
 }
 </style>

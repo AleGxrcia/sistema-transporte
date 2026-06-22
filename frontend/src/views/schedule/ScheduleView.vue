@@ -279,7 +279,7 @@ function viewRequest(a) {
   justify-content: center;
   border-radius: 50%;
 }
-.month-day-number.today { background: var(--blue); color: #fff; font-weight: 700; }
+.month-day-number.today { background: var(--blue); color: var(--white); font-weight: 700; }
 .month-events { display: flex; flex-direction: column; gap: 2px; }
 .month-event {
   font-size: 10.5px;

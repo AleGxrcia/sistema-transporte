@@ -239,15 +239,15 @@ async function handlePasswordChange() {
 }
 
 .avatar-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .avatar-wrapper {
@@ -259,24 +259,24 @@ async function handlePasswordChange() {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--blue);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
 }
 
 .profile-name {
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
 }
 
 .role-badge {
-  background: #f5f3ff;
-  color: #7c3aed;
+  background: var(--purple-bg);
+  color: var(--purple);
   font-size: 0.75rem;
   font-weight: 500;
   padding: 3px 12px;
@@ -285,7 +285,7 @@ async function handlePasswordChange() {
 
 .profile-email {
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: var(--text-3);
 }
 
 /* Panel derecho */
@@ -298,7 +298,7 @@ async function handlePasswordChange() {
 /* Tabs */
 .tabs-bar {
   display: flex;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .tab {
@@ -307,23 +307,23 @@ async function handlePasswordChange() {
   background: none;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #6b7280;
+  color: var(--text-2);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
   margin-bottom: -1px;
 }
 
-.tab:hover { color: #111827; }
-.tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--blue-hover); border-bottom-color: var(--blue-hover); font-weight: 600; }
 
 /* Tab card */
 .tab-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -332,7 +332,7 @@ async function handlePasswordChange() {
 .section-title {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.08em;
 }
 
@@ -349,40 +349,40 @@ async function handlePasswordChange() {
 .form-label {
   font-size: 0.82rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-2);
 }
 
 .form-input {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #111827;
+  color: var(--text);
   outline: none;
   transition: border-color 0.2s;
-  background: #fff;
+  background: var(--white);
 }
 
 .form-input:focus {
-  border-color: #2563eb;
+  border-color: var(--blue-hover);
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
 }
 
 .form-input:disabled {
-  background: #f9fafb;
-  color: #9ca3af;
+  background: var(--surface-hover);
+  color: var(--text-3);
   cursor: not-allowed;
 }
 
 .error-msg {
   font-size: 0.78rem;
-  color: #dc2626;
+  color: var(--red);
 }
 
 .success-msg {
   font-size: 0.78rem;
-  color: #16a34a;
+  color: var(--mint-dark);
 }
 
 /* Form actions */
@@ -395,21 +395,21 @@ async function handlePasswordChange() {
 
 .btn-cancel {
   padding: 0.6rem 1.25rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--white);
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #374151;
+  color: var(--text-2);
   cursor: pointer;
 }
 
-.btn-cancel:hover { background: #f9fafb; }
+.btn-cancel:hover { background: var(--surface-hover); }
 
 .btn-submit {
   padding: 0.6rem 1.25rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.875rem;
@@ -419,6 +419,6 @@ async function handlePasswordChange() {
   transition: background 0.2s;
 }
 
-.btn-submit:hover:not(:disabled) { background: #1d4ed8; }
+.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

@@ -161,7 +161,7 @@ function afterSaved(successMsg) {
         <button
           v-if="vehicle.status === 'Inactive'"
           class="btn"
-          style="border-color:#16a34a;color:#16a34a"
+          style="border-color:var(--mint-dark);color:var(--mint-dark)"
           @click="handleReactivate"
         >
           <RefreshCw :size="14" /> Reactivar
@@ -169,7 +169,7 @@ function afterSaved(successMsg) {
         <button
           v-else
           class="btn"
-          style="border-color:var(--amber-border);color:#b45309"
+          style="border-color:var(--amber-border);color:var(--amber-text)"
           @click="deactivateModal.open()"
         >
           <PowerOff :size="14" /> Desactivar
