@@ -44,6 +44,13 @@ export const REQUEST_STATUSES = [
   { name: 'Cancelled', label: 'Cancelada' },
 ]
 
+export const ASSIGNMENT_STATUSES = [
+  { name: 'Scheduled', label: 'Programada' },
+  { name: 'InProgress', label: 'En curso' },
+  { name: 'Completed', label: 'Completada' },
+  { name: 'Cancelled', label: 'Cancelada' },
+]
+
 function labelByName(list, name) {
   return list.find((i) => i.name === name)?.label ?? name
 }
@@ -62,6 +69,7 @@ export const getLicenseCategoryLabel = (name) => labelByName(LICENSE_CATEGORIES,
 export const getVehicleStatusLabel = (name) => labelByName(VEHICLE_STATUSES, name)
 export const getDriverStatusLabel = (name) => labelByName(DRIVER_STATUSES, name)
 export const getRequestStatusLabel = (name) => labelByName(REQUEST_STATUSES, name)
+export const getAssignmentStatusLabel = (name) => labelByName(ASSIGNMENT_STATUSES, name)
 
 export const vehicleTypeValueByName = (name) => valueByName(VEHICLE_TYPES, name)
 export const maintenanceTypeValueByName = (name) => valueByName(MAINTENANCE_TYPES, name)
