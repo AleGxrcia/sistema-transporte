@@ -37,7 +37,7 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.Regi
             _repository.Update(vehicle);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return vehicle.Id;
+            return record.Id;
         }
     }
 }
