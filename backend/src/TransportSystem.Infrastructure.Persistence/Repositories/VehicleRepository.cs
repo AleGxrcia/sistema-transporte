@@ -59,6 +59,7 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
             return await _dbcontext.Vehicles
                 .Include(v => v.MaintenanceRecords)
                 .Include(v => v.FuelRecords)
+                .Include(v => v.ScheduledMaintenances)
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
         }
 
@@ -71,7 +72,7 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
         }
 
         public async Task<IReadOnlyList<Vehicle>> GetWithUpcomingMaintenanceAsync(
-            int withinDays, 
+            int withinDays,
             CancellationToken cancellationToken = default)
         {
             var thresholdDate = DateTime.UtcNow.Date.AddDays(withinDays);
@@ -82,6 +83,16 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
                     m.NextMaintenanceDateScheduled.HasValue &&
                     m.ActualExitDate == null &&
                     m.NextMaintenanceDateScheduled.Value <= thresholdDate))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Vehicle>> GetAllWithFullDetailsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbcontext.Vehicles
+                .Include(v => v.MaintenanceRecords)
+                .Include(v => v.FuelRecords)
+                .Include(v => v.ScheduledMaintenances)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }

@@ -75,7 +75,6 @@ namespace TransportSystem.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.FuelRecord", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -117,7 +116,6 @@ namespace TransportSystem.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.MaintenanceRecord", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("ActualExitDate")
@@ -167,6 +165,61 @@ namespace TransportSystem.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Maintenance_VehicleId");
 
                     b.ToTable("MaintenanceRecords", (string)null);
+                });
+
+            modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.ScheduledMaintenance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("ResultingMaintenanceRecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ScheduledDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("StatusId");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("MaintenanceTypeId");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Workshop")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduledDate")
+                        .HasDatabaseName("IX_ScheduledMaintenance_ScheduledDate");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_ScheduledMaintenance_StatusId");
+
+                    b.HasIndex("VehicleId")
+                        .HasDatabaseName("IX_ScheduledMaintenance_VehicleId");
+
+                    b.ToTable("ScheduledMaintenances", (string)null);
                 });
 
             modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.Vehicle", b =>
@@ -497,6 +550,34 @@ namespace TransportSystem.Infrastructure.Persistence.Migrations
                     b.Navigation("NextMaintenanceKmScheduled");
                 });
 
+            modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.ScheduledMaintenance", b =>
+                {
+                    b.HasOne("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.Vehicle", null)
+                        .WithMany("ScheduledMaintenances")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.Mileage", "ScheduledKm", b1 =>
+                        {
+                            b1.Property<Guid>("ScheduledMaintenanceId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Value")
+                                .HasColumnType("decimal(10,2)")
+                                .HasColumnName("ScheduledKm");
+
+                            b1.HasKey("ScheduledMaintenanceId");
+
+                            b1.ToTable("ScheduledMaintenances");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ScheduledMaintenanceId");
+                        });
+
+                    b.Navigation("ScheduledKm");
+                });
+
             modelBuilder.Entity("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.Vehicle", b =>
                 {
                     b.OwnsOne("TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle.LicensePlate", "LicensePlate", b1 =>
@@ -681,6 +762,8 @@ namespace TransportSystem.Infrastructure.Persistence.Migrations
                     b.Navigation("FuelRecords");
 
                     b.Navigation("MaintenanceRecords");
+
+                    b.Navigation("ScheduledMaintenances");
                 });
 
             modelBuilder.Entity("TransportSystem.Core.Domain.Transportation.Aggregates.Schedule", b =>

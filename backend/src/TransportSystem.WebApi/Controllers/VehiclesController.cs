@@ -158,11 +158,11 @@ namespace TransportSystem.WebApi.Controllers
             [FromBody] RegisterFuelRequest body,
             CancellationToken cancellationToken)
         {
-            var result = await Sender.Send(new RegisterFuelCommand(
+            var recordId = await Sender.Send(new RegisterFuelCommand(
                 id, body.RecordDate, body.Gallons,
                 body.PricePerGallon, body.MileageAtRefuel, body.Notes), cancellationToken);
 
-            return CreatedAtRoute("GetVehicleById", new { id }, result);
+            return CreatedAtRoute("GetVehicleById", new { id }, new { fuelRecordId = recordId });
         }
     }
 }

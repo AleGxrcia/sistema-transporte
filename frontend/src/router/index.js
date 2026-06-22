@@ -82,12 +82,36 @@ const routes = [
         component: () => import('@/views/requests/RequestsView.vue'),
         meta: { title: 'Solicitudes', module: 'requests' },
       },
+      {
+        path: 'requests/new',
+        name: 'request-new',
+        component: () => import('@/views/requests/RequestNewView.vue'),
+        meta: {
+          title: 'Nueva solicitud',
+          module: 'requests',
+          roles: ['Operador', 'Supervisor'],
+        },
+      },
+      {
+        path: 'requests/:id',
+        name: 'request-detail',
+        component: () => import('@/views/requests/RequestFlowView.vue'),
+        props: true,
+        meta: { title: 'Detalle de solicitud', module: 'requests' },
+      },
 
       {
         path: 'schedules',
         name: 'schedules',
-        component: () => import('@/views/calendar/CalendarView.vue'),
+        component: () => import('@/views/schedule/ScheduleView.vue'),
         meta: { title: 'Agenda', module: 'schedules' },
+      },
+
+      {
+        path: 'trips',
+        name: 'trips',
+        component: () => import('@/views/trips/TripHistoryView.vue'),
+        meta: { title: 'Historial de viajes', module: 'trips' },
       },
 
       {
@@ -95,6 +119,17 @@ const routes = [
         name: 'fuel',
         component: () => import('@/views/fuel/FuelView.vue'),
         meta: { title: 'Combustible', module: 'fuel' },
+      },
+
+      {
+        path: 'maintenance',
+        name: 'maintenance',
+        component: () => import('@/views/maintenance/MaintenanceView.vue'),
+        meta: {
+          title: 'Mantenimiento',
+          module: 'maintenance',
+          roles: ['Administrador', 'Supervisor'],
+        },
       },
 
       {

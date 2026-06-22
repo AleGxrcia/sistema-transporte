@@ -19,9 +19,11 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
 
         private readonly List<MaintenanceRecord> _maintenanceRecords = [];
         private readonly List<FuelRecord> _fuelRecords = [];
+        private readonly List<ScheduledMaintenance> _scheduledMaintenances = [];
 
         public IReadOnlyCollection<MaintenanceRecord> MaintenanceRecords => _maintenanceRecords.AsReadOnly();
         public IReadOnlyCollection<FuelRecord> FuelRecords => _fuelRecords.AsReadOnly();
+        public IReadOnlyCollection<ScheduledMaintenance> ScheduledMaintenances => _scheduledMaintenances.AsReadOnly();
 
         private Vehicle() { }
 
@@ -161,6 +163,41 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
 
             record.Close(actualExitDate, cost);
             ReturnFromMaintenance(actualExitDate);
+        }
+
+        public ScheduledMaintenance ScheduleMaintenance(MaintenanceType type, string description, DateTime scheduledDate,
+            Guid createdByUserId, string? workshop = null, Mileage? scheduledKm = null)
+        {
+            var scheduled = ScheduledMaintenance.Create(
+                Id, type, description, scheduledDate, createdByUserId, workshop, scheduledKm);
+
+            _scheduledMaintenances.Add(scheduled);
+            return scheduled;
+        }
+
+        public void CancelScheduledMaintenance(Guid scheduledMaintenanceId, string reason)
+        {
+            var scheduled = _scheduledMaintenances.FirstOrDefault(s => s.Id == scheduledMaintenanceId)
+                ?? throw new DomainException("SCHEDULED_MAINTENANCE_NOT_FOUND",
+                    $"La programación de mantenimiento {scheduledMaintenanceId} no existe para este vehículo.");
+
+            scheduled.Cancel(reason);
+        }
+
+        public MaintenanceRecord ExecuteScheduledMaintenance(Guid scheduledMaintenanceId, DateTime entryDate, string workshop,
+            Guid registeredByUserId, DateTime? estimatedExitDate = null, DateTime? nextMaintenanceDateScheduled = null,
+            Mileage? nextMaintenanceKmScheduled = null)
+        {
+            var scheduled = _scheduledMaintenances.FirstOrDefault(s => s.Id == scheduledMaintenanceId)
+                ?? throw new DomainException("SCHEDULED_MAINTENANCE_NOT_FOUND",
+                    $"La programación de mantenimiento {scheduledMaintenanceId} no existe para este vehículo.");
+
+            var record = RegisterMaintenance(scheduled.Type, scheduled.Description, entryDate, workshop,
+                registeredByUserId, estimatedExitDate, nextMaintenanceDateScheduled, nextMaintenanceKmScheduled);
+
+            scheduled.MarkAsExecuted(record.Id);
+
+            return record;
         }
 
         public FuelRecord RegisterFuel(DateTime recordDate, decimal gallons, decimal pricePerGallon, Mileage mileageAtRefuel,

@@ -7,7 +7,7 @@ const PERMISSIONS = {
     dashboard:    ['view'],
     vehicles:     ['view', 'create', 'edit', 'delete'],
     drivers:      ['view', 'create', 'edit', 'delete'],
-    requests:     ['view', 'create', 'edit', 'delete', 'approve'],
+    requests:     ['view', 'edit', 'delete', 'approve'],
     schedules:    ['view', 'create', 'edit', 'delete'],
     reports:      ['view', 'export'],
     maintenance:  ['view', 'create', 'edit', 'delete'],

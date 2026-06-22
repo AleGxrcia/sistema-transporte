@@ -57,11 +57,11 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: var(--bg);
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 16px;
   padding: 2rem;
   width: 100%;
@@ -85,19 +85,19 @@ onMounted(async () => {
 .auth-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   text-align: center;
 }
 
-.status-msg { font-size: 0.875rem; color: #6b7280; text-align: center; }
-.success-msg { font-size: 0.875rem; color: #16a34a; text-align: center; }
-.error-msg { font-size: 0.875rem; color: #dc2626; text-align: center; }
+.status-msg { font-size: 0.875rem; color: var(--text-2); text-align: center; }
+.success-msg { font-size: 0.875rem; color: var(--mint-dark); text-align: center; }
+.error-msg { font-size: 0.875rem; color: var(--red); text-align: center; }
 
 .btn-primary {
   width: 70%;
   padding: 0.75rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -107,5 +107,5 @@ onMounted(async () => {
   transition: background 0.2s;
 }
 
-.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:hover { background: var(--blue-hover); }
 </style>

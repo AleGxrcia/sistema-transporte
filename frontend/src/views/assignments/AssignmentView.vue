@@ -62,7 +62,7 @@
             </div>
             <div v-if="selectedVehicle === vehicle.id" class="check-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                viewBox="0 0 24 24" fill="#2563eb" stroke="#2563eb" stroke-width="2">
+                viewBox="0 0 24 24" fill="var(--blue-hover)" stroke="var(--blue-hover)" stroke-width="2">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
@@ -103,7 +103,7 @@
             </div>
             <div v-if="selectedDriver === driver.id" class="check-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                viewBox="0 0 24 24" fill="#2563eb" stroke="#2563eb" stroke-width="2">
+                viewBox="0 0 24 24" fill="var(--blue-hover)" stroke="var(--blue-hover)" stroke-width="2">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
@@ -194,9 +194,9 @@ const vehicles = ref([
 ])
 
 const drivers = ref([
-  { id: 1, name: 'Juan Pérez',      initials: 'JP', avatarColor: '#3b82f6', licenseType: 'B', licenseExpiry: '15/08/2026', trips: 18, warning: false },
-  { id: 2, name: 'Ana Martínez',    initials: 'AM', avatarColor: '#8b5cf6', licenseType: 'B', licenseExpiry: '22/01/2027', trips: 12, warning: false },
-  { id: 3, name: 'Miguel Fernández',initials: 'MF', avatarColor: '#f59e0b', licenseType: 'C', licenseExpiry: '09/06/2026', trips: 8,  warning: true, daysToExpiry: 12 },
+  { id: 1, name: 'Juan Pérez',      initials: 'JP', avatarColor: 'var(--blue)', licenseType: 'B', licenseExpiry: '15/08/2026', trips: 18, warning: false },
+  { id: 2, name: 'Ana Martínez',    initials: 'AM', avatarColor: 'var(--purple)', licenseType: 'B', licenseExpiry: '22/01/2027', trips: 12, warning: false },
+  { id: 3, name: 'Miguel Fernández',initials: 'MF', avatarColor: 'var(--amber)', licenseType: 'C', licenseExpiry: '09/06/2026', trips: 8,  warning: true, daysToExpiry: 12 },
 ])
 
 const availableVehicles = computed(() => vehicles.value.filter(v => !v.disabled).length)
@@ -229,11 +229,11 @@ async function handleConfirm() {
 
 /* Banner solicitud */
 .request-banner {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   padding: 1rem 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .request-info {
@@ -248,17 +248,17 @@ async function handleConfirm() {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #8b5cf6;
+  background: var(--purple);
   flex-shrink: 0;
 }
 
 .request-id {
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
 }
 
-.request-meta { color: #374151; }
-.request-meta strong { color: #111827; }
+.request-meta { color: var(--text-2); }
+.request-meta strong { color: var(--text); }
 
 /* Badge */
 .badge {
@@ -272,7 +272,7 @@ async function handleConfirm() {
   border: 1px solid transparent;
 }
 
-.badge.aprobada { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.badge.aprobada { background: var(--mint-bg); color: var(--mint-dark); border-color: var(--mint-border); }
 
 /* Grid selección */
 .selection-grid {
@@ -296,18 +296,18 @@ async function handleConfirm() {
 .col-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
 }
 
 .col-sub {
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: var(--text-3);
   margin-top: 2px;
 }
 
 .available-badge {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: var(--mint-bg);
+  color: var(--mint-dark);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 3px 10px;
@@ -323,8 +323,8 @@ async function handleConfirm() {
 }
 
 .option-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--white);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem;
   display: flex;
@@ -334,9 +334,9 @@ async function handleConfirm() {
   transition: all 0.2s;
 }
 
-.option-card:hover { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
-.option-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 1px #2563eb; }
-.option-card.warning { border-color: #fde68a; background: #fffbeb; }
+.option-card:hover { border-color: var(--blue-hover); box-shadow: 0 0 0 1px var(--blue-hover); }
+.option-card.selected { border-color: var(--blue-hover); background: var(--blue-light); box-shadow: 0 0 0 1px var(--blue-hover); }
+.option-card.warning { border-color: var(--amber-border); background: var(--amber-bg); }
 .option-card.disabled { opacity: 0.5; cursor: not-allowed; }
 
 .option-left {
@@ -350,24 +350,24 @@ async function handleConfirm() {
   height: 40px;
   min-width: 40px;
   border-radius: 8px;
-  background: #f3f4f6;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--text-2);
 }
 
-.option-icon.active { background: #dbeafe; color: #2563eb; }
+.option-icon.active { background: var(--blue-mid); color: var(--blue-hover); }
 
 .option-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
 }
 
 .option-detail {
   font-size: 0.78rem;
-  color: #6b7280;
+  color: var(--text-2);
   margin-top: 2px;
 }
 
@@ -381,22 +381,22 @@ async function handleConfirm() {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 500;
-  color: #d97706;
-  background: #fff7ed;
-  border: 1px solid #fde68a;
+  color: var(--amber-text);
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
   padding: 2px 8px;
   border-radius: 999px;
   margin-top: 4px;
 }
 
-.warning-tag.orange { color: #d97706; }
+.warning-tag.orange { color: var(--amber-text); }
 
 .check-icon {
   width: 28px;
   height: 28px;
   min-width: 28px;
   border-radius: 50%;
-  background: #dbeafe;
+  background: var(--blue-mid);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -413,7 +413,7 @@ async function handleConfirm() {
   justify-content: center;
   font-size: 0.875rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
 }
 
 .driver-avatar.sm {
@@ -425,17 +425,23 @@ async function handleConfirm() {
 
 /* Summary */
 .summary-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--border);
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.summary-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .summary-title {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.08em;
   margin-bottom: 1rem;
 }
@@ -462,14 +468,14 @@ async function handleConfirm() {
   justify-content: center;
 }
 
-.summary-icon.blue  { background: #dbeafe; color: #2563eb; }
-.summary-icon.green { background: #dcfce7; color: #16a34a; }
+.summary-icon.blue  { background: var(--blue-mid); color: var(--blue-hover); }
+.summary-icon.green { background: var(--mint-bg); color: var(--mint-dark); }
 
 .summary-label {
   display: block;
   font-size: 0.65rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-3);
   letter-spacing: 0.05em;
   margin-bottom: 2px;
 }
@@ -477,7 +483,7 @@ async function handleConfirm() {
 .summary-value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
 }
 
 /* Acciones */
@@ -489,21 +495,21 @@ async function handleConfirm() {
 
 .btn-cancel {
   padding: 0.6rem 1.25rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--white);
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #374151;
+  color: var(--text-2);
   cursor: pointer;
 }
 
-.btn-cancel:hover { background: #f9fafb; }
+.btn-cancel:hover { background: var(--surface-hover); }
 
 .btn-submit {
   padding: 0.6rem 1.25rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.875rem;
@@ -513,8 +519,8 @@ async function handleConfirm() {
   transition: background 0.2s;
 }
 
-.btn-submit:hover:not(:disabled) { background: #1d4ed8; }
+.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.green { color: #16a34a; }
+.green { color: var(--mint-dark); }
 </style>

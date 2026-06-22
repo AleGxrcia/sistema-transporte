@@ -73,6 +73,14 @@
           <span v-if="!isCollapsed">Agenda</span>
         </router-link>
 
+        <router-link to="/trips" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span v-if="!isCollapsed">Historial de viajes</span>
+        </router-link>
+
         <router-link to="/fuel" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -81,6 +89,14 @@
             <line x1="6" y1="2" x2="10" y2="2"/><line x1="8" y1="2" x2="8" y2="6"/>
           </svg>
           <span v-if="!isCollapsed">Combustible</span>
+        </router-link>
+
+        <router-link to="/maintenance" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span v-if="!isCollapsed">Mantenimiento</span>
         </router-link>
 
         <router-link to="/reports" class="nav-item">
@@ -142,9 +158,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAuth } from '@/composables/useAuth'
+import { useRequestsStore } from '@/stores/requests.store'
 
 const auth = useAuthStore()
 const { logout } = useAuth()
@@ -155,7 +172,9 @@ function handleLogout() {
 }
 
 // Badge de solicitudes pendientes
-const pendingCount = ref(5)
+const requestsStore = useRequestsStore()
+onMounted(() => requestsStore.fetchPending())
+const pendingCount = computed(() => requestsStore.pendingCount)
 
 const isAdmin = computed(() => auth.currentRole === 'Administrador')
 

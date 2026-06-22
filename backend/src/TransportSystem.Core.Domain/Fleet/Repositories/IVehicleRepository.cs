@@ -28,6 +28,10 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
             int withinDays,
             CancellationToken cancellationToken = default);
 
+        // Para mantenimiento (historial/programados) y reportes
+        Task<IReadOnlyList<Vehicle>> GetAllWithFullDetailsAsync(
+            CancellationToken cancellationToken = default);
+
         Task AddAsync(Vehicle vehicle, CancellationToken cancellationToken = default);
         void Update(Vehicle vehicle);
         void Delete(Vehicle vehicle);

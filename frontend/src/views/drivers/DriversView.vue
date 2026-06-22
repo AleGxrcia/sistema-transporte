@@ -20,6 +20,17 @@ const auth   = useAuthStore()
 const toast  = useToast()
 const driverStore = useDriverStore()
 
+const AVATAR_PALETTE = [
+  { background: 'var(--blue-light)', color: 'var(--blue)' },
+  { background: 'var(--sky-bg)', color: 'var(--sky)' },
+  { background: 'var(--purple-bg)', color: 'var(--purple)' },
+  { background: 'var(--amber-bg)', color: 'var(--amber-text)' },
+  { background: 'var(--mint-bg)', color: 'var(--mint-dark)' },
+]
+function avatarStyle(index) {
+  return AVATAR_PALETTE[index % AVATAR_PALETTE.length]
+}
+
 const search       = ref('')
 const statusFilter = ref('')
 
@@ -119,62 +130,58 @@ async function confirmDelete() {
       </button>
     </div>
 
-    <!-- Tabla -->
+    <!-- Grid de conductores -->
     <template v-else>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Conductor</th>
-              <th>Cédula</th>
-              <th>Teléfono</th>
-              <th>Licencia</th>
-              <th>Vencimiento</th>
-              <th>Estado</th>
-              <th style="text-align:center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="driver in filteredDrivers" :key="driver.id">
-              <td>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span class="avatar-sm">{{ getInitials(driver.firstName, driver.lastName) }}</span>
-                  {{ driver.firstName }} {{ driver.lastName }}
-                </div>
-              </td>
-              <td class="muted">{{ driver.nationalId }}</td>
-              <td class="muted">{{ driver.phone }}</td>
-              <td><span class="tag">{{ getLicenseCategoryLabel(driver.licenseType) }}</span></td>
-              <td :class="{ 'text-red': driver.licenseExpired, 'text-amber': !driver.licenseExpired && driver.licenseExpiringSoon }">
-                {{ formatDate(driver.licenseExpirationDate) }}
-              </td>
-              <td><AppBadge :status="driver.status" /></td>
-              <td>
-                <div class="action-buttons">
-                  <button class="icon-btn" title="Ver detalle" @click="router.push(`/drivers/${driver.id}`)">
-                    <Eye :size="13" />
-                  </button>
-                  <button
-                    v-if="auth.isAdmin && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
-                    class="icon-btn edit"
-                    title="Editar"
-                    @click="router.push(`/drivers/${driver.id}?edit=true`)"
-                  >
-                    <Pencil :size="13" />
-                  </button>
-                  <button
-                    v-if="auth.isAdmin"
-                    class="icon-btn reject"
-                    title="Eliminar"
-                    @click="deleteModal.open(driver)"
-                  >
-                    <Trash2 :size="13" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="grid3">
+        <div v-for="(driver, index) in filteredDrivers" :key="driver.id" class="driver-card">
+          <div class="driver-avatar" :style="avatarStyle(index)">
+            {{ getInitials(driver.firstName, driver.lastName) }}
+          </div>
+          <div class="driver-info">
+            <div class="driver-name">{{ driver.firstName }} {{ driver.lastName }}</div>
+            <div class="driver-meta">Cédula: {{ driver.nationalId }}</div>
+            <div class="driver-meta">Tel: {{ driver.phone }}</div>
+
+            <div class="driver-card-footer">
+              <AppBadge :status="driver.status" />
+              <div class="action-buttons">
+                <button class="icon-btn" title="Ver detalle" @click="router.push(`/drivers/${driver.id}`)">
+                  <Eye :size="12" />
+                </button>
+                <button
+                  v-if="auth.isAdmin && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
+                  class="icon-btn edit"
+                  title="Editar"
+                  @click="router.push(`/drivers/${driver.id}?edit=true`)"
+                >
+                  <Pencil :size="12" />
+                </button>
+                <button
+                  v-if="auth.isAdmin"
+                  class="icon-btn reject"
+                  title="Eliminar"
+                  @click="deleteModal.open(driver)"
+                >
+                  <Trash2 :size="12" />
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="driver-lic"
+              :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
+            >
+              <span v-if="driver.licenseExpired || driver.licenseExpiringSoon">⚠ </span>
+              Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
+              {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
+            </div>
+          </div>
+        </div>
+
+        <div v-if="auth.isAdmin" class="driver-card driver-card--add" @click="createModal.open()">
+          <div class="add-icon"><Plus :size="16" /></div>
+          <span>Agregar conductor</span>
+        </div>
       </div>
     </template>
 
@@ -248,20 +255,50 @@ async function confirmDelete() {
   margin: 0 0 8px;
 }
 
-.avatar-sm {
-  width: 26px;
-  height: 26px;
+.driver-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+
+.driver-card--add {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  box-shadow: none;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 12.5px;
+  font-weight: 500;
+  min-height: 132px;
+}
+.driver-card--add:hover {
+  transform: none;
+}
+.driver-card--add:hover {
+  border-color: var(--blue-mid);
+  background: var(--blue-light);
+  color: var(--blue);
+}
+.driver-card--add .add-icon {
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--blue-light, #dbeafe);
-  color: var(--blue, #2563eb);
-  font-size: 10px;
-  font-weight: 700;
+  background: var(--white);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  color: var(--text-3);
+  transition: color 0.15s, border-color 0.15s;
 }
-
-.text-red   { color: var(--red); font-weight: 600; }
-.text-amber { color: #b45309; font-weight: 600; }
+.driver-card--add:hover .add-icon {
+  color: var(--blue);
+  border-color: var(--blue-mid);
+}
 </style>

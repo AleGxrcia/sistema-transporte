@@ -8,6 +8,7 @@ using TransportSystem.Core.Application.Features.Transportation.Commands.Complete
 using TransportSystem.Core.Application.Features.Transportation.Commands.CreateTravelRequest;
 using TransportSystem.Core.Application.Features.Transportation.Commands.RejectRequest;
 using TransportSystem.Core.Application.Features.Transportation.Commands.StartTrip;
+using TransportSystem.Core.Application.Features.Transportation.Queries.GetAllRequests;
 using TransportSystem.Core.Application.Features.Transportation.Queries.GetPendingRequests;
 using TransportSystem.Core.Application.Features.Transportation.Queries.GetRequestById;
 using TransportSystem.WebApi.Contracts.Requests;
@@ -25,6 +26,16 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> GetPending(CancellationToken cancellationToken)
         {
             var result = await Sender.Send(new GetPendingRequestsQuery(), cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("all")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyList<TravelRequestDto>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await Sender.Send(new GetAllRequestsQuery(), cancellationToken);
             return Ok(result);
         }
 

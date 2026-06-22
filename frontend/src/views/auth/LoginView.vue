@@ -85,11 +85,11 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: var(--bg);
 }
 
 .auth-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 16px;
   padding: 2rem 2rem 2rem;
   width: 100%;
@@ -113,19 +113,19 @@ async function handleLogin() {
 .auth-title {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   margin-bottom: 0.2rem;
 }
 
 .auth-subtitle {
   font-size: 0.82rem;
-  color: #6b7280;
+  color: var(--text-2);
   margin-bottom: 1.25rem;
 }
 
 .role-tabs {
   display: flex;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 1.25rem;
@@ -138,18 +138,18 @@ async function handleLogin() {
   background: transparent;
   font-size: 0.82rem;
   font-family: 'Inter', sans-serif;
-  color: #6b7280;
+  color: var(--text-2);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .role-tab:not(:last-child) {
-  border-right: 1px solid #d1d5db;
+  border-right: 1px solid var(--border-strong);
 }
 
 .role-tab.active {
   background: #efecec;
-  color: #2563eb;
+  color: var(--blue-hover);
   font-weight: 600;
 }
 
@@ -168,21 +168,21 @@ async function handleLogin() {
 .form-label {
   font-size: 0.82rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-2);
 }
 
 .input-field {
   display: flex;
   align-items: center;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: #fff;
+  background: var(--white);
   overflow: hidden;
   transition: border-color 0.2s;
 }
 
 .input-field:focus-within {
-  border-color: #2563eb;
+  border-color: var(--blue-hover);
   box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
 }
 
@@ -193,8 +193,8 @@ async function handleLogin() {
   width: 42px;
   min-width: 42px;
   height: 42px;
-  color: #9ca3af;
-  border-right: 1px solid #e5e7eb;
+  color: var(--text-3);
+  border-right: 1px solid var(--border);
 }
 
 .field-input {
@@ -204,11 +204,11 @@ async function handleLogin() {
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
-  color: #111827;
+  color: var(--text);
   background: transparent;
 }
 
-.field-input::placeholder { color: #9ca3af; }
+.field-input::placeholder { color: var(--text-3); }
 
 .forgot-link {
   text-align: right;
@@ -216,13 +216,13 @@ async function handleLogin() {
 
 .forgot-link a {
   font-size: 0.78rem;
-  color: #2563eb;
+  color: var(--blue-hover);
   text-decoration: none;
 }
 
 .error-msg {
   font-size: 0.78rem;
-  color: #dc2626;
+  color: var(--red);
   text-align: center;
 }
 
@@ -230,8 +230,8 @@ async function handleLogin() {
   width: 50%;
   margin: 0 auto;
   padding: 0.75rem;
-  background: #2563eb;
-  color: #fff;
+  background: var(--blue);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -242,6 +242,6 @@ async function handleLogin() {
   margin-top: 0.25rem;
 }
 
-.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-hover); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
