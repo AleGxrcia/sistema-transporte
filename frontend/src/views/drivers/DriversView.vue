@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { driverApi } from '@/services/drivers.service'
 import { useDriverStore } from '@/stores/drivers.store'
 import { useModal } from '@/composables/useModal'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
 import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
@@ -16,7 +16,7 @@ import { formatDate, getInitials } from '@/utils/formatters'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
 
 const router = useRouter()
-const auth   = useAuthStore()
+const { can } = useAuth()
 const toast  = useToast()
 const driverStore = useDriverStore()
 
@@ -84,7 +84,7 @@ async function confirmDelete() {
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de conductores</h1>
-      <button v-if="auth.isAdmin" class="btn primary" @click="createModal.open()">
+      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
         <Plus :size="14" /> Nuevo conductor
       </button>
     </div>
@@ -122,7 +122,7 @@ async function confirmDelete() {
         }}
       </p>
       <button
-        v-if="auth.isAdmin && !hasActiveFilters"
+        v-if="can('create', 'drivers') && !hasActiveFilters"
         class="btn primary"
         @click="createModal.open()"
       >
@@ -149,7 +149,7 @@ async function confirmDelete() {
                   <Eye :size="12" />
                 </button>
                 <button
-                  v-if="auth.isAdmin && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
+                  v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
                   class="icon-btn edit"
                   title="Editar"
                   @click="router.push(`/drivers/${driver.id}?edit=true`)"
@@ -157,7 +157,7 @@ async function confirmDelete() {
                   <Pencil :size="12" />
                 </button>
                 <button
-                  v-if="auth.isAdmin"
+                  v-if="can('delete', 'drivers')"
                   class="icon-btn reject"
                   title="Eliminar"
                   @click="deleteModal.open(driver)"
@@ -178,7 +178,7 @@ async function confirmDelete() {
           </div>
         </div>
 
-        <div v-if="auth.isAdmin" class="driver-card driver-card--add" @click="createModal.open()">
+        <div v-if="can('create', 'drivers')" class="driver-card driver-card--add" @click="createModal.open()">
           <div class="add-icon"><Plus :size="16" /></div>
           <span>Agregar conductor</span>
         </div>
