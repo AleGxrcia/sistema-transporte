@@ -93,6 +93,16 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
                 .UsePropertyAccessMode(PropertyAccessMode.Field)
                 .HasField("_fuelRecords");
 
+            // ScheduledMaintenance
+            builder.HasMany(v => v.ScheduledMaintenances)
+                .WithOne()
+                .HasForeignKey(s => s.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Navigation(v => v.ScheduledMaintenances)
+                .UsePropertyAccessMode(PropertyAccessMode.Field)
+                .HasField("_scheduledMaintenances");
+
             // Indices
             builder.HasIndex(v => v.Status)
                 .HasDatabaseName("IX_Vehicles_StatusId");
