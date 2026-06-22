@@ -13,6 +13,8 @@ const badge = computed(() => {
     Inactive:        { label: 'Inactivo',          cls: 'badge--gray'   },
     Suspended:       { label: 'Suspendido',        cls: 'badge--red'    },
 
+    Scheduled:       { label: 'Programada',        cls: 'badge--blue'   },
+
     Pending:         { label: 'Pendiente',         cls: 'badge--amber'  },
     Approved:        { label: 'Aprobada',          cls: 'badge--green'  },
     Rejected:        { label: 'Rechazada',         cls: 'badge--red'    },

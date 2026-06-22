@@ -2,11 +2,14 @@
   <div class="maintenance">
 
     <!-- Alerta -->
-    <div class="alert-banner">
+    <div v-if="alerts.length" class="alert-banner">
       <span>⚠️</span>
       <span>
-        <strong>3 vehículos requieren mantenimiento</strong>
-        próximamente — Toyota Hilux (7 días), Honda CRV (4 días), Hyundai H1 (12 días).
+        <strong>{{ alerts.length }} vehículo{{ alerts.length > 1 ? 's' : '' }} requiere{{ alerts.length > 1 ? 'n' : '' }} mantenimiento</strong>
+        próximamente —
+        <template v-for="(a, i) in alerts" :key="`${a.vehicleId}-${a.dueDate}`">
+          {{ a.vehicleLabel }} ({{ a.daysRemaining }} día{{ a.daysRemaining === 1 ? '' : 's' }}){{ i < alerts.length - 1 ? ', ' : '.' }}
+        </template>
       </span>
     </div>
 
@@ -15,38 +18,55 @@
       <!-- Próximos mantenimientos -->
       <div class="card">
         <div class="card-section-title">PRÓXIMOS MANTENIMIENTOS</div>
-        <div class="upcoming-list">
-          <div v-for="item in upcoming" :key="item.id" class="upcoming-item">
-            <div class="upcoming-icon" :class="item.color">
+        <div v-if="maintenanceStore.isLoadingScheduled" class="empty-state">Cargando…</div>
+        <div v-else-if="!scheduled.length" class="empty-state">No hay mantenimientos programados.</div>
+        <div v-else class="upcoming-list">
+          <div v-for="item in scheduled" :key="item.id" class="upcoming-item">
+            <div class="upcoming-icon" :class="daysColorClass(item.daysRemaining)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
             </div>
             <div class="upcoming-info">
-              <p class="upcoming-name">{{ item.vehicle }}</p>
-              <p class="upcoming-detail">{{ item.type }} · {{ item.shop }}</p>
+              <p class="upcoming-name">{{ item.vehicleLabel }} — {{ item.vehiclePlate }}</p>
+              <p class="upcoming-detail">{{ getMaintenanceTypeLabel(item.type) }} · {{ item.workshop || 'Taller por definir' }}</p>
             </div>
-            <span class="upcoming-days" :class="item.daysColor">
-              en {{ item.days }} días
+            <span class="upcoming-days" :class="textColorClass(item.daysRemaining)">
+              {{ item.daysRemaining >= 0 ? `en ${item.daysRemaining} días` : 'vencido' }}
             </span>
+            <div class="upcoming-actions">
+              <button
+                class="btn-mini"
+                :disabled="!isVehicleAvailable(item.vehicleId)"
+                :title="isVehicleAvailable(item.vehicleId) ? '' : 'El vehículo no está disponible (en viaje o en mantenimiento)'"
+                @click="openExecuteModal(item)"
+              >
+                Ejecutar
+              </button>
+              <button class="btn-mini btn-mini--danger" @click="openCancelModal(item)">Cancelar</button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Formulario registro -->
       <div class="card">
-        <div class="card-section-title">REGISTRAR MANTENIMIENTO</div>
+        <div class="card-section-title-row">
+          <div class="card-section-title">{{ mode === 'now' ? 'REGISTRAR MANTENIMIENTO' : 'PROGRAMAR MANTENIMIENTO' }}</div>
+          <div class="mode-toggle">
+            <button :class="{ active: mode === 'now' }" @click="mode = 'now'">Registrar ahora</button>
+            <button :class="{ active: mode === 'schedule' }" @click="mode = 'schedule'">Programar para después</button>
+          </div>
+        </div>
 
         <div class="form-group">
           <label class="form-label">Vehículo</label>
-          <select v-model="form.vehicle" class="form-input">
+          <select v-model="form.vehicleId" class="form-input">
             <option value="">Seleccionar vehículo</option>
-            <option value="GHI-789">Toyota Hilux — GHI-789</option>
-            <option value="ABC-123">Toyota Hiace — ABC-123</option>
-            <option value="DEF-456">Honda CRV — DEF-456</option>
-            <option value="JKL-012">Nissan Frontier — JKL-012</option>
-            <option value="MNO-345">Hyundai H1 — MNO-345</option>
+            <option v-for="v in vehicles" :key="v.id" :value="v.id">
+              {{ v.brand }} {{ v.model }} — {{ v.licensePlate }}
+            </option>
           </select>
         </div>
 
@@ -55,44 +75,47 @@
             <label class="form-label">Tipo</label>
             <select v-model="form.type" class="form-input">
               <option value="">Seleccionar</option>
-              <option value="Preventivo">Preventivo</option>
-              <option value="Correctivo">Correctivo</option>
+              <option v-for="t in MAINTENANCE_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Fecha de ingreso</label>
+            <label class="form-label">{{ mode === 'now' ? 'Fecha de ingreso' : 'Fecha programada' }}</label>
             <input v-model="form.date" type="date" class="form-input" />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Costo (RD$)</label>
-            <input v-model="form.cost" type="number"
-              class="form-input" placeholder="0.00" />
+            <label class="form-label">Taller {{ mode === 'schedule' ? '(tentativo, opcional)' : '' }}</label>
+            <input v-model="form.workshop" type="text" class="form-input" placeholder="Nombre del taller" />
           </div>
           <div class="form-group">
-            <label class="form-label">Taller</label>
-            <input v-model="form.shop" type="text"
-              class="form-input" placeholder="Nombre del taller" />
+            <label class="form-label">{{ mode === 'now' ? 'Kilometraje próximo mantenimiento' : 'Kilometraje programado' }} (opcional)</label>
+            <input v-model="form.km" type="number" class="form-input" placeholder="0" />
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Descripción</label>
           <textarea v-model="form.description" class="form-textarea"
-            placeholder="Detalla el trabajo realizado..." />
+            placeholder="Detalla el trabajo a realizar..." />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Fecha próximo mantenimiento</label>
-          <input v-model="form.nextService" type="date" class="form-input" />
+        <div v-if="mode === 'now'" class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fecha estimada de salida (opcional)</label>
+            <input v-model="form.estimatedExitDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha próximo mantenimiento (opcional)</label>
+            <input v-model="form.nextMaintenanceDate" type="date" class="form-input" />
+          </div>
         </div>
 
         <div class="form-actions">
           <button class="btn-cancel" @click="resetForm">Cancelar</button>
-          <button class="btn-submit" @click="handleSave" :disabled="loading">
-            {{ loading ? 'Guardando...' : 'Guardar registro' }}
+          <button class="btn-submit" @click="handleSave" :disabled="saving">
+            {{ saving ? 'Guardando...' : (mode === 'now' ? 'Registrar' : 'Programar') }}
           </button>
         </div>
       </div>
@@ -102,7 +125,9 @@
     <!-- Historial tabla -->
     <div class="card">
       <h3 class="section-title">Historial de mantenimiento</h3>
-      <div class="table-wrapper">
+      <div v-if="maintenanceStore.isLoadingHistory" class="empty-state">Cargando…</div>
+      <div v-else-if="!history.length" class="empty-state">Aún no hay mantenimientos registrados.</div>
+      <div v-else class="table-wrapper">
         <table class="table">
           <thead>
             <tr>
@@ -113,66 +138,316 @@
               <th>COSTO</th>
               <th>TALLER</th>
               <th>PRÓX. MANT.</th>
+              <th>ACCIONES</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in history" :key="item.id">
-              <td class="td-bold">{{ item.vehicle }}</td>
+              <td class="td-bold">{{ item.vehicleLabel }} — {{ item.vehiclePlate }}</td>
               <td>
-                <span class="badge" :class="item.type === 'Preventivo' ? 'preventivo' : 'correctivo'">
-                  • {{ item.type }}
+                <span class="badge" :class="item.type === 'Preventive' ? 'preventivo' : 'correctivo'">
+                  • {{ getMaintenanceTypeLabel(item.type) }}
                 </span>
               </td>
               <td>{{ item.description }}</td>
-              <td class="td-gray">{{ item.date }}</td>
-              <td class="td-bold">{{ item.cost }}</td>
-              <td class="td-gray">{{ item.shop }}</td>
-              <td :class="item.urgent ? 'red' : 'td-gray'">{{ item.nextService }}</td>
+              <td class="td-gray">{{ formatDate(item.entryDate) }}</td>
+              <td class="td-bold">{{ item.cost != null ? formatCurrency(item.cost) : '—' }}</td>
+              <td class="td-gray">{{ item.workshop }}</td>
+              <td :class="item.nextMaintenanceDateScheduled ? 'red' : 'td-gray'">
+                {{ item.nextMaintenanceDateScheduled ? formatDate(item.nextMaintenanceDateScheduled) : '—' }}
+              </td>
+              <td>
+                <span v-if="item.isClosed" class="td-gray">Cerrado</span>
+                <button v-else class="btn-mini" @click="openCloseModal(item)">Cerrar</button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Modal: ejecutar mantenimiento programado -->
+    <BaseModal
+      :model-value="executeModal.isOpen.value"
+      size="md"
+      @update:model-value="executeModal.close()"
+    >
+      <template #header><h3>Ejecutar mantenimiento</h3></template>
+      <div v-if="executeModal.payload.value" class="modal-form">
+        <p class="modal-subtitle">{{ executeModal.payload.value.vehicleLabel }} — {{ executeModal.payload.value.vehiclePlate }}</p>
+
+        <div class="form-group">
+          <label class="form-label">Fecha de ingreso</label>
+          <input v-model="executeForm.entryDate" type="date" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Taller</label>
+          <input v-model="executeForm.workshop" type="text" class="form-input" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fecha estimada de salida (opcional)</label>
+            <input v-model="executeForm.estimatedExitDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Próximo mantenimiento (opcional)</label>
+            <input v-model="executeForm.nextMaintenanceDate" type="date" class="form-input" />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn-cancel" @click="executeModal.close()">Cancelar</button>
+        <button class="btn-submit" :disabled="saving" @click="handleExecute">
+          {{ saving ? 'Procesando...' : 'Confirmar' }}
+        </button>
+      </template>
+    </BaseModal>
+
+    <!-- Modal: cancelar mantenimiento programado -->
+    <BaseModal
+      :model-value="cancelModal.isOpen.value"
+      size="sm"
+      @update:model-value="cancelModal.close()"
+    >
+      <template #header><h3>Cancelar programación</h3></template>
+      <div v-if="cancelModal.payload.value" class="modal-form">
+        <p class="modal-subtitle">{{ cancelModal.payload.value.vehicleLabel }} — {{ cancelModal.payload.value.vehiclePlate }}</p>
+        <div class="form-group">
+          <label class="form-label">Motivo</label>
+          <textarea v-model="cancelReason" class="form-textarea" placeholder="Indica el motivo de la cancelación..." />
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn-cancel" @click="cancelModal.close()">Volver</button>
+        <button class="btn-submit" :disabled="saving" @click="handleCancelScheduled">
+          {{ saving ? 'Procesando...' : 'Cancelar programación' }}
+        </button>
+      </template>
+    </BaseModal>
+
+    <!-- Modal: cerrar mantenimiento -->
+    <BaseModal
+      :model-value="closeModal.isOpen.value"
+      size="sm"
+      @update:model-value="closeModal.close()"
+    >
+      <template #header><h3>Cerrar mantenimiento</h3></template>
+      <div v-if="closeModal.payload.value" class="modal-form">
+        <p class="modal-subtitle">{{ closeModal.payload.value.vehicleLabel }} — {{ closeModal.payload.value.vehiclePlate }}</p>
+        <div class="form-group">
+          <label class="form-label">Fecha de salida real</label>
+          <input v-model="closeForm.actualExitDate" type="date" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Costo (RD$)</label>
+          <input v-model="closeForm.cost" type="number" class="form-input" placeholder="0.00" />
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn-cancel" @click="closeModal.close()">Cancelar</button>
+        <button class="btn-submit" :disabled="saving" @click="handleClose">
+          {{ saving ? 'Procesando...' : 'Cerrar mantenimiento' }}
+        </button>
+      </template>
+    </BaseModal>
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useMaintenanceStore } from '@/stores/maintenance.store'
+import { useVehicleStore } from '@/stores/vehicles.store'
+import { useModal } from '@/composables/useModal'
+import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/apiError'
+import { formatDate, formatCurrency } from '@/utils/formatters'
+import { MAINTENANCE_TYPES, getMaintenanceTypeLabel } from '@/utils/enumLabels'
+import BaseModal from '@/components/ui/AppBaseModal.vue'
 
-const loading = ref(false)
+const maintenanceStore = useMaintenanceStore()
+const vehicleStore = useVehicleStore()
+const toast = useToast()
 
-const form = reactive({
-  vehicle: 'GHI-789', type: 'Preventivo', date: '',
-  cost: '', shop: '', description: '', nextService: ''
+onMounted(() => {
+  vehicleStore.fetchAll()
+  maintenanceStore.refreshAll()
 })
 
-const upcoming = ref([
-  { id: 1, vehicle: 'Honda CRV — DEF-456',   type: 'Preventivo', shop: 'Taller Honda',   days: 4,  color: 'red',    daysColor: 'text-red'    },
-  { id: 2, vehicle: 'Toyota Hilux — GHI-789', type: 'Correctivo', shop: 'AutoFix',        days: 7,  color: 'orange', daysColor: 'text-orange' },
-  { id: 3, vehicle: 'Hyundai H1 — MNO-345',  type: 'Preventivo', shop: 'Hyundai Motors', days: 12, color: 'gray',   daysColor: 'text-gray'   },
-])
+const vehicles = computed(() => vehicleStore.vehicles)
+const alerts = computed(() => maintenanceStore.alerts)
+const scheduled = computed(() => maintenanceStore.scheduled)
+const history = computed(() => maintenanceStore.history)
 
-const history = ref([
-  { id: 1, vehicle: 'GHI-789', type: 'Correctivo', description: 'Cambio de frenos y aceite',  date: '15/05/26', cost: 'RD$ 8,500',  shop: 'AutoFix',       nextService: '04/06/26', urgent: true  },
-  { id: 2, vehicle: 'ABC-123', type: 'Preventivo', description: 'Revisión general 40k km',    date: '10/05/26', cost: 'RD$ 5,200',  shop: 'Toyota Service',nextService: '10/08/26', urgent: false },
-  { id: 3, vehicle: 'DEF-456', type: 'Correctivo', description: 'Reparación A/C + gomas',     date: '02/05/26', cost: 'RD$ 14,800', shop: 'Taller Honda',  nextService: '01/06/26', urgent: true  },
-  { id: 4, vehicle: 'JKL-012', type: 'Preventivo', description: 'Cambio de aceite y filtros', date: '28/04/26', cost: 'RD$ 3,200',  shop: 'Toyota Service',nextService: '28/07/26', urgent: false },
-])
+const saving = ref(false)
+const mode = ref('schedule')
+
+const form = reactive({
+  vehicleId: '', type: '', date: '', workshop: '',
+  km: '', description: '', estimatedExitDate: '', nextMaintenanceDate: '',
+})
 
 function resetForm() {
   Object.assign(form, {
-    vehicle: '', type: '', date: '', cost: '', shop: '', description: '', nextService: ''
+    vehicleId: '', type: '', date: '', workshop: '',
+    km: '', description: '', estimatedExitDate: '', nextMaintenanceDate: '',
   })
 }
 
+function daysColorClass(days) {
+  if (days <= 5) return 'red'
+  if (days <= 10) return 'orange'
+  return 'gray'
+}
+
+function isVehicleAvailable(vehicleId) {
+  const vehicle = vehicles.value.find((v) => v.id === vehicleId)
+  return vehicle?.status === 'Available'
+}
+
+function textColorClass(days) {
+  if (days <= 5) return 'text-red'
+  if (days <= 10) return 'text-orange'
+  return 'text-gray'
+}
+
 async function handleSave() {
-  loading.value = true
+  if (!form.vehicleId || form.type === '' || !form.date || !form.description) {
+    toast.error('Datos incompletos', 'Completa los campos requeridos.')
+    return
+  }
+
+  saving.value = true
   try {
-    await new Promise(r => setTimeout(r, 800))
+    if (mode.value === 'now') {
+      if (!form.workshop) {
+        toast.error('Datos incompletos', 'El taller es requerido para registrar un mantenimiento.')
+        return
+      }
+      await maintenanceStore.registerNow(form.vehicleId, {
+        type: Number(form.type),
+        description: form.description,
+        entryDate: form.date,
+        workshop: form.workshop,
+        estimatedExitDate: form.estimatedExitDate || null,
+        nextMaintenanceDateScheduled: form.nextMaintenanceDate || null,
+        nextMaintenanceKmScheduled: form.km ? Number(form.km) : null,
+      })
+      toast.success('Mantenimiento registrado', 'El vehículo entró a mantenimiento.')
+    } else {
+      await maintenanceStore.scheduleMaintenance({
+        vehicleId: form.vehicleId,
+        type: Number(form.type),
+        description: form.description,
+        scheduledDate: form.date,
+        workshop: form.workshop || null,
+        scheduledKm: form.km ? Number(form.km) : null,
+      })
+      toast.success('Mantenimiento programado', 'Se programó correctamente.')
+    }
     resetForm()
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'Error al guardar el mantenimiento'))
   } finally {
-    loading.value = false
+    saving.value = false
+  }
+}
+
+// Ejecutar mantenimiento programado
+const executeModal = useModal()
+const executeForm = reactive({ entryDate: '', workshop: '', estimatedExitDate: '', nextMaintenanceDate: '' })
+
+function openExecuteModal(item) {
+  Object.assign(executeForm, {
+    entryDate: new Date().toISOString().slice(0, 10),
+    workshop: item.workshop || '',
+    estimatedExitDate: '',
+    nextMaintenanceDate: '',
+  })
+  executeModal.open(item)
+}
+
+async function handleExecute() {
+  if (!executeForm.entryDate || !executeForm.workshop) {
+    toast.error('Datos incompletos', 'La fecha de ingreso y el taller son requeridos.')
+    return
+  }
+
+  saving.value = true
+  try {
+    const item = executeModal.payload.value
+    await maintenanceStore.executeScheduled(item.vehicleId, item.id, {
+      entryDate: executeForm.entryDate,
+      workshop: executeForm.workshop,
+      estimatedExitDate: executeForm.estimatedExitDate || null,
+      nextMaintenanceDateScheduled: executeForm.nextMaintenanceDate || null,
+      nextMaintenanceKmScheduled: null,
+    })
+    toast.success('Mantenimiento ejecutado', 'El vehículo entró a mantenimiento.')
+    executeModal.close()
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'Error al ejecutar el mantenimiento'))
+  } finally {
+    saving.value = false
+  }
+}
+
+// Cancelar mantenimiento programado
+const cancelModal = useModal()
+const cancelReason = ref('')
+
+function openCancelModal(item) {
+  cancelReason.value = ''
+  cancelModal.open(item)
+}
+
+async function handleCancelScheduled() {
+  if (!cancelReason.value.trim()) {
+    toast.error('Datos incompletos', 'Indica el motivo de la cancelación.')
+    return
+  }
+
+  saving.value = true
+  try {
+    const item = cancelModal.payload.value
+    await maintenanceStore.cancelScheduled(item.vehicleId, item.id, cancelReason.value)
+    toast.success('Programación cancelada', '')
+    cancelModal.close()
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'Error al cancelar la programación'))
+  } finally {
+    saving.value = false
+  }
+}
+
+// Cerrar mantenimiento abierto
+const closeModal = useModal()
+const closeForm = reactive({ actualExitDate: '', cost: '' })
+
+function openCloseModal(item) {
+  Object.assign(closeForm, { actualExitDate: new Date().toISOString().slice(0, 10), cost: '' })
+  closeModal.open(item)
+}
+
+async function handleClose() {
+  if (!closeForm.actualExitDate || closeForm.cost === '') {
+    toast.error('Datos incompletos', 'La fecha de salida y el costo son requeridos.')
+    return
+  }
+
+  saving.value = true
+  try {
+    const item = closeModal.payload.value
+    await maintenanceStore.closeMaintenance(item.vehicleId, item.id, {
+      actualExitDate: closeForm.actualExitDate,
+      cost: Number(closeForm.cost),
+    })
+    toast.success('Mantenimiento cerrado', 'Se cerró correctamente.')
+    closeModal.close()
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'Error al cerrar el mantenimiento'))
+  } finally {
+    saving.value = false
   }
 }
 </script>
@@ -225,10 +500,46 @@ async function handleSave() {
   letter-spacing: 0.08em;
 }
 
+.card-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-toggle button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.mode-toggle button.active {
+  background: #2563eb;
+  color: #fff;
+}
+
 .section-title {
   font-size: 0.95rem;
   font-weight: 600;
   color: #111827;
+}
+
+.empty-state {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  padding: 1rem 0;
+  text-align: center;
 }
 
 /* Upcoming */
@@ -245,6 +556,7 @@ async function handleSave() {
   padding: 0.75rem;
   border: 1px solid #f3f4f6;
   border-radius: 8px;
+  flex-wrap: wrap;
 }
 
 .upcoming-icon {
@@ -261,7 +573,7 @@ async function handleSave() {
 .upcoming-icon.orange { background: #fff7ed; color: #d97706; }
 .upcoming-icon.gray   { background: #f3f4f6; color: #9ca3af; }
 
-.upcoming-info { flex: 1; }
+.upcoming-info { flex: 1; min-width: 160px; }
 
 .upcoming-name {
   font-size: 0.875rem;
@@ -281,9 +593,31 @@ async function handleSave() {
   white-space: nowrap;
 }
 
+.upcoming-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
 .text-red    { color: #dc2626; }
 .text-orange { color: #d97706; }
 .text-gray   { color: #9ca3af; }
+
+.btn-mini {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  color: #374151;
+  cursor: pointer;
+}
+
+.btn-mini:hover { background: #f9fafb; }
+.btn-mini:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-mini:disabled:hover { background: #fff; }
+.btn-mini--danger { color: #dc2626; border-color: #fecaca; }
+.btn-mini--danger:hover { background: #fef2f2; }
 
 /* Formulario */
 .form-group {
@@ -322,6 +656,7 @@ async function handleSave() {
 }
 
 .form-textarea {
+  width: 100%;
   padding: 0.6rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -426,4 +761,17 @@ async function handleSave() {
 
 .badge.preventivo { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
 .badge.correctivo { background: #fff7ed; color: #d97706; border-color: #fed7aa; }
+
+/* Modales */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.modal-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: -0.5rem 0 0;
+}
 </style>

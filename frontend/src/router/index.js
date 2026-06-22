@@ -103,7 +103,7 @@ const routes = [
       {
         path: 'schedules',
         name: 'schedules',
-        component: () => import('@/views/calendar/CalendarView.vue'),
+        component: () => import('@/views/schedule/ScheduleView.vue'),
         meta: { title: 'Agenda', module: 'schedules' },
       },
 
@@ -112,6 +112,17 @@ const routes = [
         name: 'fuel',
         component: () => import('@/views/fuel/FuelView.vue'),
         meta: { title: 'Combustible', module: 'fuel' },
+      },
+
+      {
+        path: 'maintenance',
+        name: 'maintenance',
+        component: () => import('@/views/maintenance/MaintenanceView.vue'),
+        meta: {
+          title: 'Mantenimiento',
+          module: 'maintenance',
+          roles: ['Administrador', 'Supervisor'],
+        },
       },
 
       {
