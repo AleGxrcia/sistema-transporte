@@ -127,7 +127,7 @@ namespace TransportSystem.Infrastructure.Identity.Services
             await _userManager.UpdateAsync(user);
         }
 
-        public async Task<UserResult> CreateUserAsync(CreateUserRequest request, string origin, CancellationToken cancellationToken = default)
+        public async Task<UserResult> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
         {
             var existing = await _userManager.FindByEmailAsync(request.Email);
             if (existing is not null)
@@ -139,7 +139,8 @@ namespace TransportSystem.Infrastructure.Identity.Services
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                IsActive = true
+                IsActive = true,
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -147,13 +148,6 @@ namespace TransportSystem.Infrastructure.Identity.Services
                 throw new ConflictException(string.Join("; ", result.Errors.Select(e => e.Description)));
 
             await _userManager.AddToRoleAsync(user, request.Role.ToString());
-
-            var confirmUri = await BuildConfirmEmailUriAsync(user, origin);
-            await _emailService.SendAsync(new EmailRequest(
-                To: user.Email!,
-                Subject: "Confirma tu cuenta — TransFleet",
-                Body: $"Confirma tu cuenta en: {confirmUri}"
-            ));
 
             return ToUserResult(user, request.Role);
         }
@@ -168,7 +162,6 @@ namespace TransportSystem.Infrastructure.Identity.Services
             {
                 user.Email = request.Email;
                 user.UserName = request.Email;
-                user.EmailConfirmed = false;
             }
 
             var result = await _userManager.UpdateAsync(user);
@@ -306,15 +299,6 @@ namespace TransportSystem.Infrastructure.Identity.Services
         private async Task<ApplicationUser> FindOrThrowAsync(string userId)
             => await _userManager.FindByIdAsync(userId)
                ?? throw new NotFoundException($"Usuario '{userId}' no encontrado.");
-
-        private async Task<string> BuildConfirmEmailUriAsync(ApplicationUser user, string origin)
-        {
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var uri = new Uri($"{origin}/auth/confirm-email");
-            var result = QueryHelpers.AddQueryString(uri.ToString(), "userId", user.Id);
-            return QueryHelpers.AddQueryString(result, "token", code);
-        }
 
         private async Task<string> BuildResetPasswordUriAsync(ApplicationUser user, string origin)
         {

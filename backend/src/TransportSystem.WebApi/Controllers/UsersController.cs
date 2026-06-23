@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using TransportSystem.Core.Application.Common.Exceptions;
 using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Core.Application.Dtos.Auth;
 using TransportSystem.WebApi.Contracts.Auth;
-using TransportSystem.WebApi.Settings;
 
 namespace TransportSystem.WebApi.Controllers
 {
@@ -15,12 +13,10 @@ namespace TransportSystem.WebApi.Controllers
     public class UsersController : ApiControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly ClientSettings _clientSettings;
 
-        public UsersController(IAccountService accountService, IOptions<ClientSettings> clientSettings)
+        public UsersController(IAccountService accountService)
         {
             _accountService = accountService;
-            _clientSettings = clientSettings.Value;
         }
 
         private string CurrentUserId =>
@@ -53,7 +49,7 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> Create(
             [FromBody] CreateUserRequest request, CancellationToken cancellationToken)
         {
-            var result = await _accountService.CreateUserAsync(request, _clientSettings.BaseUrl, cancellationToken);
+            var result = await _accountService.CreateUserAsync(request, cancellationToken);
             return CreatedAtRoute("GetUserById", new { id = result.Id }, result);
         }
 
