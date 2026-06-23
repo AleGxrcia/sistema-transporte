@@ -316,14 +316,14 @@ async function handleSave() {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   outline: none;
 }
 
 .empty-state {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-3);
   padding: 1.5rem 0;
   text-align: center;
@@ -358,7 +358,7 @@ async function handleSave() {
 }
 
 .kpi-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -385,7 +385,7 @@ async function handleSave() {
   margin-bottom: 0.25rem;
 }
 
-.kpi-sub { font-size: 0.75rem; }
+.kpi-sub { font-size: 0.8rem; }
 .kpi-sub.gray  { color: var(--text-3); }
 
 /* Main grid */
@@ -427,7 +427,7 @@ async function handleSave() {
 }
 
 .card-section-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -448,7 +448,7 @@ async function handleSave() {
 
 .bar-label {
   width: 70px;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
   flex-shrink: 0;
@@ -470,7 +470,7 @@ async function handleSave() {
 
 .bar-value {
   width: 60px;
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-3);
   text-align: right;
   flex-shrink: 0;
@@ -479,7 +479,7 @@ async function handleSave() {
 .bar-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-3);
   padding-top: 0.25rem;
   border-top: 1px solid var(--border);
@@ -501,7 +501,7 @@ async function handleSave() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -510,7 +510,7 @@ async function handleSave() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -533,15 +533,15 @@ async function handleSave() {
   background: var(--surface-hover);
 }
 
-.calculated-label { font-size: 0.82rem; color: var(--text-3); }
-.calculated-value { font-size: 0.875rem; font-weight: 600; color: var(--blue-hover); }
+.calculated-label { font-size: 0.87rem; color: var(--text-3); }
+.calculated-value { font-size: 0.925rem; font-weight: 600; color: var(--blue-hover); }
 
 .warning-banner {
   background: var(--amber-bg);
   border: 1px solid var(--amber-border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--amber-text);
   line-height: 1.5;
 }
@@ -557,7 +557,7 @@ async function handleSave() {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -571,7 +571,7 @@ async function handleSave() {
   color: var(--white);
   border: none;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -595,7 +595,7 @@ async function handleSave() {
 
 .table th {
   text-align: left;
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -606,7 +606,7 @@ async function handleSave() {
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
 }

@@ -164,7 +164,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--amber-text);
 }
 
@@ -207,7 +207,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 .role-name.active { color: var(--purple); }
 
 .role-count {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-3);
 }
 
@@ -229,7 +229,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 }
 
 .permissions-title {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -241,14 +241,14 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 .permissions-title .gray   { color: var(--text-2); }
 
 .permissions-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
 }
 
 .restricted-badge {
   background: var(--purple-bg);
   color: var(--purple);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   padding: 4px 12px;
   border-radius: 999px;
@@ -263,7 +263,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 
 .table th {
   text-align: center;
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -275,7 +275,7 @@ const currentPermissions = computed(() => permissionsMap[selectedRole.value] || 
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
   text-align: center;

@@ -276,13 +276,13 @@ async function confirmDelete() {
 }
 
 .empty-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   margin: 0;
 }
 .empty-sub {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-3);
   line-height: 1.6;
   max-width: 360px;

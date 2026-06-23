@@ -241,7 +241,7 @@ async function handleConfirm() {
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
 }
 
 .request-dot {
@@ -267,7 +267,7 @@ async function handleConfirm() {
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   border: 1px solid transparent;
 }
@@ -300,7 +300,7 @@ async function handleConfirm() {
 }
 
 .col-sub {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-3);
   margin-top: 2px;
 }
@@ -308,7 +308,7 @@ async function handleConfirm() {
 .available-badge {
   background: var(--mint-bg);
   color: var(--mint-dark);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
@@ -360,26 +360,26 @@ async function handleConfirm() {
 .option-icon.active { background: var(--blue-mid); color: var(--blue-hover); }
 
 .option-name {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .option-detail {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-2);
   margin-top: 2px;
 }
 
 .option-confirm {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   margin-top: 4px;
   font-weight: 500;
 }
 
 .warning-tag {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.77rem;
   font-weight: 500;
   color: var(--amber-text);
   background: var(--amber-bg);
@@ -411,7 +411,7 @@ async function handleConfirm() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 700;
   color: var(--white);
 }
@@ -420,7 +420,7 @@ async function handleConfirm() {
   width: 36px;
   height: 36px;
   min-width: 36px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
 /* Summary */
@@ -439,7 +439,7 @@ async function handleConfirm() {
 }
 
 .summary-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -473,7 +473,7 @@ async function handleConfirm() {
 
 .summary-label {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -481,7 +481,7 @@ async function handleConfirm() {
 }
 
 .summary-value {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -498,7 +498,7 @@ async function handleConfirm() {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -512,7 +512,7 @@ async function handleConfirm() {
   color: var(--white);
   border: none;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;

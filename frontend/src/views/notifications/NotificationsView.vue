@@ -336,7 +336,7 @@ const selectedNotif = computed(() =>
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--white);
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -353,7 +353,7 @@ const selectedNotif = computed(() =>
 .tab-count {
   background: var(--bg);
   color: var(--text-2);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 999px;
@@ -371,7 +371,7 @@ const selectedNotif = computed(() =>
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -384,7 +384,7 @@ const selectedNotif = computed(() =>
   border: 1px solid var(--red-border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-family: 'Inter', sans-serif;
   color: var(--red);
   cursor: pointer;
@@ -440,14 +440,14 @@ const selectedNotif = computed(() =>
 .notif-content { flex: 1; min-width: 0; }
 
 .notif-title {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 2px;
 }
 
 .notif-desc {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-2);
   margin-bottom: 2px;
   white-space: nowrap;
@@ -456,7 +456,7 @@ const selectedNotif = computed(() =>
 }
 
 .notif-time {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-3);
 }
 
@@ -508,13 +508,13 @@ const selectedNotif = computed(() =>
 .detail-title.warning { color: var(--amber-text); }
 
 .detail-meta {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-3);
   margin-top: 2px;
 }
 
 .urgency-badge {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
@@ -533,7 +533,7 @@ const selectedNotif = computed(() =>
 }
 
 .detail-text {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--text-2);
   line-height: 1.6;
 }
@@ -547,7 +547,7 @@ const selectedNotif = computed(() =>
 }
 
 .vehicle-title {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -563,14 +563,14 @@ const selectedNotif = computed(() =>
 .vehicle-item { display: flex; flex-direction: column; gap: 2px; }
 
 .v-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
 }
 
 .v-value {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -585,7 +585,7 @@ const selectedNotif = computed(() =>
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   border: 1px solid transparent;
   width: fit-content;
@@ -605,7 +605,7 @@ const selectedNotif = computed(() =>
 .btn-action {
   padding: 0.6rem 1.1rem;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   cursor: pointer;
@@ -634,7 +634,7 @@ const selectedNotif = computed(() =>
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -647,7 +647,7 @@ const selectedNotif = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--text-3);
 }
 </style>

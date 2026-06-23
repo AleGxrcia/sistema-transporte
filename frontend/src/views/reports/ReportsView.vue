@@ -325,7 +325,7 @@ async function handleExportPdf() {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   outline: none;
@@ -341,7 +341,7 @@ async function handleExportPdf() {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -352,7 +352,7 @@ async function handleExportPdf() {
 .btn-export:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .empty-state {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-3);
   padding: 1.5rem 0;
   text-align: center;
@@ -387,7 +387,7 @@ async function handleExportPdf() {
 }
 
 .kpi-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -414,7 +414,7 @@ async function handleExportPdf() {
   margin-bottom: 0.25rem;
 }
 
-.kpi-sub { font-size: 0.75rem; }
+.kpi-sub { font-size: 0.8rem; }
 .kpi-sub.green { color: var(--mint-dark); }
 .kpi-sub.gray  { color: var(--text-2); }
 
@@ -435,7 +435,7 @@ async function handleExportPdf() {
 }
 
 .card-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -481,7 +481,7 @@ async function handleExportPdf() {
 }
 
 .bar-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-3);
   margin-top: 0.4rem;
 }
@@ -528,7 +528,7 @@ async function handleExportPdf() {
 
 .hbar-label {
   width: 80px;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
   text-align: right;
   flex-shrink: 0;
@@ -550,7 +550,7 @@ async function handleExportPdf() {
 
 .hbar-value {
   width: 24px;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
   font-weight: 600;
   text-align: right;
@@ -568,7 +568,7 @@ async function handleExportPdf() {
 
 .table th {
   text-align: left;
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -578,7 +578,7 @@ async function handleExportPdf() {
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
 }

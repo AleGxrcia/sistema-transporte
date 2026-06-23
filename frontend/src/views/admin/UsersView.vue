@@ -411,7 +411,7 @@ async function handleDelete() {
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1.1rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -449,7 +449,7 @@ async function handleDelete() {
 }
 
 .kpi-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -496,7 +496,7 @@ async function handleDelete() {
 .search-input {
   border: none;
   outline: none;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   width: 160px;
@@ -506,7 +506,7 @@ async function handleDelete() {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   background: var(--white);
@@ -520,7 +520,7 @@ async function handleDelete() {
   color: var(--red);
   border-radius: 8px;
   padding: 0.6rem 0.875rem;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
 }
 
 /* Tabla */
@@ -536,7 +536,7 @@ async function handleDelete() {
 
 .table th {
   text-align: left;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -546,7 +546,7 @@ async function handleDelete() {
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
 }
@@ -572,13 +572,13 @@ async function handleDelete() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--white);
 }
 
 .user-name {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -588,7 +588,7 @@ async function handleDelete() {
   display: inline-flex;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -603,7 +603,7 @@ async function handleDelete() {
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   border: 1px solid transparent;
 }
@@ -686,7 +686,7 @@ async function handleDelete() {
 .form-group.full-width { grid-column: 1 / -1; }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -695,7 +695,7 @@ async function handleDelete() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -715,7 +715,7 @@ async function handleDelete() {
 }
 
 .error-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--red);
 }
 
@@ -732,7 +732,7 @@ async function handleDelete() {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -746,7 +746,7 @@ async function handleDelete() {
   color: var(--white);
   border: none;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;

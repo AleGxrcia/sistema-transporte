@@ -170,8 +170,8 @@ const oldNotifications = ref([
 }
 
 .page-date {
-  font-size: 0.8rem;
-  color: #9ca3af;
+  font-size: 0.85rem;
+  color: #6b7280;
   font-family: 'Inter', sans-serif;
   text-transform: capitalize;
 }
@@ -305,7 +305,7 @@ const oldNotifications = ref([
   background: none;
   border: none;
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: #6b7280;
   cursor: pointer;
   padding: 4px 6px;
 }
@@ -318,9 +318,9 @@ const oldNotifications = ref([
 }
 
 .notif-section-title {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: #6b7280;
   letter-spacing: 0.08em;
   padding: 0.75rem 0.5rem 0.25rem;
 }
@@ -357,7 +357,7 @@ const oldNotifications = ref([
 .notif-content { flex: 1; }
 
 .notif-name {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #111827;
   font-family: 'Inter', sans-serif;
@@ -365,15 +365,15 @@ const oldNotifications = ref([
 }
 
 .notif-desc {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: #6b7280;
   font-family: 'Inter', sans-serif;
   margin-bottom: 2px;
 }
 
 .notif-time {
-  font-size: 0.72rem;
-  color: #9ca3af;
+  font-size: 0.77rem;
+  color: #6b7280;
   font-family: 'Inter', sans-serif;
 }
 

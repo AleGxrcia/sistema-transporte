@@ -264,7 +264,7 @@ const userInitials = computed(() => {
 
 .nav-section-title {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #475569;
   letter-spacing: 0.08em;
@@ -280,7 +280,7 @@ const userInitials = computed(() => {
   padding: 0.6rem 1rem;
   color: #94a3b8;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   border-radius: 6px;
   margin: 0 0.5rem;
@@ -306,7 +306,7 @@ const userInitials = computed(() => {
   margin-left: auto;
   background: #ef4444;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 999px;
@@ -369,7 +369,7 @@ const userInitials = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #fff;
 }
@@ -381,7 +381,7 @@ const userInitials = computed(() => {
 }
 
 .user-name {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #e2e8f0;
   white-space: nowrap;
@@ -390,7 +390,7 @@ const userInitials = computed(() => {
 }
 
 .user-role {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #64748b;
 }
 </style>

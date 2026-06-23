@@ -273,9 +273,9 @@ async function loadAssignedResources() {
         <div v-if="request.status === 'Pending'">
           <div class="sec-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <span class="card-title" style="margin:0">OTRAS SOLICITUDES PENDIENTES</span>
-            <router-link to="/requests" style="font-size:12px;color:var(--blue)">Ver todas →</router-link>
+            <router-link to="/requests" style="font-size:13px;color:var(--blue)">Ver todas →</router-link>
           </div>
-          <div v-if="otherPending.length === 0" class="card" style="text-align:center;color:var(--text-3);font-size:12.5px">
+          <div v-if="otherPending.length === 0" class="card" style="text-align:center;color:var(--text-3);font-size:13.5px">
             No hay otras solicitudes pendientes.
           </div>
           <div v-else style="display:flex;flex-direction:column;gap:8px">
@@ -287,11 +287,11 @@ async function loadAssignedResources() {
               @click="router.push(`/requests/${r.id}`)"
             >
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                <span style="font-size:11px;font-weight:700;color:var(--text-3)">{{ r.requestNumber }}</span>
+                <span style="font-size:12px;font-weight:700;color:var(--text-3)">{{ r.requestNumber }}</span>
                 <AppBadge status="Pending" />
               </div>
-              <div style="font-size:12.5px;font-weight:600;color:var(--text)">{{ r.requestingArea }} → {{ r.destination }}</div>
-              <div style="font-size:11.5px;color:var(--text-3)">{{ formatDate(r.departureDateTime) }} · {{ r.passengerCount }} pers.</div>
+              <div style="font-size:13.5px;font-weight:600;color:var(--text)">{{ r.requestingArea }} → {{ r.destination }}</div>
+              <div style="font-size:12.5px;color:var(--text-3)">{{ formatDate(r.departureDateTime) }} · {{ r.passengerCount }} pers.</div>
             </div>
           </div>
         </div>
@@ -307,7 +307,7 @@ async function loadAssignedResources() {
         <div v-else class="grid2">
           <div>
             <div class="card-title">SELECCIONAR VEHÍCULO ({{ availableVehicles.length }} disponibles)</div>
-            <div v-if="availableVehicles.length === 0" class="card" style="color:var(--text-3);font-size:12.5px">
+            <div v-if="availableVehicles.length === 0" class="card" style="color:var(--text-3);font-size:13.5px">
               No hay vehículos disponibles con la capacidad requerida.
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
@@ -330,7 +330,7 @@ async function loadAssignedResources() {
 
           <div>
             <div class="card-title">SELECCIONAR CONDUCTOR ({{ availableDrivers.length }} disponibles)</div>
-            <div v-if="availableDrivers.length === 0" class="card" style="color:var(--text-3);font-size:12.5px">
+            <div v-if="availableDrivers.length === 0" class="card" style="color:var(--text-3);font-size:13.5px">
               No hay conductores disponibles con licencia vigente.
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
@@ -439,14 +439,14 @@ async function loadAssignedResources() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--white);
 }
 .step-circle.completed { background: var(--mint-dark); }
 .step-circle.active { background: var(--blue); }
 .step-circle.inactive { background: var(--border-strong); color: var(--text-3); }
-.step-label { font-size: 12px; font-weight: 600; }
+.step-label { font-size: 13px; font-weight: 600; }
 .step-label.completed { color: var(--mint-dark); }
 .step-label.active { color: var(--blue); }
 .step-label.inactive { color: var(--text-3); font-weight: 500; }
@@ -469,8 +469,8 @@ async function loadAssignedResources() {
 }
 .info-item { display: flex; flex-direction: column; gap: 2px; }
 .info-item.full { grid-column: 1 / -1; }
-.info-item dt { font-size: 10.5px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
-.info-item dd { font-size: 13px; font-weight: 600; color: var(--text); }
+.info-item dt { font-size: 11.5px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.info-item dd { font-size: 14px; font-weight: 600; color: var(--text); }
 .text-red { color: var(--red); font-weight: 500; }
 
 .option-selected {

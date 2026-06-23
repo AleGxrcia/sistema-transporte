@@ -196,7 +196,7 @@ async function handleSubmit() {
 
 <style scoped>
 .section-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;

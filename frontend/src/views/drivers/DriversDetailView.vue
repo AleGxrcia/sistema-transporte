@@ -378,7 +378,7 @@ function afterSaved(msg) {
         <div class="driver-avatar-lg">{{ initials }}</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-            <h2 style="font-size:18px;font-weight:700;color:var(--text)">{{ driver.firstName }} {{ driver.lastName }}</h2>
+            <h2 style="font-size:19px;font-weight:700;color:var(--text)">{{ driver.firstName }} {{ driver.lastName }}</h2>
             <AppBadge :status="driver.status" />
           </div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
@@ -394,7 +394,7 @@ function afterSaved(msg) {
             <div class="info-block"><span class="info-label">Teléfono</span><div class="info-value">{{ driver.phone }}</div></div>
             <div class="info-block"><span class="info-label">Supervisor</span><div class="info-value">{{ supervisorName || 'Sin asignar' }}</div></div>
           </div>
-          <div v-if="driver.address" style="margin-top:10px;font-size:12.5px;color:var(--text-3);display:flex;align-items:center;gap:4px">
+          <div v-if="driver.address" style="margin-top:10px;font-size:13.5px;color:var(--text-3);display:flex;align-items:center;gap:4px">
             <MapPin :size="12" />{{ driver.address }}
           </div>
         </div>
@@ -416,7 +416,7 @@ function afterSaved(msg) {
         </div>
         <div class="kpi">
           <div class="kpi-label">Conductor desde</div>
-          <div class="kpi-val" style="font-size:18px">{{ seniority }}</div>
+          <div class="kpi-val" style="font-size:19px">{{ seniority }}</div>
           <div class="kpi-sub">{{ driver.createdAt ? formatDate(driver.createdAt) : '—' }}</div>
           <div class="kpi-icon purple"><CircleUser :size="15" /></div>
         </div>
@@ -589,10 +589,10 @@ function afterSaved(msg) {
             <CheckCircle v-if="checkResult.ok" :size="18" style="color:var(--mint-dark)" />
             <AlertTriangle v-else :size="18" style="color:var(--red)" />
             <div>
-              <div :style="checkResult.ok ? 'color:var(--mint-dark)' : 'color:var(--red)'" style="font-size:13px;font-weight:600">
+              <div :style="checkResult.ok ? 'color:var(--mint-dark)' : 'color:var(--red)'" style="font-size:14px;font-weight:600">
                 {{ checkResult.ok ? 'Conductor disponible' : 'Conductor no disponible' }}
               </div>
-              <div style="font-size:11.5px;color:var(--text-2);margin-top:2px">{{ checkResult.message }}</div>
+              <div style="font-size:12.5px;color:var(--text-2);margin-top:2px">{{ checkResult.message }}</div>
             </div>
           </div>
         </div>
@@ -665,7 +665,7 @@ function afterSaved(msg) {
 
 <style scoped>
 .loading-placeholder { padding: 48px; text-align: center; color: var(--text-3); }
-.empty-card { font-size: 13px; color: var(--text-3); text-align: center; padding: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
+.empty-card { font-size: 14px; color: var(--text-3); text-align: center; padding: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
 
 /* Header card */
 .driver-header-card {
@@ -683,10 +683,10 @@ function afterSaved(msg) {
 }
 .info-block { display: flex; flex-direction: column; gap: 3px; }
 .info-label {
-  font-size: 10.5px; color: var(--text-3); font-weight: 500;
+  font-size: 11.5px; color: var(--text-3); font-weight: 500;
   text-transform: uppercase; letter-spacing: 0.04em;
 }
-.info-value { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.info-value { font-size: 14.5px; font-weight: 600; color: var(--text); }
 .info-value.strong { color: var(--navy); font-weight: 700; }
 .info-value.mint { color: var(--mint-dark); }
 
@@ -694,18 +694,18 @@ function afterSaved(msg) {
 .text-amber { color: var(--amber-text) !important; font-weight: 700; }
 
 /* Info general — tab 0 */
-.field-label { font-size: 11px; color: var(--text-3); font-weight: 500; margin-bottom: 3px; }
-.field-value { font-size: 13px; font-weight: 600; color: var(--text); }
+.field-label { font-size: 12px; color: var(--text-3); font-weight: 500; margin-bottom: 3px; }
+.field-value { font-size: 14px; font-weight: 600; color: var(--text); }
 .field-value.strong { color: var(--navy); font-weight: 700; }
 
 /* Disponibilidad */
 .availability-list { display: flex; flex-direction: column; gap: 6px; }
 .avail-row { display: flex; align-items: center; gap: 10px; }
-.avail-day { font-size: 11.5px; color: var(--text-2); min-width: 28px; font-weight: 500; }
+.avail-day { font-size: 12.5px; color: var(--text-2); min-width: 28px; font-weight: 500; }
 .avail-bar {
   flex: 1; height: 26px; border-radius: 5px;
   display: flex; align-items: center; padding: 0 8px;
-  font-size: 10px; font-weight: 600; border: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; border: 1px solid var(--border);
 }
 .avail-bar--free { background: var(--mint-bg); border-color: #6ee7b7; color: var(--mint-dark); }
 .avail-bar--busy { background: var(--sky-bg); border-color: var(--sky-border); color: var(--sky); }
@@ -714,7 +714,7 @@ function afterSaved(msg) {
 .license-banner {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; border-radius: 8px;
-  font-size: 13px; font-weight: 600; margin-bottom: 16px;
+  font-size: 14px; font-weight: 600; margin-bottom: 16px;
 }
 .banner--warning { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border); }
 .banner--expired { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
@@ -725,15 +725,15 @@ function afterSaved(msg) {
 }
 .mini-stat--mint { background: var(--mint-bg); border-color: #6ee7b7; }
 .mini-stat--red  { background: var(--red-bg); border-color: var(--red-border); }
-.mini-stat-label { font-size: 11px; color: var(--text-3); font-weight: 500; }
+.mini-stat-label { font-size: 12px; color: var(--text-3); font-weight: 500; }
 .mini-stat--mint .mini-stat-label { color: var(--mint-dark); }
 .mini-stat--red .mini-stat-label  { color: var(--red); }
-.mini-stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
+.mini-stat-val { font-size: 19px; font-weight: 700; color: var(--text); }
 .mini-stat--mint .mini-stat-val { color: var(--mint-dark); }
 .mini-stat--red .mini-stat-val  { color: var(--red); }
 
 .btn-sm {
-  margin-left: auto; font-size: 11px; padding: 4px 10px;
+  margin-left: auto; font-size: 12px; padding: 4px 10px;
   border: 1px solid currentColor; border-radius: 6px;
   background: transparent; cursor: pointer;
 }

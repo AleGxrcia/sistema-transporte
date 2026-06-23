@@ -469,7 +469,7 @@ async function handleClose() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--amber-text);
 }
 
@@ -494,7 +494,7 @@ async function handleClose() {
 }
 
 .card-section-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -516,7 +516,7 @@ async function handleClose() {
 
 .mode-toggle button {
   padding: 0.4rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-family: 'Inter', sans-serif;
   background: var(--white);
   border: none;
@@ -536,7 +536,7 @@ async function handleClose() {
 }
 
 .empty-state {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-3);
   padding: 1rem 0;
   text-align: center;
@@ -576,19 +576,19 @@ async function handleClose() {
 .upcoming-info { flex: 1; min-width: 160px; }
 
 .upcoming-name {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .upcoming-detail {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-3);
   margin-top: 2px;
 }
 
 .upcoming-days {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -607,7 +607,7 @@ async function handleClose() {
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   background: var(--white);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -633,7 +633,7 @@ async function handleClose() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -642,7 +642,7 @@ async function handleClose() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -660,7 +660,7 @@ async function handleClose() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -686,7 +686,7 @@ async function handleClose() {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--white);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -700,7 +700,7 @@ async function handleClose() {
   color: var(--white);
   border: none;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -724,7 +724,7 @@ async function handleClose() {
 
 .table th {
   text-align: left;
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -735,7 +735,7 @@ async function handleClose() {
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
 }
@@ -754,7 +754,7 @@ async function handleClose() {
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   border: 1px solid transparent;
 }
@@ -770,7 +770,7 @@ async function handleClose() {
 }
 
 .modal-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   margin: -0.5rem 0 0;
 }

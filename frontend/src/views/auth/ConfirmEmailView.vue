@@ -89,9 +89,9 @@ onMounted(async () => {
   text-align: center;
 }
 
-.status-msg { font-size: 0.875rem; color: var(--text-2); text-align: center; }
-.success-msg { font-size: 0.875rem; color: var(--mint-dark); text-align: center; }
-.error-msg { font-size: 0.875rem; color: var(--red); text-align: center; }
+.status-msg { font-size: 0.925rem; color: var(--text-2); text-align: center; }
+.success-msg { font-size: 0.925rem; color: var(--mint-dark); text-align: center; }
+.error-msg { font-size: 0.925rem; color: var(--red); text-align: center; }
 
 .btn-primary {
   width: 70%;

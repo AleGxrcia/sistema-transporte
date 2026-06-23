@@ -118,7 +118,7 @@ async function handleLogin() {
 }
 
 .auth-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
   margin-bottom: 1.25rem;
 }
@@ -136,7 +136,7 @@ async function handleLogin() {
   padding: 0.5rem 0.25rem;
   border: none;
   background: transparent;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -166,7 +166,7 @@ async function handleLogin() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -202,7 +202,7 @@ async function handleLogin() {
   border: none;
   outline: none;
   padding: 0.625rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   background: transparent;
@@ -215,13 +215,13 @@ async function handleLogin() {
 }
 
 .forgot-link a {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--blue-hover);
   text-decoration: none;
 }
 
 .error-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--red);
   text-align: center;
 }

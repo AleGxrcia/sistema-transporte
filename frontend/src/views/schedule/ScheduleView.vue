@@ -138,7 +138,7 @@ function viewRequest(a) {
     </div>
 
     <div class="search-row" style="justify-content:space-between">
-      <h2 style="font-size:16px;font-weight:700;color:var(--text);text-transform:capitalize">{{ headerLabel }}</h2>
+      <h2 style="font-size:17px;font-weight:700;color:var(--text);text-transform:capitalize">{{ headerLabel }}</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <input v-model="currentDate" type="date" style="width:auto" />
         <button class="btn" @click="goPrev">←</button>
@@ -178,11 +178,11 @@ function viewRequest(a) {
           <div v-if="col.items.length === 0" class="week-empty">Sin viajes</div>
           <div v-for="a in col.items" :key="a.assignmentId" class="card trip-card" @click="viewRequest(a)">
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-weight:700;font-size:12px">{{ dayjs(a.departureTime).format('HH:mm') }}</span>
+              <span style="font-weight:700;font-size:13px">{{ dayjs(a.departureTime).format('HH:mm') }}</span>
               <AppBadge :status="a.status" />
             </div>
-            <div style="font-size:12px;font-weight:600;color:var(--text);margin-top:4px">{{ a.destination }}</div>
-            <div style="font-size:11px;color:var(--text-3);margin-top:2px">{{ a.vehiclePlate }} · {{ a.driverFullName }}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-top:4px">{{ a.destination }}</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:2px">{{ a.vehiclePlate }} · {{ a.driverFullName }}</div>
           </div>
         </div>
       </div>
@@ -193,16 +193,16 @@ function viewRequest(a) {
         <div v-else style="display:flex;flex-direction:column;gap:8px">
           <div v-for="a in dayItems" :key="a.assignmentId" class="card trip-card" @click="viewRequest(a)">
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-weight:700;font-size:14px">
+              <span style="font-weight:700;font-size:15px">
                 {{ dayjs(a.departureTime).format('HH:mm') }} — {{ dayjs(a.returnTime).format('HH:mm') }}
               </span>
               <AppBadge :status="a.status" />
             </div>
-            <div style="font-size:13px;font-weight:600;color:var(--text);margin-top:6px">{{ a.requestNumber }} · {{ a.destination }}</div>
-            <div style="font-size:12px;color:var(--text-3);margin-top:2px">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:6px">{{ a.requestNumber }} · {{ a.destination }}</div>
+            <div style="font-size:13px;color:var(--text-3);margin-top:2px">
               {{ a.vehiclePlate }} — {{ a.vehicleDescription }} · {{ a.driverFullName }}
             </div>
-            <div v-if="a.cancellationReason" class="text-red" style="font-size:11.5px;margin-top:4px">
+            <div v-if="a.cancellationReason" class="text-red" style="font-size:12.5px;margin-top:4px">
               Cancelado: {{ a.cancellationReason }}
             </div>
           </div>
@@ -211,7 +211,7 @@ function viewRequest(a) {
     </template>
 
     <!-- Leyenda -->
-    <div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--text-3);margin-top:14px;flex-wrap:wrap">
+    <div style="display:flex;gap:16px;align-items:center;font-size:13px;color:var(--text-3);margin-top:14px;flex-wrap:wrap">
       <span v-for="s in ASSIGNMENT_STATUSES" :key="s.name" style="display:flex;align-items:center;gap:6px">
         <AppBadge :status="s.name" />
       </span>
@@ -226,7 +226,7 @@ function viewRequest(a) {
   color: var(--text-3);
 }
 .empty-card {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-3);
   text-align: center;
   padding: 24px;
@@ -246,7 +246,7 @@ function viewRequest(a) {
 .month-day-header {
   padding: 8px;
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-3);
   background: var(--white);
@@ -269,7 +269,7 @@ function viewRequest(a) {
 .month-cell.other-month .month-day-number { color: var(--text-3); }
 .month-cell.today { background: var(--blue-light); }
 .month-day-number {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-2);
   width: 22px;
@@ -282,7 +282,7 @@ function viewRequest(a) {
 .month-day-number.today { background: var(--blue); color: var(--white); font-weight: 700; }
 .month-events { display: flex; flex-direction: column; gap: 2px; }
 .month-event {
-  font-size: 10.5px;
+  font-size: 11.5px;
   padding: 2px 5px;
   border-radius: 4px;
   white-space: nowrap;
@@ -292,7 +292,7 @@ function viewRequest(a) {
   color: var(--blue);
   border-left: 2px solid var(--blue);
 }
-.month-event-more { font-size: 10.5px; color: var(--text-3); padding: 0 5px; }
+.month-event-more { font-size: 11.5px; color: var(--text-3); padding: 0 5px; }
 
 /* Semana */
 .week-grid {
@@ -308,7 +308,7 @@ function viewRequest(a) {
 }
 .week-col.today .week-col-header { color: var(--blue); }
 .week-col-header {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-2);
   text-align: center;
@@ -316,7 +316,7 @@ function viewRequest(a) {
   border-bottom: 1px solid var(--border);
 }
 .week-empty {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
   text-align: center;
   padding: 10px 0;
