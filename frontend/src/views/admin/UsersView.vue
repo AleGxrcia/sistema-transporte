@@ -3,106 +3,64 @@
 
     <!-- Header -->
     <div class="page-header">
-      <h2 class="page-title">Gestión de usuarios</h2>
-      <button class="btn-primary" @click="openCreate">
+      <h1>Gestión de usuarios</h1>
+      <button class="btn primary" @click="openCreate">
         + Nuevo usuario
       </button>
     </div>
 
     <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-top">
-          <span class="kpi-label">TOTAL USUARIOS</span>
-          <div class="kpi-icon blue">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-        </div>
-        <div class="kpi-value">{{ users.length }}</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi">
+        <div class="kpi-label">Total usuarios</div>
+        <div class="kpi-val">{{ users.length }}</div>
+        <div class="kpi-icon blue"><Users :size="16" /></div>
       </div>
-
-      <div class="kpi-card">
-        <div class="kpi-top">
-          <span class="kpi-label">ACTIVOS</span>
-          <div class="kpi-icon green">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </div>
-        </div>
-        <div class="kpi-value">{{ activeCount }}</div>
+      <div class="kpi">
+        <div class="kpi-label">Activos</div>
+        <div class="kpi-val">{{ activeCount }}</div>
+        <div class="kpi-icon green"><UserCheck :size="16" /></div>
       </div>
-
-      <div class="kpi-card">
-        <div class="kpi-top">
-          <span class="kpi-label">INACTIVOS</span>
-          <div class="kpi-icon red">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-            </svg>
-          </div>
-        </div>
-        <div class="kpi-value">{{ inactiveCount }}</div>
+      <div class="kpi">
+        <div class="kpi-label">Inactivos</div>
+        <div class="kpi-val">{{ inactiveCount }}</div>
+        <div class="kpi-icon red"><UserX :size="16" /></div>
       </div>
-
-      <div class="kpi-card">
-        <div class="kpi-top">
-          <span class="kpi-label">ADMINISTRADORES</span>
-          <div class="kpi-icon purple">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </div>
-        </div>
-        <div class="kpi-value">{{ adminCount }}</div>
+      <div class="kpi">
+        <div class="kpi-label">Administradores</div>
+        <div class="kpi-val">{{ adminCount }}</div>
+        <div class="kpi-icon purple"><ShieldCheck :size="16" /></div>
       </div>
     </div>
 
     <!-- Filtros -->
-    <div class="filters">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input v-model="search" type="text"
-          placeholder="Buscar..." class="search-input" />
-      </div>
-      <select v-model="roleFilter" class="filter-select">
+    <div class="search-row">
+      <input v-model="search" class="search-input" placeholder="Buscar por nombre o correo…" />
+      <select v-model="roleFilter">
         <option value="">Todos los roles</option>
         <option value="Administrador">Administrador</option>
         <option value="Supervisor">Supervisor</option>
         <option value="Operador">Operador</option>
       </select>
-      <select v-model="statusFilter" class="filter-select">
+      <select v-model="statusFilter">
         <option value="">Todos los estados</option>
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
       </select>
     </div>
 
-    <p v-if="loadError" class="error-banner">{{ loadError }}</p>
+    <p v-if="loadError" class="alert red">{{ loadError }}</p>
 
     <!-- Tabla -->
-    <div class="table-wrapper">
-      <table class="table">
+    <div class="table-wrap">
+      <table>
         <thead>
           <tr>
-            <th>USUARIO</th>
-            <th>CORREO ELECTRÓNICO</th>
-            <th>ROL</th>
-            <th>ESTADO</th>
-            <th>ACCIONES</th>
+            <th>Usuario</th>
+            <th>Correo electrónico</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -115,7 +73,7 @@
                 <p class="user-name">{{ u.firstName }} {{ u.lastName }}</p>
               </div>
             </td>
-            <td class="td-gray">{{ u.email }}</td>
+            <td class="muted">{{ u.email }}</td>
             <td>
               <span class="role-badge" :class="u.role.toLowerCase()">
                 {{ u.role }}
@@ -127,39 +85,21 @@
               </span>
             </td>
             <td>
-              <div class="actions">
-                <button class="action-btn" title="Editar" @click="openEdit(u)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
+              <div class="action-buttons">
+                <button class="icon-btn edit" title="Editar" @click="openEdit(u)">
+                  <Pencil :size="14" />
                 </button>
-                <button class="action-btn" title="Enviar enlace para restablecer contraseña"
+                <button class="icon-btn" title="Enviar enlace para restablecer contraseña"
                   @click="handleSendReset(u)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
+                  <KeyRound :size="14" />
                 </button>
-                <button class="action-btn" :title="u.isActive ? 'Desactivar' : 'Activar'"
+                <button class="icon-btn" :title="u.isActive ? 'Desactivar' : 'Activar'"
                   @click="handleToggleActive(u)">
-                  <svg v-if="u.isActive" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
+                  <Ban v-if="u.isActive" :size="14" />
+                  <Check v-else :size="14" />
                 </button>
-                <button class="action-btn danger" title="Eliminar" @click="confirmDelete(u)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  </svg>
+                <button class="icon-btn danger" title="Eliminar" @click="confirmDelete(u)">
+                  <Trash2 :size="14" />
                 </button>
               </div>
             </td>
@@ -182,20 +122,20 @@
           <div class="form-grid">
 
             <div class="form-group">
-              <label class="form-label">Nombre</label>
+              <label>Nombre</label>
               <input v-model="form.firstName" type="text"
-                class="form-input" placeholder="ej: Michael" />
+                placeholder="ej: Michael" />
             </div>
 
             <div class="form-group">
-              <label class="form-label">Apellido</label>
+              <label>Apellido</label>
               <input v-model="form.lastName" type="text"
-                class="form-input" placeholder="ej: Admin" />
+                placeholder="ej: Admin" />
             </div>
 
             <div class="form-group">
-              <label class="form-label">Rol</label>
-              <select v-model="form.role" class="form-input" :disabled="!!editingUser">
+              <label>Rol</label>
+              <select v-model="form.role" :disabled="!!editingUser">
                 <option value="">Seleccionar rol</option>
                 <option value="Administrador">Administrador</option>
                 <option value="Supervisor">Supervisor</option>
@@ -204,15 +144,15 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Correo electrónico</label>
+              <label>Correo electrónico</label>
               <input v-model="form.email" type="email"
-                class="form-input" placeholder="ej: usuario@empresa.com" />
+                placeholder="ej: usuario@empresa.com" />
             </div>
 
             <div v-if="!editingUser" class="form-group full-width">
-              <label class="form-label">Contraseña temporal</label>
+              <label>Contraseña temporal</label>
               <input v-model="form.password" type="password"
-                class="form-input" placeholder="Mín. 6 caracteres" />
+                placeholder="Mín. 6 caracteres" />
             </div>
 
           </div>
@@ -221,8 +161,8 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn-cancel" @click="closeModal">Cancelar</button>
-          <button class="btn-submit" @click="handleSave" :disabled="loading">
+          <button class="btn" @click="closeModal">Cancelar</button>
+          <button class="btn primary" @click="handleSave" :disabled="loading">
             {{ loading ? 'Guardando...' : editingUser ? 'Guardar cambios' : 'Crear usuario' }}
           </button>
         </div>
@@ -247,6 +187,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import UsersService from '@/services/users.service.js'
 import AuthService from '@/services/auth.service.js'
 import ModalConfirm from '@/components/modals/ModalConfirm.vue'
+import { Users, UserCheck, UserX, ShieldCheck, Pencil, KeyRound, Ban, Check, Trash2 } from '@lucide/vue'
 
 const search = ref('')
 const roleFilter = ref('')
@@ -387,174 +328,8 @@ async function handleDelete() {
 
 <style scoped>
 .users {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
   font-family: 'Inter', sans-serif;
 }
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.page-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.btn-primary {
-  background: var(--blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.925rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover { background: var(--blue-hover); }
-
-/* KPIs */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.kpi-card {
-  background: var(--white);
-  border-radius: 10px;
-  padding: 1.1rem;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-  transition: box-shadow .15s, transform .15s;
-}
-
-.kpi-card:hover {
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.kpi-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-}
-
-.kpi-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-}
-
-.kpi-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kpi-icon.blue   { background: var(--blue-light); color: var(--blue-hover); }
-.kpi-icon.green  { background: var(--mint-bg); color: var(--mint-dark); }
-.kpi-icon.red    { background: var(--red-bg); color: var(--red); }
-.kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
-
-.kpi-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* Filtros */
-.filters {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  background: var(--white);
-  color: var(--text-3);
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  width: 160px;
-}
-
-.filter-select {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  background: var(--white);
-  outline: none;
-  min-width: 160px;
-}
-
-.error-banner {
-  background: var(--red-bg);
-  border: 1px solid var(--red-border);
-  color: var(--red);
-  border-radius: 8px;
-  padding: 0.6rem 0.875rem;
-  font-size: 0.87rem;
-}
-
-/* Tabla */
-.table-wrapper {
-  background: var(--white);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  overflow: hidden;
-  box-shadow: var(--shadow-xs);
-}
-
-.table { width: 100%; border-collapse: collapse; }
-
-.table th {
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.table td {
-  padding: 0.875rem 1rem;
-  font-size: 0.9rem;
-  color: var(--text-2);
-  border-bottom: 1px solid var(--surface-hover);
-}
-
-.table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: var(--surface-hover); }
-
-.td-gray { color: var(--text-3); }
 
 /* User cell */
 .user-cell {
@@ -611,26 +386,6 @@ async function handleDelete() {
 .badge.activo   { background: var(--mint-bg); color: var(--mint-dark); border-color: var(--mint-border); }
 .badge.inactivo { background: var(--surface-hover); color: var(--text-3); border-color: var(--border); }
 
-/* Acciones */
-.actions { display: flex; gap: 0.4rem; }
-
-.action-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--white);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-3);
-  transition: all 0.15s;
-}
-
-.action-btn:hover { background: var(--blue-light); border-color: var(--blue-hover); color: var(--blue-hover); }
-.action-btn.danger:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
-
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -676,43 +431,8 @@ async function handleDelete() {
 
 .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-group { display: flex; flex-direction: column; gap: 0.3rem; }
-.form-group.full-width { grid-column: 1 / -1; }
-
-.form-label {
-  font-size: 0.87rem;
-  font-weight: 500;
-  color: var(--text-2);
-}
-
-.form-input {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-  background: var(--white);
-}
-
-.form-input:focus {
-  border-color: var(--blue-hover);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-.form-input:disabled {
-  background: var(--surface-hover);
-  color: var(--text-3);
-  cursor: not-allowed;
-}
+/* form-grid, form-group e inputs heredan del sistema global (main.css) */
+.form-grid { margin-bottom: 0; }
 
 .error-msg {
   font-size: 0.83rem;
@@ -727,32 +447,4 @@ async function handleDelete() {
   border-top: 1px solid var(--border);
 }
 
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: var(--blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.925rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

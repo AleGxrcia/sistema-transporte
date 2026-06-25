@@ -1,6 +1,10 @@
 <template>
   <div class="maintenance">
 
+    <div class="page-header">
+      <h1>Mantenimiento de vehículos</h1>
+    </div>
+
     <!-- Alerta -->
     <div v-if="alerts.length" class="alert-banner">
       <span>⚠️</span>
@@ -37,14 +41,14 @@
             </span>
             <div class="upcoming-actions">
               <button
-                class="btn-mini"
+                class="btn sm"
                 :disabled="!isVehicleAvailable(item.vehicleId)"
                 :title="isVehicleAvailable(item.vehicleId) ? '' : 'El vehículo no está disponible (en viaje o en mantenimiento)'"
                 @click="openExecuteModal(item)"
               >
                 Ejecutar
               </button>
-              <button class="btn-mini btn-mini--danger" @click="openCancelModal(item)">Cancelar</button>
+              <button class="btn sm danger" @click="openCancelModal(item)">Cancelar</button>
             </div>
           </div>
         </div>
@@ -113,8 +117,8 @@
         </div>
 
         <div class="form-actions">
-          <button class="btn-cancel" @click="resetForm">Cancelar</button>
-          <button class="btn-submit" @click="handleSave" :disabled="saving">
+          <button class="btn" @click="resetForm">Cancelar</button>
+          <button class="btn primary" @click="handleSave" :disabled="saving">
             {{ saving ? 'Guardando...' : (mode === 'now' ? 'Registrar' : 'Programar') }}
           </button>
         </div>
@@ -158,7 +162,7 @@
               </td>
               <td>
                 <span v-if="item.isClosed" class="td-gray">Cerrado</span>
-                <button v-else class="btn-mini" @click="openCloseModal(item)">Cerrar</button>
+                <button v-else class="btn sm" @click="openCloseModal(item)">Cerrar</button>
               </td>
             </tr>
           </tbody>
@@ -196,8 +200,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="executeModal.close()">Cancelar</button>
-        <button class="btn-submit" :disabled="saving" @click="handleExecute">
+        <button class="btn" @click="executeModal.close()">Cancelar</button>
+        <button class="btn primary" :disabled="saving" @click="handleExecute">
           {{ saving ? 'Procesando...' : 'Confirmar' }}
         </button>
       </template>
@@ -218,8 +222,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="cancelModal.close()">Volver</button>
-        <button class="btn-submit" :disabled="saving" @click="handleCancelScheduled">
+        <button class="btn" @click="cancelModal.close()">Volver</button>
+        <button class="btn primary" :disabled="saving" @click="handleCancelScheduled">
           {{ saving ? 'Procesando...' : 'Cancelar programación' }}
         </button>
       </template>
@@ -244,8 +248,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="closeModal.close()">Cancelar</button>
-        <button class="btn-submit" :disabled="saving" @click="handleClose">
+        <button class="btn" @click="closeModal.close()">Cancelar</button>
+        <button class="btn primary" :disabled="saving" @click="handleClose">
           {{ saving ? 'Procesando...' : 'Cerrar mantenimiento' }}
         </button>
       </template>
@@ -602,23 +606,6 @@ async function handleClose() {
 .text-orange { color: var(--amber); }
 .text-gray   { color: var(--text-3); }
 
-.btn-mini {
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  background: var(--white);
-  font-size: 0.8rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-mini:hover { background: var(--surface-hover); }
-.btn-mini:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-mini:disabled:hover { background: var(--white); }
-.btn-mini--danger { color: var(--red); border-color: var(--red-border); }
-.btn-mini--danger:hover { background: var(--red-bg); }
-
 /* Formulario */
 .form-group {
   display: flex;
@@ -681,34 +668,6 @@ async function handleClose() {
   margin-top: 0.25rem;
 }
 
-.btn-cancel {
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1rem;
-  background: var(--blue-hover);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.925rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Tabla */
 .table-wrapper {

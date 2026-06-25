@@ -11,7 +11,8 @@ import BaseModal from '@/components/ui/AppBaseModal.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
-import { Eye, Pencil, Trash2, Plus } from '@lucide/vue'
+import AppEmptyState from '@/components/ui/AppEmptyState.vue'
+import { Pencil, Trash2, Plus, AlertTriangle } from '@lucide/vue'
 import { formatDate, getInitials } from '@/utils/formatters'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
 
@@ -19,17 +20,6 @@ const router = useRouter()
 const { can } = useAuth()
 const toast  = useToast()
 const driverStore = useDriverStore()
-
-const AVATAR_PALETTE = [
-  { background: 'var(--blue-light)', color: 'var(--blue)' },
-  { background: 'var(--sky-bg)', color: 'var(--sky)' },
-  { background: 'var(--purple-bg)', color: 'var(--purple)' },
-  { background: 'var(--amber-bg)', color: 'var(--amber-text)' },
-  { background: 'var(--mint-bg)', color: 'var(--mint-dark)' },
-]
-function avatarStyle(index) {
-  return AVATAR_PALETTE[index % AVATAR_PALETTE.length]
-}
 
 const search       = ref('')
 const statusFilter = ref('')
@@ -106,53 +96,66 @@ async function confirmDelete() {
     <div v-if="isLoading" class="loading-placeholder">Cargando conductores…</div>
 
     <!-- Empty state -->
-    <div v-else-if="filteredDrivers.length === 0" class="empty-state">
-      <div class="empty-icon empty-icon--blue">
+    <AppEmptyState
+      v-else-if="filteredDrivers.length === 0"
+      title="Aún no hay conductores"
+      :message="hasActiveFilters
+        ? 'No se encontraron conductores con los filtros aplicados.'
+        : 'Registra el primer conductor para comenzar a asignar viajes.'"
+    >
+      <template #icon>
         <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
           <circle cx="12" cy="8" r="4"/>
           <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
         </svg>
-      </div>
-      <p class="empty-title">Aún no hay conductores</p>
-      <p class="empty-sub">
-        {{
-          hasActiveFilters
-            ? 'No se encontraron conductores con los filtros aplicados.'
-            : 'Registra el primer conductor para comenzar a asignar viajes.'
-        }}
-      </p>
-      <button
-        v-if="can('create', 'drivers') && !hasActiveFilters"
-        class="btn primary"
-        @click="createModal.open()"
-      >
-        <Plus :size="14" /> Registrar primer conductor
-      </button>
-    </div>
+      </template>
+      <template #action v-if="can('create', 'drivers') && !hasActiveFilters">
+        <button class="btn primary" @click="createModal.open()">
+          <Plus :size="14" /> Registrar primer conductor
+        </button>
+      </template>
+    </AppEmptyState>
 
     <!-- Grid de conductores -->
     <template v-else>
       <div class="grid3">
-        <div v-for="(driver, index) in filteredDrivers" :key="driver.id" class="driver-card">
-          <div class="driver-avatar" :style="avatarStyle(index)">
+        <div
+          v-for="driver in filteredDrivers"
+          :key="driver.id"
+          class="driver-card"
+          @click="router.push(`/drivers/${driver.id}`)"
+        >
+          <div class="driver-avatar">
             {{ getInitials(driver.firstName, driver.lastName) }}
           </div>
           <div class="driver-info">
-            <div class="driver-name">{{ driver.firstName }} {{ driver.lastName }}</div>
+            <router-link
+              :to="`/drivers/${driver.id}`"
+              class="driver-name driver-name-link"
+              @click.stop
+            >
+              {{ driver.firstName }} {{ driver.lastName }}
+            </router-link>
             <div class="driver-meta">Cédula: {{ driver.nationalId }}</div>
             <div class="driver-meta">Tel: {{ driver.phone }}</div>
+
+            <div
+              class="driver-lic"
+              :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
+            >
+              <AlertTriangle v-if="driver.licenseExpired || driver.licenseExpiringSoon" :size="11" />
+              Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
+              {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
+            </div>
 
             <div class="driver-card-footer">
               <AppBadge :status="driver.status" />
               <div class="action-buttons">
-                <button class="icon-btn" title="Ver detalle" @click="router.push(`/drivers/${driver.id}`)">
-                  <Eye :size="12" />
-                </button>
                 <button
                   v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
                   class="icon-btn edit"
                   title="Editar"
-                  @click="router.push(`/drivers/${driver.id}?edit=true`)"
+                  @click.stop="router.push(`/drivers/${driver.id}?edit=true`)"
                 >
                   <Pencil :size="12" />
                 </button>
@@ -160,20 +163,11 @@ async function confirmDelete() {
                   v-if="can('delete', 'drivers')"
                   class="icon-btn reject"
                   title="Eliminar"
-                  @click="deleteModal.open(driver)"
+                  @click.stop="deleteModal.open(driver)"
                 >
                   <Trash2 :size="12" />
                 </button>
               </div>
-            </div>
-
-            <div
-              class="driver-lic"
-              :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
-            >
-              <span v-if="driver.licenseExpired || driver.licenseExpiringSoon">⚠ </span>
-              Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
-              {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
             </div>
           </div>
         </div>
@@ -212,54 +206,22 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
-.loading-placeholder {
-  padding: 48px;
-  text-align: center;
-  color: var(--text-3);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 64px 24px;
-  gap: 10px;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 6px;
-}
-.empty-icon--blue {
-  background: var(--blue-light);
-  border: 1px solid var(--blue-mid, #93c5fd);
-}
-
-.empty-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-}
-.empty-sub {
-  font-size: 14px;
-  color: var(--text-3);
-  line-height: 1.6;
-  max-width: 360px;
-  margin: 0 0 8px;
+.driver-avatar {
+  background: rgba(18, 26, 45, 0.07);
+  color: var(--navy);
 }
 
 .driver-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 9px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* Los botones de acción permanecen visibles; el hover cambia color, no opacidad */
+.driver-card-footer .action-buttons {
+  opacity: 1;
 }
 
 .driver-card--add {
@@ -275,7 +237,7 @@ async function confirmDelete() {
   color: var(--text-3);
   font-size: 13.5px;
   font-weight: 500;
-  min-height: 132px;
+  min-height: 160px;
 }
 .driver-card--add:hover {
   transform: none;

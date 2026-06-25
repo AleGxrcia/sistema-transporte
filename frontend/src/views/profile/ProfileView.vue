@@ -1,6 +1,10 @@
 <template>
   <div class="profile">
 
+    <div class="page-header">
+      <h1>Mi perfil</h1>
+    </div>
+
     <!-- Dos columnas -->
     <div class="profile-grid">
 
@@ -69,8 +73,8 @@
           <p v-if="saveError" class="error-msg">{{ saveError }}</p>
 
           <div class="form-actions">
-            <button class="btn-cancel" @click="resetForm">Descartar cambios</button>
-            <button class="btn-submit" @click="handleSave" :disabled="loading">
+            <button class="btn" @click="resetForm">Descartar cambios</button>
+            <button class="btn primary" @click="handleSave" :disabled="loading">
               {{ loading ? 'Guardando...' : 'Guardar cambios' }}
             </button>
           </div>
@@ -102,8 +106,8 @@
           <p v-if="passwordSuccess" class="success-msg">Contraseña actualizada correctamente.</p>
 
           <div class="form-actions">
-            <button class="btn-cancel" @click="resetPasswordForm">Cancelar</button>
-            <button class="btn-submit" @click="handlePasswordChange" :disabled="loadingPassword">
+            <button class="btn" @click="resetPasswordForm">Cancelar</button>
+            <button class="btn primary" @click="handlePasswordChange" :disabled="loadingPassword">
               {{ loadingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
             </button>
           </div>
@@ -393,32 +397,4 @@ async function handlePasswordChange() {
   margin-top: 0.25rem;
 }
 
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: var(--blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.925rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

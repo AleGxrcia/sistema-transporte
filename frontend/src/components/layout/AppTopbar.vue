@@ -2,7 +2,7 @@
   <header class="topbar">
 
     <div class="topbar-left">
-      <h1 class="page-title">{{ title }}</h1>
+      <span class="topbar-greeting">Hola, {{ firstName }}</span>
       <span class="page-date">{{ fechaHoy }}</span>
     </div>
 
@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useRoute } from 'vue-router'
 import { format } from 'date-fns'
@@ -99,23 +99,33 @@ const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value
 }
 
-const title = computed(() => {
-  const titles = {
-    '/dashboard':    'Dashboard',
-    '/vehicles':     'Vehículos',
-    '/drivers':      'Conductores',
-    '/requests':     'Solicitudes de transporte',
-    '/schedules':    'Agenda',
-    '/trips':        'Historial de viajes',
-    '/fuel':         'Combustible',
-    '/reports':      'Reportes y estadísticas',
-    '/notifications':'Notificaciones',
-    '/profile':      'Mi perfil',
-    '/users':        'Usuarios',
-    '/roles':        'Roles y permisos',
-  }
-  return titles[route.path] || 'TransFleet'
-})
+const TITLES = {
+  '/dashboard':    'Dashboard',
+  '/vehicles':     'Vehículos',
+  '/drivers':      'Conductores',
+  '/requests':     'Solicitudes de transporte',
+  '/schedules':    'Agenda',
+  '/trips':        'Historial de viajes',
+  '/fuel':         'Combustible',
+  '/reports':      'Reportes y estadísticas',
+  '/notifications':'Notificaciones',
+  '/profile':      'Mi perfil',
+  '/users':        'Usuarios',
+  '/roles':        'Roles y permisos',
+}
+
+// El título de marca vive en la barra de pestaña del navegador,
+// no se duplica con el encabezado de la vista.
+watch(
+  () => route.path,
+  (path) => {
+    const section = TITLES[path]
+    document.title = section ? `${section} · TransFleet` : 'TransFleet'
+  },
+  { immediate: true }
+)
+
+const firstName = computed(() => (auth.user?.fullName || 'Usuario').split(' ')[0])
 
 const fechaHoy = computed(() =>
   format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })
@@ -145,8 +155,8 @@ const oldNotifications = ref([
 <style scoped>
 .topbar {
   height: 60px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -162,18 +172,28 @@ const oldNotifications = ref([
   gap: 1rem;
 }
 
-.page-title {
-  font-size: 1.1rem;
+.topbar-greeting {
+  font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   font-family: 'Inter', sans-serif;
+}
+
+.topbar-left::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--mint-accent);
 }
 
 .page-date {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-3);
   font-family: 'Inter', sans-serif;
   text-transform: capitalize;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--border);
 }
 
 .topbar-right {
@@ -189,22 +209,22 @@ const oldNotifications = ref([
   height: 38px;
   border-radius: 50%;
   border: none;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg);
+  color: var(--text-3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
-.icon-btn:hover { background: #e5e7eb; }
+.icon-btn:hover { background: var(--border); color: var(--text-2); }
 
 .notif-dot {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #ef4444;
+  background: var(--red);
   color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
@@ -219,7 +239,7 @@ const oldNotifications = ref([
 .user-avatar {
   width: 36px;
   height: 36px;
-  background: #2563eb;
+  background: var(--blue);
   border-radius: 50%;
   display: flex;
   align-items: center;

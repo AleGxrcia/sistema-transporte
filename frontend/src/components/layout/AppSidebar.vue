@@ -188,7 +188,7 @@ const userInitials = computed(() => {
 .sidebar {
   width: 220px;
   min-width: 220px;
-  background: #0f172a;
+  background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -233,10 +233,10 @@ const userInitials = computed(() => {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--navy-hover);
+  border: 1px solid var(--sidebar-border);
   border-radius: 50%;
-  color: #94a3b8;
+  color: var(--sidebar-item);
   cursor: pointer;
   position: absolute;
   right: -12px;
@@ -245,7 +245,7 @@ const userInitials = computed(() => {
   transition: background 0.2s;
 }
 
-.collapse-btn:hover { background: #334155; }
+.collapse-btn:hover { background: var(--navy-active); color: var(--sidebar-item-strong); }
 
 /* Navegación */
 .sidebar-nav {
@@ -256,7 +256,7 @@ const userInitials = computed(() => {
 }
 
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
-.sidebar-nav::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 4px; }
 
 .nav-section {
   padding: 0.75rem 0 0.25rem;
@@ -266,7 +266,7 @@ const userInitials = computed(() => {
   display: block;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--sidebar-section);
   letter-spacing: 0.08em;
   padding: 0 1rem 0.5rem;
   white-space: nowrap;
@@ -278,7 +278,7 @@ const userInitials = computed(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.6rem 1rem;
-  color: #94a3b8;
+  color: var(--sidebar-item);
   text-decoration: none;
   font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
@@ -290,13 +290,27 @@ const userInitials = computed(() => {
 }
 
 .nav-item:hover {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--sidebar-item-hover-bg);
+  color: var(--sidebar-item-strong);
 }
 
 .nav-item.router-link-active {
-  background: #1e40af;
+  background: var(--blue);
   color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* Acento de marca (mint) en el item activo */
+.nav-item.router-link-active::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--mint-accent);
 }
 
 .nav-item svg { flex-shrink: 0; }
@@ -304,7 +318,7 @@ const userInitials = computed(() => {
 /* Badge de notificaciones */
 .nav-badge {
   margin-left: auto;
-  background: #ef4444;
+  background: var(--red);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -320,7 +334,7 @@ const userInitials = computed(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--sidebar-border);
   margin-top: auto;
 }
 
@@ -337,7 +351,7 @@ const userInitials = computed(() => {
 }
 
 .sidebar-user-info:hover {
-  background: #1e293b;
+  background: var(--sidebar-item-hover-bg);
 }
 
 .logout-btn {
@@ -350,21 +364,21 @@ const userInitials = computed(() => {
   border-radius: 6px;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--sidebar-item);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 
 .logout-btn:hover {
-  background: #1e293b;
-  color: #ef4444;
+  background: var(--sidebar-item-hover-bg);
+  color: var(--red);
 }
 
 .user-avatar {
   width: 36px;
   height: 36px;
   min-width: 36px;
-  background: #2563eb;
+  background: var(--blue);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -383,7 +397,7 @@ const userInitials = computed(() => {
 .user-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--sidebar-item-strong);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -391,6 +405,6 @@ const userInitials = computed(() => {
 
 .user-role {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--sidebar-section);
 }
 </style>

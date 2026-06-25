@@ -185,6 +185,10 @@ function viewTrip(trip) {
 
 <template>
   <div class="trips-view">
+    <div class="page-header">
+      <h1>Historial de viajes</h1>
+    </div>
+
     <!-- KPIs -->
     <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
       <div class="kpi">

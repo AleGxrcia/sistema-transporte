@@ -1,6 +1,10 @@
 <template>
   <div class="roles">
 
+    <div class="page-header">
+      <h1>Roles y permisos</h1>
+    </div>
+
     <!-- Alerta -->
     <div class="alert-banner">
       <span>⚠️</span>

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useRequestsStore } from '@/stores/requests.store'
 import { useAuth } from '@/composables/useAuth'
 import AppBadge from '@/components/ui/AppBadge.vue'
+import AppEmptyState from '@/components/ui/AppEmptyState.vue'
 import { Eye, Plus } from '@lucide/vue'
 import { formatDate } from '@/utils/formatters'
 import { REQUEST_STATUSES } from '@/utils/enumLabels'
@@ -78,29 +79,25 @@ const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
 
     <div v-else-if="requestsStore.listError" class="alert red">{{ requestsStore.listError }}</div>
 
-    <div v-else-if="filteredRequests.length === 0" class="empty-state">
-      <div class="empty-icon empty-icon--blue">
+    <AppEmptyState
+      v-else-if="filteredRequests.length === 0"
+      title="No hay solicitudes"
+      :message="hasActiveFilters
+        ? 'No se encontraron solicitudes con los filtros aplicados.'
+        : 'Aún no se ha creado ninguna solicitud de transporte.'"
+    >
+      <template #icon>
         <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
         </svg>
-      </div>
-      <p class="empty-title">No hay solicitudes</p>
-      <p class="empty-sub">
-        {{
-          hasActiveFilters
-            ? 'No se encontraron solicitudes con los filtros aplicados.'
-            : 'Aún no se ha creado ninguna solicitud de transporte.'
-        }}
-      </p>
-      <button
-        v-if="can('create', 'requests') && !hasActiveFilters"
-        class="btn primary"
-        @click="router.push('/requests/new')"
-      >
-        <Plus :size="14" /> Crear primera solicitud
-      </button>
-    </div>
+      </template>
+      <template #action v-if="can('create', 'requests') && !hasActiveFilters">
+        <button class="btn primary" @click="router.push('/requests/new')">
+          <Plus :size="14" /> Crear primera solicitud
+        </button>
+      </template>
+    </AppEmptyState>
 
     <div v-else class="table-wrap">
       <table>
@@ -138,45 +135,3 @@ const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
     </div>
   </div>
 </template>
-
-<style scoped>
-.loading-placeholder {
-  padding: 48px;
-  text-align: center;
-  color: var(--text-3);
-}
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 64px 24px;
-  gap: 10px;
-}
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 6px;
-}
-.empty-icon--blue {
-  background: var(--blue-light);
-  border: 1px solid var(--blue-mid, #93c5fd);
-}
-.empty-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-}
-.empty-sub {
-  font-size: 14px;
-  color: var(--text-3);
-  line-height: 1.6;
-  max-width: 360px;
-  margin: 0 0 8px;
-}
-</style>

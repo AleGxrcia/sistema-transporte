@@ -1,6 +1,10 @@
 <template>
   <div class="assignments">
 
+    <div class="page-header">
+      <h1>Asignar vehículo y conductor</h1>
+    </div>
+
     <!-- Info de la solicitud -->
     <div class="request-banner">
       <div class="request-info">
@@ -165,9 +169,9 @@
 
     <!-- Acciones -->
     <div class="form-actions">
-      <button class="btn-cancel" @click="$router.push('/requests')">Cancelar</button>
+      <button class="btn" @click="$router.push('/requests')">Cancelar</button>
       <button
-        class="btn-submit"
+        class="btn primary"
         :disabled="!selectedVehicle || !selectedDriver || loading"
         @click="handleConfirm"
       >
@@ -493,34 +497,6 @@ async function handleConfirm() {
   gap: 0.75rem;
 }
 
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.925rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: var(--blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.925rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .green { color: var(--mint-dark); }
 </style>
