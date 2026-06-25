@@ -134,7 +134,7 @@ async function quickApprove(req) {
       <div class="card">
         <div class="card-header">
           <span class="card-title">SOLICITUDES PENDIENTES</span>
-          <router-link to="/requests" style="font-size:12px;color:var(--blue)">Gestionar →</router-link>
+          <router-link to="/requests" style="font-size:13px;color:var(--blue)">Gestionar →</router-link>
         </div>
 
         <div v-if="requestsStore.isLoadingPending" class="loading-placeholder">Cargando…</div>
@@ -148,8 +148,8 @@ async function quickApprove(req) {
             style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:8px"
           >
             <div>
-              <div style="font-size:12.5px;font-weight:600;color:var(--text)">{{ req.requestingArea }} → {{ req.destination }}</div>
-              <div style="font-size:11.5px;color:var(--text-3)">
+              <div style="font-size:13.5px;font-weight:600;color:var(--text)">{{ req.requestingArea }} → {{ req.destination }}</div>
+              <div style="font-size:12.5px;color:var(--text-3)">
                 {{ formatDate(req.departureDateTime) }} · {{ req.passengerCount }} pers. · {{ req.requestNumber }}
               </div>
             </div>
@@ -181,7 +181,7 @@ async function quickApprove(req) {
   color: var(--text-3);
 }
 .empty-card {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-3);
   text-align: center;
   padding: 24px;

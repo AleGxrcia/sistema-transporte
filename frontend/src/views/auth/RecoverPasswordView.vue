@@ -131,7 +131,7 @@ async function handleSubmit() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -166,7 +166,7 @@ async function handleSubmit() {
   border: none;
   outline: none;
   padding: 0.625rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   background: transparent;
@@ -196,7 +196,7 @@ async function handleSubmit() {
   background: none;
   border: none;
   color: var(--blue-hover);
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   text-align: center;
@@ -204,13 +204,13 @@ async function handleSubmit() {
 }
 
 .success-msg {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--mint-dark);
   text-align: center;
 }
 
 .error-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--red);
   text-align: center;
 }

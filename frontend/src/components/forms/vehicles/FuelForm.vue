@@ -132,11 +132,11 @@ async function handleSubmit() {
   background: var(--blue-light, #eff6ff);
   border: 1px solid var(--sky-border, #bae6fd);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-2);
 }
 .cost-summary strong {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--blue, #2563eb);
 }
 </style>

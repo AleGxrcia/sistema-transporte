@@ -3,92 +3,51 @@
 
     <!-- Header con filtros y exportación -->
     <div class="page-header">
+      <h1>Reportes y estadísticas</h1>
+      <div class="header-controls">
       <input type="month" v-model="selectedMonth" class="month-input" />
       <div class="export-btns">
-        <button class="btn-export" :disabled="reportsStore.isExporting" @click="handleExportExcel">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Excel
+        <button class="btn" :disabled="reportsStore.isExporting" @click="handleExportExcel">
+          <Download :size="14" /> Excel
         </button>
-        <button class="btn-export" :disabled="reportsStore.isExporting" @click="handleExportPdf">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          PDF
+        <button class="btn" :disabled="reportsStore.isExporting" @click="handleExportPdf">
+          <Download :size="14" /> PDF
         </button>
+      </div>
       </div>
     </div>
 
-    <div v-if="reportsStore.isLoading" class="empty-state">Cargando reporte…</div>
+    <div v-if="reportsStore.isLoading" class="loading-placeholder">Cargando reporte…</div>
 
     <template v-else-if="summary">
       <!-- KPIs -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">VIAJES COMPLETADOS</span>
-            <div class="kpi-icon blue">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="1" y="3" width="15" height="13" rx="2"/>
-                <path d="M16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ summary.tripsCompleted }}</div>
-          <div class="kpi-sub" :class="tripsTrend.cls">{{ tripsTrend.label }}</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi">
+          <div class="kpi-label">Viajes completados</div>
+          <div class="kpi-val">{{ summary.tripsCompleted }}</div>
+          <div class="kpi-sub" :style="tripsTrend.cls === 'green' ? 'color:var(--mint-dark)' : ''">{{ tripsTrend.label }}</div>
+          <div class="kpi-icon blue"><Truck :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">TASA DE CUMPLIMIENTO</span>
-            <div class="kpi-icon green">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ summary.completionRatePercent }}%</div>
-          <div class="kpi-sub gray">{{ summary.cancelledCount }} cancelados</div>
+        <div class="kpi">
+          <div class="kpi-label">Tasa de cumplimiento</div>
+          <div class="kpi-val">{{ summary.completionRatePercent }}%</div>
+          <div class="kpi-sub">{{ summary.cancelledCount }} cancelados</div>
+          <div class="kpi-icon green"><CheckCircle2 :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">COSTO COMBUSTIBLE</span>
-            <div class="kpi-icon orange">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="13 17 18 12 13 7"/>
-                <polyline points="6 17 11 12 6 7"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ formatCurrency(summary.fuelCost) }}</div>
-          <div class="kpi-sub gray">{{ formatNumber(summary.fuelGallons) }} galones</div>
+        <div class="kpi">
+          <div class="kpi-label">Costo combustible</div>
+          <div class="kpi-val">{{ formatCurrency(summary.fuelCost) }}</div>
+          <div class="kpi-sub">{{ formatNumber(summary.fuelGallons) }} galones</div>
+          <div class="kpi-icon amber"><Fuel :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">COSTO MANTENIMIENTO</span>
-            <div class="kpi-icon purple">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ formatCurrency(summary.maintenanceCost) }}</div>
-          <div class="kpi-sub gray">{{ summary.maintenanceServicesCount }} servicios</div>
+        <div class="kpi">
+          <div class="kpi-label">Costo mantenimiento</div>
+          <div class="kpi-val">{{ formatCurrency(summary.maintenanceCost) }}</div>
+          <div class="kpi-sub">{{ summary.maintenanceServicesCount }} servicios</div>
+          <div class="kpi-icon purple"><Wrench :size="16" /></div>
         </div>
       </div>
 
@@ -122,7 +81,7 @@
         <!-- Solicitudes por área -->
         <div class="card">
           <div class="card-title">SOLICITUDES POR ÁREA</div>
-          <div v-if="!summary.requestsByArea.length" class="empty-state">Sin solicitudes este mes.</div>
+          <div v-if="!summary.requestsByArea.length" class="empty-card">Sin solicitudes este mes.</div>
           <div v-else class="hbar-list">
             <div v-for="(area, i) in summary.requestsByArea" :key="area.area" class="hbar-item">
               <span class="hbar-label">{{ area.area }}</span>
@@ -143,7 +102,7 @@
         <!-- Vehículos más utilizados -->
         <div class="card">
           <div class="card-title">VEHÍCULOS MÁS UTILIZADOS</div>
-          <div v-if="!summary.topVehicles.length" class="empty-state">Sin viajes completados este mes.</div>
+          <div v-if="!summary.topVehicles.length" class="empty-card">Sin viajes completados este mes.</div>
           <div v-else class="hbar-list">
             <div v-for="(v, i) in summary.topVehicles" :key="v.vehicleId" class="hbar-item">
               <span class="hbar-label">{{ v.licensePlate }}</span>
@@ -190,19 +149,19 @@
       <!-- Tabla conductores -->
       <div class="card">
         <h3 class="section-title">Conductores con más viajes</h3>
-        <div v-if="!summary.topDrivers.length" class="empty-state">Sin viajes asignados este mes.</div>
-        <div v-else class="table-wrapper">
-          <table class="table">
+        <div v-if="!summary.topDrivers.length" class="empty-card">Sin viajes asignados este mes.</div>
+        <div v-else class="table-wrap" style="margin-bottom:0">
+          <table>
             <thead>
               <tr>
-                <th>CONDUCTOR</th>
-                <th>VIAJES COMPLETADOS</th>
-                <th>CANCELADOS</th>
+                <th>Conductor</th>
+                <th>Viajes completados</th>
+                <th>Cancelados</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="driver in summary.topDrivers" :key="driver.driverId">
-                <td class="td-bold">{{ driver.driverName }}</td>
+                <td style="font-weight:600">{{ driver.driverName }}</td>
                 <td>
                   <div class="trips-cell">
                     <span>{{ driver.tripsCompleted }}</span>
@@ -213,7 +172,7 @@
                     </div>
                   </div>
                 </td>
-                <td class="td-gray">{{ driver.tripsCancelled }}</td>
+                <td class="muted">{{ driver.tripsCancelled }}</td>
               </tr>
             </tbody>
           </table>
@@ -221,7 +180,7 @@
       </div>
     </template>
 
-    <div v-else-if="reportsStore.error" class="empty-state">{{ reportsStore.error }}</div>
+    <div v-else-if="reportsStore.error" class="alert red">{{ reportsStore.error }}</div>
 
   </div>
 </template>
@@ -232,6 +191,7 @@ import { useReportsStore } from '@/stores/reports.store'
 import { useToast } from '@/composables/useToast'
 import { getErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatNumber } from '@/utils/formatters'
+import { Truck, CheckCircle2, Fuel, Wrench, Download } from '@lucide/vue'
 
 const reportsStore = useReportsStore()
 const toast = useToast()
@@ -316,16 +276,29 @@ async function handleExportPdf() {
 /* Header */
 .page-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.page-header h1 {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .month-input {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   outline: none;
@@ -333,113 +306,11 @@ async function handleExportPdf() {
 
 .export-btns { display: flex; gap: 0.5rem; }
 
-.btn-export {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-export:hover:not(:disabled) { background: var(--surface-hover); }
-.btn-export:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.empty-state {
-  font-size: 0.85rem;
-  color: var(--text-3);
-  padding: 1.5rem 0;
-  text-align: center;
-}
-
-/* KPIs */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.kpi-card {
-  background: var(--white);
-  border-radius: 10px;
-  padding: 1.1rem;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-  transition: box-shadow .15s, transform .15s;
-}
-
-.kpi-card:hover {
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.kpi-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-}
-
-.kpi-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-}
-
-.kpi-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kpi-icon.blue   { background: var(--blue-light); color: var(--blue-hover); }
-.kpi-icon.green  { background: var(--mint-bg); color: var(--mint-dark); }
-.kpi-icon.orange { background: var(--amber-bg); color: var(--amber); }
-.kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
-
-.kpi-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 0.25rem;
-}
-
-.kpi-sub { font-size: 0.75rem; }
-.kpi-sub.green { color: var(--mint-dark); }
-.kpi-sub.gray  { color: var(--text-2); }
-
 /* Charts grid */
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
-}
-
-/* Card */
-.card {
-  background: var(--white);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-xs);
-}
-
-.card-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.08em;
-  margin-bottom: 1.25rem;
 }
 
 .section-title {
@@ -481,7 +352,7 @@ async function handleExportPdf() {
 }
 
 .bar-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-3);
   margin-top: 0.4rem;
 }
@@ -528,7 +399,7 @@ async function handleExportPdf() {
 
 .hbar-label {
   width: 80px;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
   text-align: right;
   flex-shrink: 0;
@@ -550,44 +421,12 @@ async function handleExportPdf() {
 
 .hbar-value {
   width: 24px;
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   color: var(--text-2);
   font-weight: 600;
   text-align: right;
   flex-shrink: 0;
 }
-
-/* Tabla */
-.table-wrapper {
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.table { width: 100%; border-collapse: collapse; }
-
-.table th {
-  text-align: left;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.table td {
-  padding: 0.875rem 1rem;
-  font-size: 0.875rem;
-  color: var(--text-2);
-  border-bottom: 1px solid var(--surface-hover);
-}
-
-.table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: var(--surface-hover); }
-
-.td-bold { font-weight: 600; color: var(--text); }
-.td-gray { color: var(--text-2); }
 
 /* Trips cell con mini barra */
 .trips-cell {

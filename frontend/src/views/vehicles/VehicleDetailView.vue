@@ -415,7 +415,7 @@ function afterFuelSaved() {
         <div class="vehicle-icon"><Truck :size="32" /></div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-            <h2 style="font-size:18px;font-weight:700;color:var(--text)">{{ vehicle.brand }} {{ vehicle.model }}</h2>
+            <h2 style="font-size:19px;font-weight:700;color:var(--text)">{{ vehicle.brand }} {{ vehicle.model }}</h2>
             <BaseBadge :status="vehicle.status" />
           </div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
@@ -457,7 +457,7 @@ function afterFuelSaved() {
         </div>
         <div class="kpi">
           <div class="kpi-label">Próx. mantenimiento</div>
-          <div class="kpi-val" style="font-size:18px;color:var(--mint-dark)">
+          <div class="kpi-val" style="font-size:19px;color:var(--mint-dark)">
             {{ nextScheduledMaintenance ? formatDate(nextScheduledMaintenance.scheduledDate) : '—' }}
           </div>
           <div class="kpi-sub">
@@ -590,8 +590,8 @@ function afterFuelSaved() {
             <div class="card" :style="{ borderLeft: `3px solid ${maintenanceAccent(record.type)}` }">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px">
                 <div>
-                  <div style="font-size:13px;font-weight:700;color:var(--text)">{{ record.description }}</div>
-                  <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">
+                  <div style="font-size:14px;font-weight:700;color:var(--text)">{{ record.description }}</div>
+                  <div style="font-size:12.5px;color:var(--text-3);margin-top:2px">
                     {{ formatDate(record.entryDate) }}<template v-if="record.workshop"> · {{ record.workshop }}</template>
                   </div>
                 </div>
@@ -781,7 +781,7 @@ function afterFuelSaved() {
 
 <style scoped>
 .loading-placeholder { padding: 48px; text-align: center; color: var(--text-3); }
-.empty-card { font-size: 13px; color: var(--text-3); text-align: center; padding: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
+.empty-card { font-size: 14px; color: var(--text-3); text-align: center; padding: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
 
 /* Header card */
 .vehicle-header-card {
@@ -804,26 +804,26 @@ function afterFuelSaved() {
 }
 .info-block { display: flex; flex-direction: column; gap: 3px; }
 .info-label {
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--text-3);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.info-value { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.info-value { font-size: 14.5px; font-weight: 600; color: var(--text); }
 .info-value.strong { color: var(--navy); font-weight: 700; }
 .info-value.mint { color: var(--mint-dark); }
 
 /* Info general — tab 0 */
-.field-label { font-size: 11px; color: var(--text-3); font-weight: 500; margin-bottom: 3px; }
-.field-value { font-size: 13px; font-weight: 600; color: var(--text); }
+.field-label { font-size: 12px; color: var(--text-3); font-weight: 500; margin-bottom: 3px; }
+.field-value { font-size: 14px; font-weight: 600; color: var(--text); }
 .field-value.strong { color: var(--navy); font-weight: 700; }
 .field-value.mint { color: var(--mint-dark); }
 
 /* Disponibilidad */
 .availability-list { display: flex; flex-direction: column; gap: 6px; }
 .avail-row { display: flex; align-items: center; gap: 10px; }
-.avail-day { font-size: 11.5px; color: var(--text-2); min-width: 28px; font-weight: 500; }
+.avail-day { font-size: 12.5px; color: var(--text-2); min-width: 28px; font-weight: 500; }
 .avail-bar {
   flex: 1;
   height: 26px;
@@ -831,7 +831,7 @@ function afterFuelSaved() {
   display: flex;
   align-items: center;
   padding: 0 8px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   border: 1px solid var(--border);
 }
@@ -855,7 +855,7 @@ function afterFuelSaved() {
   box-shadow: 0 0 0 1px var(--border);
 }
 .btn-sm {
-  font-size: 11px;
+  font-size: 12px;
   padding: 4px 10px;
   border: 1px solid var(--border-strong);
   border-radius: 6px;

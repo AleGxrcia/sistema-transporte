@@ -87,7 +87,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   flex-shrink: 0;
 }
 .modal-header :deep(h3) {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   margin: 0;

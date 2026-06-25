@@ -185,6 +185,10 @@ function viewTrip(trip) {
 
 <template>
   <div class="trips-view">
+    <div class="page-header">
+      <h1>Historial de viajes</h1>
+    </div>
+
     <!-- KPIs -->
     <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
       <div class="kpi">
@@ -404,13 +408,13 @@ function viewTrip(trip) {
   border: 1px solid var(--blue-mid, #93c5fd);
 }
 .empty-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   margin: 0;
 }
 .empty-sub {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-3);
   line-height: 1.6;
   max-width: 360px;
@@ -438,14 +442,14 @@ function viewTrip(trip) {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
 .filter-badge {
   background: var(--blue);
   color: var(--white);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   padding: 1px 7px;
   border-radius: 10px;
@@ -454,7 +458,7 @@ function viewTrip(trip) {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--blue);
 }
 .chevron {
@@ -475,7 +479,7 @@ function viewTrip(trip) {
 }
 .filters-actions .btn {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Tabs + búsqueda */
@@ -493,7 +497,7 @@ function viewTrip(trip) {
   align-items: center;
 }
 .results-count {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-3);
   white-space: nowrap;
 }
@@ -517,7 +521,7 @@ function viewTrip(trip) {
 .timeline-date {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-2);
   text-transform: uppercase;
@@ -566,23 +570,23 @@ function viewTrip(trip) {
   min-width: 0;
 }
 .timeline-card-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
 }
 .timeline-card-meta {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--text-3);
   margin-top: 2px;
 }
 .timeline-card-cancel {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--red);
   margin-top: 4px;
   font-weight: 500;
 }
 .timeline-card-code {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--navy);
 }

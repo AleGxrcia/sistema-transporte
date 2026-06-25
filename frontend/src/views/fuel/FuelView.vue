@@ -2,87 +2,55 @@
   <div class="fuel">
 
     <div class="page-header">
+      <h1>Control de combustible</h1>
       <input type="month" v-model="selectedMonth" class="month-input" />
     </div>
 
-    <div v-if="fuelStore.isLoadingSummary" class="empty-state">Cargando…</div>
+    <div v-if="fuelStore.isLoadingSummary" class="loading-placeholder">Cargando…</div>
 
     <template v-else-if="summary">
       <!-- KPIs -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">TOTAL GALONES</span>
-            <div class="kpi-icon orange">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="13 17 18 12 13 7"/>
-                <polyline points="6 17 11 12 6 7"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ formatNumber(summary.totalGallons) }}</div>
-          <div class="kpi-sub gray">galones cargados</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi">
+          <div class="kpi-label">Total galones</div>
+          <div class="kpi-val">{{ formatNumber(summary.totalGallons) }}</div>
+          <div class="kpi-sub">galones cargados</div>
+          <div class="kpi-icon amber"><Fuel :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">COSTO TOTAL</span>
-            <div class="kpi-icon purple">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ formatCurrency(summary.totalCost) }}</div>
-          <div class="kpi-sub gray">Promedio {{ formatCurrency(summary.averagePricePerGallon) }}/gal</div>
+        <div class="kpi">
+          <div class="kpi-label">Costo total</div>
+          <div class="kpi-val">{{ formatCurrency(summary.totalCost) }}</div>
+          <div class="kpi-sub">Promedio {{ formatCurrency(summary.averagePricePerGallon) }}/gal</div>
+          <div class="kpi-icon purple"><DollarSign :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">VEHÍCULOS CON CARGA</span>
-            <div class="kpi-icon blue">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="1" y="3" width="15" height="13" rx="2"/>
-                <path d="M16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ summary.vehiclesWithRecords }}</div>
-          <div class="kpi-sub gray">De {{ summary.totalVehicles }} en flota</div>
+        <div class="kpi">
+          <div class="kpi-label">Vehículos con carga</div>
+          <div class="kpi-val">{{ summary.vehiclesWithRecords }}</div>
+          <div class="kpi-sub">De {{ summary.totalVehicles }} en flota</div>
+          <div class="kpi-icon blue"><Truck :size="16" /></div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-top">
-            <span class="kpi-label">MAYOR CONSUMIDOR</span>
-            <div class="kpi-icon teal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-            </div>
-          </div>
-          <div class="kpi-value">{{ summary.topConsumer?.licensePlate ?? '—' }}</div>
-          <div class="kpi-sub gray">
+        <div class="kpi">
+          <div class="kpi-label">Mayor consumidor</div>
+          <div class="kpi-val">{{ summary.topConsumer?.licensePlate ?? '—' }}</div>
+          <div class="kpi-sub">
             {{ summary.topConsumer ? `${formatNumber(summary.topConsumer.gallons)} galones / mes` : 'Sin registros este mes' }}
           </div>
+          <div class="kpi-icon sky"><TrendingUp :size="16" /></div>
         </div>
       </div>
 
       <!-- Grid principal -->
-      <div class="main-grid">
+      <div class="grid2">
 
         <!-- Consumo por vehículo -->
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Consumo por vehículo — {{ monthLabel }}</h3>
+            <span class="card-title">Consumo por vehículo — {{ monthLabel }}</span>
           </div>
-          <div v-if="!summary.consumptionByVehicle.length" class="empty-state">Sin registros este mes.</div>
+          <div v-if="!summary.consumptionByVehicle.length" class="empty-card">Sin registros este mes.</div>
           <div v-else class="bar-list">
             <div v-for="(item, i) in summary.consumptionByVehicle.slice(0, 8)" :key="item.vehicleId" class="bar-item">
               <span class="bar-label">{{ item.licensePlate }}</span>
@@ -109,95 +77,94 @@
 
         <!-- Formulario registro -->
         <div v-if="can('create', 'fuel')" class="card">
-          <div class="card-section-title">REGISTRAR CONSUMO</div>
+          <div class="card-title">Registrar consumo</div>
 
-          <div class="form-group">
-            <label class="form-label">Vehículo</label>
-            <select v-model="form.vehicleId" class="form-input">
-              <option value="">Seleccionar vehículo</option>
-              <option v-for="v in vehicles" :key="v.id" :value="v.id">
-                {{ v.licensePlate }} — {{ v.brand }} {{ v.model }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-row">
+          <div class="fuel-form">
             <div class="form-group">
-              <label class="form-label">Fecha de carga</label>
-              <input v-model="form.date" type="date" class="form-input" />
+              <label>Vehículo</label>
+              <select v-model="form.vehicleId">
+                <option value="">Seleccionar vehículo</option>
+                <option v-for="v in vehicles" :key="v.id" :value="v.id">
+                  {{ v.licensePlate }} — {{ v.brand }} {{ v.model }}
+                </option>
+              </select>
             </div>
+
+            <div class="row2">
+              <div class="form-group">
+                <label>Fecha de carga</label>
+                <input v-model="form.date" type="date" />
+              </div>
+              <div class="form-group">
+                <label>Galones cargados</label>
+                <input v-model="form.gallons" type="number" placeholder="0.00" />
+              </div>
+            </div>
+
+            <div class="row2">
+              <div class="form-group">
+                <label>Precio por galón (RD$)</label>
+                <input v-model="form.pricePerGallon" type="number" placeholder="99.50" />
+              </div>
+              <div class="form-group">
+                <label>Kilometraje al cargar</label>
+                <input v-model="form.mileageAtRefuel" type="number" placeholder="45230" />
+              </div>
+            </div>
+
             <div class="form-group">
-              <label class="form-label">Galones cargados</label>
-              <input v-model="form.gallons" type="number" class="form-input" placeholder="0.00" />
+              <label>Costo total (calculado)</label>
+              <div class="calculated-field">
+                <span class="calculated-label">Se calcula automáticamente</span>
+                <span class="calculated-value">{{ formatCurrency(totalCostPreview) }}</span>
+              </div>
             </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Precio por galón (RD$)</label>
-              <input v-model="form.pricePerGallon" type="number" class="form-input" placeholder="99.50" />
+            <div v-if="selectedVehicle" class="alert amber" style="margin-bottom:0">
+              El kilometraje ingresado debe ser <strong>mayor al último registrado</strong>
+              para este vehículo ({{ formatKilometers(selectedVehicle.currentMileage) }}).
             </div>
-            <div class="form-group">
-              <label class="form-label">Kilometraje al cargar</label>
-              <input v-model="form.mileageAtRefuel" type="number" class="form-input" placeholder="45230" />
+
+            <div class="form-actions">
+              <button class="btn" @click="resetForm">Limpiar</button>
+              <button class="btn primary" @click="handleSave" :disabled="saving">
+                {{ saving ? 'Guardando...' : 'Guardar registro' }}
+              </button>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Costo total (calculado)</label>
-            <div class="calculated-field">
-              <span class="calculated-label">Se calcula automáticamente</span>
-              <span class="calculated-value">{{ formatCurrency(totalCostPreview) }}</span>
-            </div>
-          </div>
-
-          <div v-if="selectedVehicle" class="warning-banner">
-            ⚠️ El kilometraje ingresado debe ser
-            <strong>mayor al último registrado</strong>
-            para este vehículo ({{ formatKilometers(selectedVehicle.currentMileage) }}).
-          </div>
-
-          <div class="form-actions">
-            <button class="btn-cancel" @click="resetForm">Limpiar</button>
-            <button class="btn-submit" @click="handleSave" :disabled="saving">
-              {{ saving ? 'Guardando...' : 'Guardar registro' }}
-            </button>
           </div>
         </div>
 
       </div>
 
       <!-- Historial tabla -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Registros de consumo — {{ monthLabel }}</h3>
-        </div>
-        <div v-if="fuelStore.isLoadingHistory" class="empty-state">Cargando…</div>
-        <div v-else-if="!history.length" class="empty-state">No hay registros de combustible este mes.</div>
-        <div v-else class="table-wrapper">
-          <table class="table">
+      <div>
+        <div class="card-title" style="margin-bottom:12px">Registros de consumo — {{ monthLabel }}</div>
+        <div v-if="fuelStore.isLoadingHistory" class="loading-placeholder">Cargando…</div>
+        <div v-else-if="!history.length" class="empty-card">No hay registros de combustible este mes.</div>
+        <div v-else class="table-wrap">
+          <table>
             <thead>
               <tr>
-                <th>FECHA</th>
-                <th>VEHÍCULO</th>
-                <th>GALONES</th>
-                <th>PRECIO/GAL</th>
-                <th>COSTO TOTAL</th>
-                <th>KM AL CARGAR</th>
-                <th>KM RECORRIDOS</th>
-                <th>RENDIMIENTO</th>
+                <th>Fecha</th>
+                <th>Vehículo</th>
+                <th>Galones</th>
+                <th>Precio/gal</th>
+                <th>Costo total</th>
+                <th>Km al cargar</th>
+                <th>Km recorridos</th>
+                <th>Rendimiento</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in history" :key="item.id">
-                <td class="td-gray">{{ formatDate(item.recordDate) }}</td>
-                <td class="td-bold">{{ item.vehiclePlate }} — {{ item.vehicleLabel }}</td>
+                <td class="muted">{{ formatDate(item.recordDate) }}</td>
+                <td class="plate-cell">{{ item.vehiclePlate }} — {{ item.vehicleLabel }}</td>
                 <td>{{ formatNumber(item.gallons) }} gl</td>
-                <td class="td-gray">{{ formatCurrency(item.pricePerGallon) }}</td>
-                <td class="td-bold">{{ formatCurrency(item.totalCost) }}</td>
-                <td class="td-gray">{{ formatKilometers(item.mileageAtRefuel) }}</td>
-                <td class="green">{{ item.kmDriven != null ? `+${formatKilometers(item.kmDriven)}` : '—' }}</td>
-                <td class="green">{{ item.efficiencyKmPerGallon != null ? `${item.efficiencyKmPerGallon} km/gl` : '—' }}</td>
+                <td class="muted">{{ formatCurrency(item.pricePerGallon) }}</td>
+                <td style="font-weight:600">{{ formatCurrency(item.totalCost) }}</td>
+                <td class="muted">{{ formatKilometers(item.mileageAtRefuel) }}</td>
+                <td class="pos">{{ item.kmDriven != null ? `+${formatKilometers(item.kmDriven)}` : '—' }}</td>
+                <td class="pos">{{ item.efficiencyKmPerGallon != null ? `${item.efficiencyKmPerGallon} km/gl` : '—' }}</td>
               </tr>
             </tbody>
           </table>
@@ -205,7 +172,7 @@
       </div>
     </template>
 
-    <div v-else-if="fuelStore.summaryError" class="empty-state">{{ fuelStore.summaryError }}</div>
+    <div v-else-if="fuelStore.summaryError" class="alert red">{{ fuelStore.summaryError }}</div>
 
   </div>
 </template>
@@ -218,6 +185,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
 import { getErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatDate, formatKilometers, formatNumber } from '@/utils/formatters'
+import { Fuel, DollarSign, Truck, TrendingUp } from '@lucide/vue'
 
 const fuelStore = useFuelStore()
 const vehicleStore = useVehicleStore()
@@ -303,157 +271,56 @@ async function handleSave() {
 .fuel {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  font-family: 'Inter', sans-serif;
-}
-
-.page-header {
-  display: flex;
-  justify-content: flex-end;
+  gap: 20px;
 }
 
 .month-input {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  outline: none;
+  width: auto;
+  height: 34px;
 }
 
-.empty-state {
-  font-size: 0.85rem;
-  color: var(--text-3);
-  padding: 1.5rem 0;
-  text-align: center;
-}
-
-/* KPIs */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.kpi-card {
-  background: var(--white);
-  border-radius: 10px;
-  padding: 1.1rem;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-  transition: box-shadow .15s, transform .15s;
-}
-
-.kpi-card:hover {
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.kpi-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-}
-
-.kpi-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-}
-
-.kpi-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kpi-icon.orange { background: var(--amber-bg); color: var(--amber); }
-.kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
-.kpi-icon.blue   { background: var(--blue-light); color: var(--blue-hover); }
-.kpi-icon.teal   { background: var(--sky-bg); color: var(--sky); }
-
-.kpi-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 0.25rem;
-}
-
-.kpi-sub { font-size: 0.75rem; }
-.kpi-sub.gray  { color: var(--text-3); }
-
-/* Main grid */
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  align-items: stretch;
-}
-
-/* Card */
-.card {
-  background: var(--white);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-xs);
+/* Formulario */
+.fuel-form {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  transition: box-shadow .15s, transform .15s;
+  gap: 14px;
+}
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-.card:hover {
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.card-header {
+.calculated-field {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-hover);
 }
-
-.card-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.card-section-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.08em;
-}
+.calculated-label { font-size: 13px; color: var(--text-3); }
+.calculated-value { font-size: 14px; font-weight: 600; color: var(--blue); }
 
 /* Barras horizontales */
 .bar-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
 }
-
 .bar-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
 }
-
 .bar-label {
   width: 70px;
-  font-size: 0.82rem;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--text-2);
   flex-shrink: 0;
 }
-
 .bar-track {
   flex: 1;
   height: 10px;
@@ -461,160 +328,28 @@ async function handleSave() {
   border-radius: 999px;
   overflow: hidden;
 }
-
 .bar-fill {
   height: 100%;
   border-radius: 999px;
   transition: width 0.4s ease;
 }
-
 .bar-value {
   width: 60px;
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-3);
   text-align: right;
   flex-shrink: 0;
 }
-
 .bar-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-3);
-  padding-top: 0.25rem;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
 }
-
 .bar-total { color: var(--text-2); font-weight: 500; }
 
-/* Formulario */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.form-label {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-2);
-}
-
-.form-input {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-  background: var(--white);
-}
-
-.form-input:focus {
-  border-color: var(--blue-hover);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-.calculated-field {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-hover);
-}
-
-.calculated-label { font-size: 0.82rem; color: var(--text-3); }
-.calculated-value { font-size: 0.875rem; font-weight: 600; color: var(--blue-hover); }
-
-.warning-banner {
-  background: var(--amber-bg);
-  border: 1px solid var(--amber-border);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.82rem;
-  color: var(--amber-text);
-  line-height: 1.5;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.btn-cancel {
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1rem;
-  background: var(--blue-hover);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* Tabla */
-.table-wrapper {
-  overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th {
-  text-align: left;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--white);
-}
-
-.table td {
-  padding: 0.875rem 1rem;
-  font-size: 0.85rem;
-  color: var(--text-2);
-  border-bottom: 1px solid var(--surface-hover);
-}
-
-.table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: var(--surface-hover); }
-
-.td-bold { font-weight: 600; color: var(--text); }
-.td-gray { color: var(--text-3); }
-.green   { color: var(--mint-dark); font-weight: 500; }
+/* Celdas de rendimiento positivo */
+.pos { color: var(--mint-dark); font-weight: 500; }
 </style>

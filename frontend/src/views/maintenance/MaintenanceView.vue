@@ -1,6 +1,10 @@
 <template>
   <div class="maintenance">
 
+    <div class="page-header">
+      <h1>Mantenimiento de vehículos</h1>
+    </div>
+
     <!-- Alerta -->
     <div v-if="alerts.length" class="alert-banner">
       <span>⚠️</span>
@@ -37,14 +41,14 @@
             </span>
             <div class="upcoming-actions">
               <button
-                class="btn-mini"
+                class="btn sm"
                 :disabled="!isVehicleAvailable(item.vehicleId)"
                 :title="isVehicleAvailable(item.vehicleId) ? '' : 'El vehículo no está disponible (en viaje o en mantenimiento)'"
                 @click="openExecuteModal(item)"
               >
                 Ejecutar
               </button>
-              <button class="btn-mini btn-mini--danger" @click="openCancelModal(item)">Cancelar</button>
+              <button class="btn sm danger" @click="openCancelModal(item)">Cancelar</button>
             </div>
           </div>
         </div>
@@ -113,8 +117,8 @@
         </div>
 
         <div class="form-actions">
-          <button class="btn-cancel" @click="resetForm">Cancelar</button>
-          <button class="btn-submit" @click="handleSave" :disabled="saving">
+          <button class="btn" @click="resetForm">Cancelar</button>
+          <button class="btn primary" @click="handleSave" :disabled="saving">
             {{ saving ? 'Guardando...' : (mode === 'now' ? 'Registrar' : 'Programar') }}
           </button>
         </div>
@@ -158,7 +162,7 @@
               </td>
               <td>
                 <span v-if="item.isClosed" class="td-gray">Cerrado</span>
-                <button v-else class="btn-mini" @click="openCloseModal(item)">Cerrar</button>
+                <button v-else class="btn sm" @click="openCloseModal(item)">Cerrar</button>
               </td>
             </tr>
           </tbody>
@@ -196,8 +200,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="executeModal.close()">Cancelar</button>
-        <button class="btn-submit" :disabled="saving" @click="handleExecute">
+        <button class="btn" @click="executeModal.close()">Cancelar</button>
+        <button class="btn primary" :disabled="saving" @click="handleExecute">
           {{ saving ? 'Procesando...' : 'Confirmar' }}
         </button>
       </template>
@@ -218,8 +222,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="cancelModal.close()">Volver</button>
-        <button class="btn-submit" :disabled="saving" @click="handleCancelScheduled">
+        <button class="btn" @click="cancelModal.close()">Volver</button>
+        <button class="btn primary" :disabled="saving" @click="handleCancelScheduled">
           {{ saving ? 'Procesando...' : 'Cancelar programación' }}
         </button>
       </template>
@@ -244,8 +248,8 @@
         </div>
       </div>
       <template #footer>
-        <button class="btn-cancel" @click="closeModal.close()">Cancelar</button>
-        <button class="btn-submit" :disabled="saving" @click="handleClose">
+        <button class="btn" @click="closeModal.close()">Cancelar</button>
+        <button class="btn primary" :disabled="saving" @click="handleClose">
           {{ saving ? 'Procesando...' : 'Cerrar mantenimiento' }}
         </button>
       </template>
@@ -469,7 +473,7 @@ async function handleClose() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--amber-text);
 }
 
@@ -494,7 +498,7 @@ async function handleClose() {
 }
 
 .card-section-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -516,7 +520,7 @@ async function handleClose() {
 
 .mode-toggle button {
   padding: 0.4rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-family: 'Inter', sans-serif;
   background: var(--white);
   border: none;
@@ -536,7 +540,7 @@ async function handleClose() {
 }
 
 .empty-state {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-3);
   padding: 1rem 0;
   text-align: center;
@@ -576,19 +580,19 @@ async function handleClose() {
 .upcoming-info { flex: 1; min-width: 160px; }
 
 .upcoming-name {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .upcoming-detail {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-3);
   margin-top: 2px;
 }
 
 .upcoming-days {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -601,23 +605,6 @@ async function handleClose() {
 .text-red    { color: var(--red); }
 .text-orange { color: var(--amber); }
 .text-gray   { color: var(--text-3); }
-
-.btn-mini {
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  background: var(--white);
-  font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-mini:hover { background: var(--surface-hover); }
-.btn-mini:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-mini:disabled:hover { background: var(--white); }
-.btn-mini--danger { color: var(--red); border-color: var(--red-border); }
-.btn-mini--danger:hover { background: var(--red-bg); }
 
 /* Formulario */
 .form-group {
@@ -633,7 +620,7 @@ async function handleClose() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -642,7 +629,7 @@ async function handleClose() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -660,7 +647,7 @@ async function handleClose() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -681,34 +668,6 @@ async function handleClose() {
   margin-top: 0.25rem;
 }
 
-.btn-cancel {
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1rem;
-  background: var(--blue-hover);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Tabla */
 .table-wrapper {
@@ -724,7 +683,7 @@ async function handleClose() {
 
 .table th {
   text-align: left;
-  font-size: 0.68rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.05em;
@@ -735,7 +694,7 @@ async function handleClose() {
 
 .table td {
   padding: 0.875rem 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   border-bottom: 1px solid var(--surface-hover);
 }
@@ -754,7 +713,7 @@ async function handleClose() {
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   border: 1px solid transparent;
 }
@@ -770,7 +729,7 @@ async function handleClose() {
 }
 
 .modal-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-2);
   margin: -0.5rem 0 0;
 }

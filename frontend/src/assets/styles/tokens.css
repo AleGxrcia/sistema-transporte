@@ -10,6 +10,15 @@
   --mint: #a7f3d0;
   --mint-dark: #059669;
   --mint-bg: #ecfdf5;
+  --mint-accent: #34d399; /* acento de marca sobre superficies oscuras */
+
+  /* Superficie de marca (sidebar / navy) */
+  --sidebar-bg: var(--navy);
+  --sidebar-border: #243050;
+  --sidebar-item: #9aa6bd;
+  --sidebar-item-strong: #e2e8f0;
+  --sidebar-item-hover-bg: var(--navy-hover);
+  --sidebar-section: #5a6885;
 
   /* Superficies */
   --bg: #f3f4f6;
@@ -21,7 +30,7 @@
   /* Tipografía */
   --text: #111827;
   --text-2: #4b5563;
-  --text-3: #9ca3af;
+  --text-3: #6b7280;
 
   /* Semánticos */
   --amber: #f59e0b;

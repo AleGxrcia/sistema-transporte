@@ -118,14 +118,14 @@ const confirmBtnClass = computed(() => {
 .icon--primary { background: var(--blue-light, #dbeafe); color: var(--blue, #2563eb); border: 1px solid #93c5fd; }
 
 .confirm-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text);
   margin: 0;
 }
 
 .confirm-message {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-2);
   margin: 0;
   line-height: 1.5;

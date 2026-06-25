@@ -1,6 +1,10 @@
 <template>
   <div class="profile">
 
+    <div class="page-header">
+      <h1>Mi perfil</h1>
+    </div>
+
     <!-- Dos columnas -->
     <div class="profile-grid">
 
@@ -69,8 +73,8 @@
           <p v-if="saveError" class="error-msg">{{ saveError }}</p>
 
           <div class="form-actions">
-            <button class="btn-cancel" @click="resetForm">Descartar cambios</button>
-            <button class="btn-submit" @click="handleSave" :disabled="loading">
+            <button class="btn" @click="resetForm">Descartar cambios</button>
+            <button class="btn primary" @click="handleSave" :disabled="loading">
               {{ loading ? 'Guardando...' : 'Guardar cambios' }}
             </button>
           </div>
@@ -102,8 +106,8 @@
           <p v-if="passwordSuccess" class="success-msg">Contraseña actualizada correctamente.</p>
 
           <div class="form-actions">
-            <button class="btn-cancel" @click="resetPasswordForm">Cancelar</button>
-            <button class="btn-submit" @click="handlePasswordChange" :disabled="loadingPassword">
+            <button class="btn" @click="resetPasswordForm">Cancelar</button>
+            <button class="btn primary" @click="handlePasswordChange" :disabled="loadingPassword">
               {{ loadingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
             </button>
           </div>
@@ -277,14 +281,14 @@ async function handlePasswordChange() {
 .role-badge {
   background: var(--purple-bg);
   color: var(--purple);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   padding: 3px 12px;
   border-radius: 999px;
 }
 
 .profile-email {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--text-3);
 }
 
@@ -305,7 +309,7 @@ async function handlePasswordChange() {
   padding: 0.75rem 1.25rem;
   border: none;
   background: none;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text-2);
   cursor: pointer;
@@ -330,7 +334,7 @@ async function handlePasswordChange() {
 }
 
 .section-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.08em;
@@ -347,7 +351,7 @@ async function handlePasswordChange() {
 .form-group.full-width { grid-column: 1 / -1; }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -356,7 +360,7 @@ async function handlePasswordChange() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   outline: none;
@@ -376,12 +380,12 @@ async function handlePasswordChange() {
 }
 
 .error-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--red);
 }
 
 .success-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--mint-dark);
 }
 
@@ -393,32 +397,4 @@ async function handlePasswordChange() {
   margin-top: 0.25rem;
 }
 
-.btn-cancel {
-  padding: 0.6rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--white);
-  font-size: 0.875rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.btn-cancel:hover { background: var(--surface-hover); }
-
-.btn-submit {
-  padding: 0.6rem 1.25rem;
-  background: var(--blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) { background: var(--blue-hover); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

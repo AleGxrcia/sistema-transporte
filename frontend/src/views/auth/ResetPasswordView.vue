@@ -133,19 +133,19 @@ async function handleSubmit() {
 }
 
 .form-label {
-  font-size: 0.82rem;
+  font-size: 0.87rem;
   font-weight: 500;
   color: var(--text-2);
 }
 
 .success-msg {
-  font-size: 0.875rem;
+  font-size: 0.925rem;
   color: var(--mint-dark);
   text-align: center;
 }
 
 .error-msg {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--red);
   text-align: center;
 }

@@ -67,7 +67,7 @@ const show = ref(false)
   justify-content: center;
   width: 42px;
   min-width: 42px;
-  color: #9ca3af;
+  color: #6b7280;
   border-right: 1px solid #e5e7eb;
   padding: 0;
 }
@@ -84,7 +84,7 @@ const show = ref(false)
   min-width: 0;
 }
 
-.field-input::placeholder { color: #9ca3af; }
+.field-input::placeholder { color: #6b7280; }
 
 .field-toggle {
   display: flex;
@@ -95,7 +95,7 @@ const show = ref(false)
   border: none;
   background: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: #6b7280;
   padding: 0;
 }
 

@@ -38,7 +38,7 @@ const badge = computed(() => {
   align-items: center;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;

@@ -11,6 +11,7 @@ import BaseModal from '@/components/ui/AppBaseModal.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import VehicleForm from '@/components/forms/vehicles/VehicleForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
+import AppEmptyState from '@/components/ui/AppEmptyState.vue'
 import { Eye, Pencil, Trash2, Plus, Truck, CheckCircle2, Wrench, Ban } from '@lucide/vue'
 import { formatKilometers } from '@/utils/formatters'
 import { VEHICLE_STATUSES, VEHICLE_TYPES, getVehicleTypeLabel } from '@/utils/enumLabels'
@@ -139,30 +140,26 @@ async function confirmDelete() {
     <div v-if="isLoading" class="loading-placeholder">Cargando vehículos…</div>
 
     <!-- Empty state -->
-    <div v-else-if="filteredVehicles.length === 0" class="empty-state">
-      <div class="empty-icon empty-icon--blue">
+    <AppEmptyState
+      v-else-if="filteredVehicles.length === 0"
+      title="Aún no hay vehículos"
+      :message="hasActiveFilters
+        ? 'No se encontraron vehículos con los filtros aplicados.'
+        : 'Registra el primer vehículo de tu flota para comenzar a gestionar solicitudes y viajes.'"
+    >
+      <template #icon>
         <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
           <path d="M7 17m-2 0a2 2 0 1 0 4 0"/>
           <path d="M17 17m-2 0a2 2 0 1 0 4 0"/>
           <path d="M5 17h-2v-11a1 1 0 0 1 1-1h9v12m-4 0h6m4 0h2v-6h-8m0-5h5l3 5"/>
         </svg>
-      </div>
-      <p class="empty-title">Aún no hay vehículos</p>
-      <p class="empty-sub">
-        {{
-          hasActiveFilters
-            ? 'No se encontraron vehículos con los filtros aplicados.'
-            : 'Registra el primer vehículo de tu flota para comenzar a gestionar solicitudes y viajes.'
-        }}
-      </p>
-      <button
-        v-if="can('create', 'vehicles') && !hasActiveFilters"
-        class="btn primary"
-        @click="createModal.open()"
-      >
-        <Plus :size="14" /> Registrar primer vehículo
-      </button>
-    </div>
+      </template>
+      <template #action v-if="can('create', 'vehicles') && !hasActiveFilters">
+        <button class="btn primary" @click="createModal.open()">
+          <Plus :size="14" /> Registrar primer vehículo
+        </button>
+      </template>
+    </AppEmptyState>
 
     <!-- Tabla -->
     <template v-else>
@@ -244,48 +241,3 @@ async function confirmDelete() {
     />
   </div>
 </template>
-
-<style scoped>
-.loading-placeholder {
-  padding: 48px;
-  text-align: center;
-  color: var(--text-3);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 64px 24px;
-  gap: 10px;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 6px;
-}
-.empty-icon--blue {
-  background: var(--blue-light);
-  border: 1px solid var(--blue-mid, #93c5fd);
-}
-
-.empty-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-}
-.empty-sub {
-  font-size: 13px;
-  color: var(--text-3);
-  line-height: 1.6;
-  max-width: 360px;
-  margin: 0 0 8px;
-}
-</style>
