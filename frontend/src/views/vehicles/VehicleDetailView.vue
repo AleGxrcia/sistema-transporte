@@ -16,11 +16,12 @@ import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import BaseBadge from '@/components/ui/AppBadge.vue'
+import AppBreadcrumb from '@/components/ui/AppBreadcrumb.vue'
 import VehicleForm from '@/components/forms/vehicles/VehicleForm.vue'
 import MaintenanceForm from '@/components/forms/vehicles/MaintenanceForm.vue'
 import FuelForm from '@/components/forms/vehicles/FuelForm.vue'
 import {
-  ArrowLeft, Pencil, Wrench, Fuel, PowerOff, Trash2, CheckCircle, RefreshCw,
+  Pencil, Wrench, Fuel, PowerOff, Trash2, CheckCircle, RefreshCw,
   Route, Calendar, ClipboardList, Truck, Eye,
 } from '@lucide/vue'
 import { formatDate, formatKilometers, formatCurrency, formatNumber } from '@/utils/formatters'
@@ -357,47 +358,13 @@ function afterFuelSaved() {
 
 <template>
   <div>
-    <!-- Header -->
-    <div class="page-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <button class="icon-btn" @click="router.push('/vehicles')">
-          <ArrowLeft :size="16" />
-        </button>
-        <h1 v-if="vehicle">{{ vehicle.licensePlate }} — {{ vehicle.brand }} {{ vehicle.model }}</h1>
-        <h1 v-else>Detalle de vehículo</h1>
-      </div>
-
-      <div v-if="vehicle" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button v-if="canEditVehicle" class="btn" @click="editModal.open(vehicle)">
-          <Pencil :size="14" /> Editar
-        </button>
-        <button v-if="canManageMaintenance" class="btn" @click="maintenanceModal.open()">
-          <Wrench :size="14" /> Mantenimiento
-        </button>
-        <button v-if="canManageFuel" class="btn" @click="fuelModal.open()">
-          <Fuel :size="14" /> Combustible
-        </button>
-        <button
-          v-if="canEditVehicle && vehicle.status === 'Inactive'"
-          class="btn"
-          style="border-color:var(--mint-dark);color:var(--mint-dark)"
-          @click="handleReactivate"
-        >
-          <RefreshCw :size="14" /> Reactivar
-        </button>
-        <button
-          v-else-if="canEditVehicle"
-          class="btn"
-          style="border-color:var(--amber-border);color:var(--amber-text)"
-          @click="deactivateModal.open()"
-        >
-          <PowerOff :size="14" /> Desactivar
-        </button>
-        <button v-if="canDeleteVehicle" class="btn danger" @click="deleteModal.open()">
-          <Trash2 :size="14" /> Eliminar
-        </button>
-      </div>
-    </div>
+    <!-- Breadcrumb -->
+    <AppBreadcrumb
+      :items="[
+        { label: 'Vehículos', to: '/vehicles' },
+        { label: vehicle ? vehicle.licensePlate : 'Detalle de vehículo' },
+      ]"
+    />
 
     <!-- Loading -->
     <div v-if="isLoading" class="loading-placeholder">Cargando vehículo…</div>
@@ -417,6 +384,37 @@ function afterFuelSaved() {
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
             <h2 style="font-size:19px;font-weight:700;color:var(--text)">{{ vehicle.brand }} {{ vehicle.model }}</h2>
             <BaseBadge :status="vehicle.status" />
+
+            <div class="header-actions">
+              <button v-if="canEditVehicle" class="btn sm" @click="editModal.open(vehicle)">
+                <Pencil :size="14" /> Editar
+              </button>
+              <button v-if="canManageMaintenance" class="btn sm" @click="maintenanceModal.open()">
+                <Wrench :size="14" /> Mantenimiento
+              </button>
+              <button v-if="canManageFuel" class="btn sm" @click="fuelModal.open()">
+                <Fuel :size="14" /> Combustible
+              </button>
+              <button
+                v-if="canEditVehicle && vehicle.status === 'Inactive'"
+                class="btn sm"
+                style="border-color:var(--mint-dark);color:var(--mint-dark)"
+                @click="handleReactivate"
+              >
+                <RefreshCw :size="14" /> Reactivar
+              </button>
+              <button
+                v-else-if="canEditVehicle"
+                class="btn sm"
+                style="border-color:var(--amber-border);color:var(--amber-text)"
+                @click="deactivateModal.open()"
+              >
+                <PowerOff :size="14" /> Desactivar
+              </button>
+              <button v-if="canDeleteVehicle" class="btn sm danger" @click="deleteModal.open()">
+                <Trash2 :size="14" /> Eliminar
+              </button>
+            </div>
           </div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
             <div class="info-block"><span class="info-label">Matrícula</span><div class="info-value strong">{{ vehicle.licensePlate }}</div></div>
@@ -789,6 +787,12 @@ function afterFuelSaved() {
   gap: 20px;
   align-items: flex-start;
   margin-bottom: 20px;
+}
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .vehicle-icon {
   width: 64px;
