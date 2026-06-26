@@ -1,20 +1,26 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { driverApi } from '@/services/drivers.service'
 import { useDriverStore } from '@/stores/drivers.store'
 import { useModal } from '@/composables/useModal'
 import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
-import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
-import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppEmptyState from '@/components/ui/AppEmptyState.vue'
-import { Pencil, Trash2, Plus, AlertTriangle } from '@lucide/vue'
+import { Plus, AlertTriangle, Phone, ShieldCheck } from '@lucide/vue'
 import { formatDate, getInitials } from '@/utils/formatters'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
+
+// Color de avatar determinista por conductor (paleta del sistema de diseño)
+const AVATAR_COLORS = ['var(--blue)', 'var(--purple)', 'var(--mint-dark)', 'var(--amber)', 'var(--sky)', 'var(--navy)']
+function avatarColor(driver) {
+  const key = `${driver.firstName ?? ''}${driver.lastName ?? ''}${driver.id ?? ''}`
+  let hash = 0
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
 
 const router = useRouter()
 const { can } = useAuth()
@@ -46,26 +52,9 @@ const filteredDrivers = computed(() => {
 const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
 
 const createModal = useModal()
-const deleteModal  = useModal()
-const isDeleting   = ref(false)
 
 function refresh() {
   driverStore.fetchAll()
-}
-
-async function confirmDelete() {
-  try {
-    isDeleting.value = true
-    await driverApi.delete(deleteModal.payload.value.id)
-    deleteModal.close()
-    toast.success('Conductor eliminado', `${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} fue eliminado correctamente.`)
-    refresh()
-  } catch (err) {
-    deleteModal.close()
-    toast.error('No se pudo eliminar', getErrorMessage(err, 'Error al eliminar'))
-  } finally {
-    isDeleting.value = false
-  }
 }
 </script>
 
@@ -74,22 +63,25 @@ async function confirmDelete() {
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de conductores</h1>
-      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
-        <Plus :size="14" /> Nuevo conductor
-      </button>
     </div>
 
     <!-- Filtros -->
-    <div class="search-row">
-      <input
-        v-model="search"
-        class="search-input"
-        placeholder="Buscar por nombre o cédula…"
-      />
-      <select v-model="statusFilter">
-        <option value="">Todos los estados</option>
-        <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
-      </select>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <input
+          v-model="search"
+          class="search-input"
+          placeholder="Buscar por nombre o cédula…"
+          style="max-width:360px"
+        />
+        <select v-model="statusFilter">
+          <option value="">Todos los estados</option>
+          <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
+        </select>
+      </div>
+      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
+        <Plus :size="14" /> Nuevo conductor
+      </button>
     </div>
 
     <!-- Loading -->
@@ -125,49 +117,34 @@ async function confirmDelete() {
           class="driver-card"
           @click="router.push(`/drivers/${driver.id}`)"
         >
-          <div class="driver-avatar">
-            {{ getInitials(driver.firstName, driver.lastName) }}
+          <!-- Identidad: avatar + nombre + cédula + estado -->
+          <div class="dc-top">
+            <div class="driver-avatar" :style="{ background: avatarColor(driver) }">
+              {{ getInitials(driver.firstName, driver.lastName) }}
+            </div>
+            <div class="dc-identity">
+              <div class="driver-name">{{ driver.firstName }} {{ driver.lastName }}</div>
+              <div class="dc-cedula">{{ driver.nationalId }}</div>
+            </div>
+            <AppBadge :status="driver.status" />
           </div>
-          <div class="driver-info">
-            <router-link
-              :to="`/drivers/${driver.id}`"
-              class="driver-name driver-name-link"
-              @click.stop
-            >
-              {{ driver.firstName }} {{ driver.lastName }}
-            </router-link>
-            <div class="driver-meta">Cédula: {{ driver.nationalId }}</div>
-            <div class="driver-meta">Tel: {{ driver.phone }}</div>
 
+          <!-- Contacto + licencia -->
+          <div class="dc-details">
+            <div class="dc-line">
+              <Phone :size="13" class="dc-ico" />
+              <span>{{ driver.phone }}</span>
+            </div>
             <div
-              class="driver-lic"
+              class="dc-line"
               :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
             >
-              <AlertTriangle v-if="driver.licenseExpired || driver.licenseExpiringSoon" :size="11" />
-              Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
-              {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
-            </div>
-
-            <div class="driver-card-footer">
-              <AppBadge :status="driver.status" />
-              <div class="action-buttons">
-                <button
-                  v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
-                  class="icon-btn edit"
-                  title="Editar"
-                  @click.stop="router.push(`/drivers/${driver.id}?edit=true`)"
-                >
-                  <Pencil :size="12" />
-                </button>
-                <button
-                  v-if="can('delete', 'drivers')"
-                  class="icon-btn reject"
-                  title="Eliminar"
-                  @click.stop="deleteModal.open(driver)"
-                >
-                  <Trash2 :size="12" />
-                </button>
-              </div>
+              <AlertTriangle v-if="driver.licenseExpired || driver.licenseExpiringSoon" :size="13" class="dc-ico" />
+              <ShieldCheck v-else :size="13" class="dc-ico" />
+              <span>
+                Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
+                {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
+              </span>
             </div>
           </div>
         </div>
@@ -190,38 +167,116 @@ async function confirmDelete() {
         @cancel="createModal.close()"
       />
     </BaseModal>
-
-    <!-- ── ConfirmModal: Eliminar ─────────────────────────────────────────── -->
-    <ConfirmModal
-      :model-value="deleteModal.isOpen.value"
-      title="¿Eliminar conductor?"
-      :message="`Esta acción eliminará permanentemente a ${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} del sistema.`"
-      confirm-text="Eliminar"
-      variant="danger"
-      :is-loading="isDeleting"
-      @update:model-value="deleteModal.close()"
-      @confirm="confirmDelete"
-    />
   </div>
 </template>
 
 <style scoped>
-.driver-avatar {
-  background: rgba(18, 26, 45, 0.07);
-  color: var(--navy);
-}
-
-.driver-card-footer {
+/* Fila de filtros transparente (sin tarjeta): los inputs y el botón
+   quedan directamente sobre el lienzo, igual que la referencia. */
+.filter-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: auto;
-  padding-top: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+/* Grupo búsqueda + filtros: ocupa el espacio disponible y empuja
+   el botón de acción al final de la fila, dejando el hueco intermedio. */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 280px;
+  flex-wrap: wrap;
+}
+.filter-bar select {
+  width: auto;
+  flex: 0 0 auto;
+  min-width: 160px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13.5px;
+  color: var(--text-2);
 }
 
-/* Los botones de acción permanecen visibles; el hover cambia color, no opacidad */
-.driver-card-footer .action-buttons {
-  opacity: 1;
+/* Card de conductor en columna con zonas claras (igual que la referencia) */
+.driver-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 18px;
+  border-radius: 13px;
+}
+.driver-card:hover {
+  border-color: var(--blue-mid);
+}
+
+/* Zona 1 — identidad */
+.dc-top {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+.driver-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+.dc-identity {
+  flex: 1;
+  min-width: 0;
+}
+.driver-name {
+  display: block;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dc-cedula {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Zona 2 — contacto + licencia (divisor superior, igual que la referencia) */
+.dc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.dc-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.dc-ico {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.dc-line.warn {
+  color: var(--amber-text);
+}
+.dc-line.warn .dc-ico {
+  color: var(--amber);
+}
+.dc-line.danger {
+  color: var(--red);
+}
+.dc-line.danger .dc-ico {
+  color: var(--red);
 }
 
 .driver-card--add {

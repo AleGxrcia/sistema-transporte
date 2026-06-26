@@ -9,10 +9,10 @@ import { RequestsService } from '@/services/requests.service'
 import { VehiclesService } from '@/services/vehicles.service'
 import { driverApi } from '@/services/drivers.service'
 import { getErrorMessage } from '@/utils/apiError'
-import { formatDate, formatDateTime, getInitials } from '@/utils/formatters'
+import { formatDate, formatDateTime } from '@/utils/formatters'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
-import { ArrowLeft, Check, X } from '@lucide/vue'
+import { ArrowLeft, Check, X, Play, Flag } from '@lucide/vue'
 
 const props = defineProps({ id: { type: String, required: true } })
 
@@ -50,14 +50,11 @@ function stepClass(index) {
   return 'inactive'
 }
 
-// ── Carga de la solicitud ───────────────────────────────────────────────────
+// Carga de la solicitud
 async function load() {
   await store.fetchById(props.id)
   if (request.value?.status === 'Pending') {
     store.fetchPending()
-  }
-  if (request.value?.status === 'Approved' && canManage.value) {
-    loadAvailableResources()
   }
   if (['Assigned', 'InProgress', 'Completed'].includes(request.value?.status) && request.value) {
     loadAssignedResources()
@@ -71,7 +68,7 @@ const otherPending = computed(() =>
   store.pendingRequests.filter((r) => r.id !== request.value?.id)
 )
 
-// ── Aprobar / Rechazar ──────────────────────────────────────────────────────
+// Aprobar / Rechazar 
 const isApproving = ref(false)
 const rejectModal = useModal()
 const rejectReason = ref('')
@@ -84,7 +81,6 @@ async function handleApprove() {
     await RequestsService.approve(request.value.id)
     toast.success('Solicitud aprobada', 'Ahora puedes asignar vehículo y conductor.')
     await store.fetchById(props.id)
-    loadAvailableResources()
   } catch (err) {
     toast.error('No se pudo aprobar', getErrorMessage(err))
     await store.fetchById(props.id)
@@ -118,61 +114,65 @@ async function handleReject() {
   }
 }
 
-// ── Asignación de recursos ──────────────────────────────────────────────────
-const availableVehicles = ref([])
-const availableDrivers = ref([])
-const isLoadingResources = ref(false)
-const selectedVehicleId = ref(null)
-const selectedDriverId = ref(null)
-const assignModal = useModal()
-const isAssigning = ref(false)
-const assignError = ref('')
+// Iniciar viaje (Assigned → InProgress)
+const isStarting = ref(false)
 
-async function loadAvailableResources() {
+async function handleStart() {
   try {
-    isLoadingResources.value = true
-    const [vehiclesRes, driversRes] = await Promise.all([
-      VehiclesService.available(request.value.passengerCount),
-      driverApi.available(),
-    ])
-    availableVehicles.value = vehiclesRes.data
-    availableDrivers.value = driversRes.data
-  } catch {
-    availableVehicles.value = []
-    availableDrivers.value = []
-  } finally {
-    isLoadingResources.value = false
-  }
-}
-
-const selectedVehicle = computed(() =>
-  availableVehicles.value.find((v) => v.id === selectedVehicleId.value)
-)
-const selectedDriver = computed(() =>
-  availableDrivers.value.find((d) => d.id === selectedDriverId.value)
-)
-
-function openAssignModal() {
-  assignError.value = ''
-  assignModal.open()
-}
-
-async function handleAssign() {
-  try {
-    isAssigning.value = true
-    await RequestsService.assign(request.value.id, selectedVehicleId.value, selectedDriverId.value)
-    assignModal.close()
-    toast.success('Asignación confirmada', 'El vehículo y conductor fueron asignados al viaje.')
+    isStarting.value = true
+    await RequestsService.start(request.value.id)
+    toast.success('Viaje iniciado', 'El viaje está ahora en curso.')
     await store.fetchById(props.id)
   } catch (err) {
-    assignError.value = getErrorMessage(err, 'No se pudo confirmar la asignación')
+    toast.error('No se pudo iniciar el viaje', getErrorMessage(err))
     await store.fetchById(props.id)
   } finally {
-    isAssigning.value = false
+    isStarting.value = false
   }
 }
 
-// ── Recursos ya asignados (para mostrar en estados posteriores) ────────────
+// Completar viaje (InProgress → Completed)
+const completeModal = useModal()
+const actualDeparture = ref('')
+const actualReturn = ref('')
+const completeError = ref('')
+const isCompleting = ref(false)
+
+function openCompleteModal() {
+  completeError.value = ''
+  actualDeparture.value = formatDate(request.value.departureDateTime, 'YYYY-MM-DDTHH:mm')
+  actualReturn.value = formatDate(request.value.returnDateTime, 'YYYY-MM-DDTHH:mm')
+  completeModal.open()
+}
+
+async function handleComplete() {
+  if (!actualDeparture.value || !actualReturn.value) {
+    completeError.value = 'Debes indicar la hora real de salida y de regreso.'
+    return
+  }
+  if (new Date(actualReturn.value) <= new Date(actualDeparture.value)) {
+    completeError.value = 'La hora de regreso debe ser posterior a la de salida.'
+    return
+  }
+  try {
+    isCompleting.value = true
+    await RequestsService.complete(
+      request.value.id,
+      new Date(actualDeparture.value).toISOString(),
+      new Date(actualReturn.value).toISOString()
+    )
+    completeModal.close()
+    toast.success('Viaje completado', 'El vehículo y el conductor quedaron disponibles nuevamente.')
+    await store.fetchById(props.id)
+  } catch (err) {
+    completeError.value = getErrorMessage(err, 'No se pudo completar el viaje')
+    await store.fetchById(props.id)
+  } finally {
+    isCompleting.value = false
+  }
+}
+
+// Recursos ya asignados (para mostrar en estados posteriores)
 const assignedVehicle = ref(null)
 const assignedDriver = ref(null)
 
@@ -267,6 +267,18 @@ async function loadAssignedResources() {
           <div v-else-if="request.status === 'Pending'" class="alert amber" style="margin-top:14px">
             Esta solicitud está pendiente de revisión por un supervisor.
           </div>
+
+          <!-- Acciones: iniciar / completar viaje -->
+          <div v-if="request.status === 'Assigned' && canManage" class="form-actions" style="justify-content:flex-start">
+            <button class="btn primary" :disabled="isStarting" @click="handleStart">
+              <Play :size="14" /> Iniciar viaje
+            </button>
+          </div>
+          <div v-else-if="request.status === 'InProgress' && canManage" class="form-actions" style="justify-content:flex-start">
+            <button class="btn success" @click="openCompleteModal">
+              <Flag :size="14" /> Completar viaje
+            </button>
+          </div>
         </div>
 
         <!-- Otras pendientes (solo mientras esta está Pending) -->
@@ -297,70 +309,18 @@ async function loadAssignedResources() {
         </div>
       </div>
 
-      <!-- Asignación de recursos -->
-      <div v-if="request.status === 'Approved' && canManage">
-        <div class="alert" style="background:var(--mint-bg);border:1px solid var(--mint-border);color:var(--mint-dark)">
-          ✓ Solicitud aprobada — ahora asigna los recursos para el viaje.
+      <!-- Asignación de recursos (pantalla aparte) -->
+      <div
+        v-if="request.status === 'Approved' && canManage"
+        class="card assign-cta"
+      >
+        <div class="assign-cta-text">
+          <div class="assign-cta-title">✓ Solicitud aprobada</div>
+          <div class="assign-cta-sub">Asigna el vehículo y el conductor para completar el viaje.</div>
         </div>
-
-        <div v-if="isLoadingResources" class="loading-placeholder">Cargando disponibilidad…</div>
-        <div v-else class="grid2">
-          <div>
-            <div class="card-title">SELECCIONAR VEHÍCULO ({{ availableVehicles.length }} disponibles)</div>
-            <div v-if="availableVehicles.length === 0" class="card" style="color:var(--text-3);font-size:13.5px">
-              No hay vehículos disponibles con la capacidad requerida.
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div
-                v-for="v in availableVehicles"
-                :key="v.id"
-                class="driver-card"
-                :class="{ 'option-selected': selectedVehicleId === v.id }"
-                style="cursor:pointer"
-                @click="selectedVehicleId = v.id"
-              >
-                <div class="driver-avatar" style="background:var(--blue-light);color:var(--blue)">{{ v.type?.[0] }}</div>
-                <div class="driver-info">
-                  <div class="driver-name">{{ v.licensePlate }} — {{ v.brand }} {{ v.model }}</div>
-                  <div class="driver-meta">{{ v.type }} · {{ v.capacity }} pasajeros</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="card-title">SELECCIONAR CONDUCTOR ({{ availableDrivers.length }} disponibles)</div>
-            <div v-if="availableDrivers.length === 0" class="card" style="color:var(--text-3);font-size:13.5px">
-              No hay conductores disponibles con licencia vigente.
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div
-                v-for="d in availableDrivers"
-                :key="d.id"
-                class="driver-card"
-                :class="{ 'option-selected': selectedDriverId === d.id }"
-                style="cursor:pointer"
-                @click="selectedDriverId = d.id"
-              >
-                <div class="driver-avatar" style="background:var(--blue)">{{ getInitials(d.firstName, d.lastName) }}</div>
-                <div class="driver-info">
-                  <div class="driver-name">{{ d.firstName }} {{ d.lastName }}</div>
-                  <div class="driver-meta">Lic. {{ d.licenseType }} · vence {{ formatDate(d.licenseExpirationDate) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button
-            class="btn primary"
-            :disabled="!selectedVehicleId || !selectedDriverId"
-            @click="openAssignModal"
-          >
-            Confirmar asignación →
-          </button>
-        </div>
+        <button class="btn primary" @click="router.push(`/requests/${request.id}/assign`)">
+          Asignar recursos →
+        </button>
       </div>
       <div v-else-if="request.status === 'Approved'" class="alert amber">
         Esta solicitud está aprobada y en espera de asignación de recursos por un supervisor.
@@ -385,29 +345,28 @@ async function loadAssignedResources() {
       <span v-if="rejectError" class="field-error">{{ rejectError }}</span>
     </ConfirmModal>
 
-    <!-- Modal: Confirmar asignación -->
+    <!-- Modal: Completar viaje -->
     <ConfirmModal
-      v-if="selectedVehicle && selectedDriver"
-      :model-value="assignModal.isOpen.value"
-      title="Confirmar asignación"
-      message="Una vez asignados, los recursos quedarán bloqueados para este horario."
-      confirm-text="Confirmar asignación"
+      :model-value="completeModal.isOpen.value"
+      title="Completar viaje"
+      message="Registra las horas reales de salida y regreso. Al completar, el vehículo y el conductor quedarán disponibles."
+      confirm-text="Completar viaje"
       variant="primary"
-      :is-loading="isAssigning"
-      @update:model-value="assignModal.close()"
-      @confirm="handleAssign"
+      :is-loading="isCompleting"
+      @update:model-value="completeModal.close()"
+      @confirm="handleComplete"
     >
-      <div class="info-grid">
-        <div class="info-item">
-          <dt>Vehículo</dt>
-          <dd>{{ selectedVehicle.licensePlate }} — {{ selectedVehicle.brand }} {{ selectedVehicle.model }}</dd>
+      <div class="complete-grid">
+        <div class="form-group">
+          <label>Salida real <span class="required">*</span></label>
+          <input v-model="actualDeparture" type="datetime-local" />
         </div>
-        <div class="info-item">
-          <dt>Conductor</dt>
-          <dd>{{ selectedDriver.firstName }} {{ selectedDriver.lastName }}</dd>
+        <div class="form-group">
+          <label>Regreso real <span class="required">*</span></label>
+          <input v-model="actualReturn" type="datetime-local" />
         </div>
       </div>
-      <span v-if="assignError" class="field-error">{{ assignError }}</span>
+      <span v-if="completeError" class="field-error">{{ completeError }}</span>
     </ConfirmModal>
   </div>
 </template>
@@ -473,9 +432,34 @@ async function loadAssignedResources() {
 .info-item dd { font-size: 14px; font-weight: 600; color: var(--text); }
 .text-red { color: var(--red); font-weight: 500; }
 
-.option-selected {
-  border-color: var(--blue) !important;
-  background: var(--blue-light);
-  box-shadow: 0 0 0 1px var(--blue);
+.assign-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--mint-bg);
+  border: 1px solid var(--mint-border);
+}
+.assign-cta-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mint-dark);
+}
+.assign-cta-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+
+.complete-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.complete-grid .form-group { min-width: 0; }
+.complete-grid input {
+  width: 100%;
+  box-sizing: border-box;
 }
 </style>

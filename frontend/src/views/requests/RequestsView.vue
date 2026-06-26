@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import dayjs from 'dayjs'
 import { useRequestsStore } from '@/stores/requests.store'
 import { useAuth } from '@/composables/useAuth'
 import AppBadge from '@/components/ui/AppBadge.vue'
@@ -15,6 +16,7 @@ const requestsStore = useRequestsStore()
 
 const search = ref('')
 const statusFilter = ref('')
+const dateFilter = ref('')
 
 onMounted(() => requestsStore.fetchAll())
 
@@ -35,6 +37,9 @@ const tabs = computed(() => {
 const filteredRequests = computed(() => {
   let result = requests.value
   if (statusFilter.value) result = result.filter((r) => r.status === statusFilter.value)
+  if (dateFilter.value) {
+    result = result.filter((r) => dayjs(r.departureDateTime).format('YYYY-MM-DD') === dateFilter.value)
+  }
   if (search.value.trim()) {
     const q = search.value.trim().toLowerCase()
     result = result.filter(
@@ -47,32 +52,36 @@ const filteredRequests = computed(() => {
   return result
 })
 
-const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
+const hasActiveFilters = computed(() => !!(search.value || statusFilter.value || dateFilter.value))
 </script>
 
 <template>
   <div>
     <div class="page-header">
       <h1>Solicitudes de transporte</h1>
+    </div>
+
+    <div class="tabs-row">
+      <div class="page-tabs">
+        <span
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="pt"
+          :class="{ active: statusFilter === tab.key }"
+          @click="statusFilter = tab.key"
+        >
+          {{ tab.label }} ({{ tab.count }})
+        </span>
+      </div>
+
       <button v-if="can('create', 'requests')" class="btn primary" @click="router.push('/requests/new')">
         <Plus :size="14" /> Nueva solicitud
       </button>
     </div>
 
-    <div class="page-tabs">
-      <span
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="pt"
-        :class="{ active: statusFilter === tab.key }"
-        @click="statusFilter = tab.key"
-      >
-        {{ tab.label }} ({{ tab.count }})
-      </span>
-    </div>
-
     <div class="search-row">
       <input v-model="search" class="search-input" placeholder="Buscar por área, destino o número…" />
+      <input v-model="dateFilter" type="date" title="Filtrar por fecha de salida" />
     </div>
 
     <div v-if="isLoading" class="loading-placeholder">Cargando solicitudes…</div>
@@ -135,3 +144,17 @@ const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
     </div>
   </div>
 </template>
+
+<style scoped>
+.tabs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.tabs-row .page-tabs {
+  margin-bottom: 0;
+}
+</style>

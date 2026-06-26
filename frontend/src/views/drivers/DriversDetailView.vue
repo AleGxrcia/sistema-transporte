@@ -14,10 +14,11 @@ import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
+import AppBreadcrumb from '@/components/ui/AppBreadcrumb.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import RenewLicenseForm from '@/components/forms/drivers/RenewLicenseForm.vue'
 import {
-  ArrowLeft, Pencil, RefreshCw, Ban, CheckCircle, Trash2, AlertTriangle,
+  Pencil, RefreshCw, Ban, CheckCircle, Trash2, AlertTriangle,
   Route, Calendar, MapPin, Eye, CircleUser,
 } from '@lucide/vue'
 import { formatDate, getInitials, daysUntil } from '@/utils/formatters'
@@ -315,46 +316,13 @@ function afterSaved(msg) {
 
 <template>
   <div>
-    <!-- Header -->
-    <div class="page-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <button class="icon-btn" @click="router.push('/drivers')">
-          <ArrowLeft :size="16" />
-        </button>
-        <h1 v-if="driver">{{ driver.firstName }} {{ driver.lastName }}</h1>
-        <h1 v-else>Detalle de conductor</h1>
-      </div>
-
-      <div v-if="driver && (canEditDriver || canDeleteDriver)" style="display:flex;gap:8px;flex-wrap:wrap">
-        <template v-if="canEditDriver">
-          <button class="btn" @click="editModal.open(driver)">
-            <Pencil :size="14" /> Editar
-          </button>
-          <button class="btn" @click="renewModal.open(driver)">
-            <RefreshCw :size="14" /> Renovar licencia
-          </button>
-          <button
-            v-if="driver.status === 'Suspended' || driver.status === 'Inactive'"
-            class="btn"
-            style="border-color:var(--mint-dark);color:var(--mint-dark)"
-            @click="handleReactivate"
-          >
-            <CheckCircle :size="14" /> Reactivar
-          </button>
-          <button
-            v-else-if="driver.status === 'Available'"
-            class="btn"
-            style="border-color:var(--amber-border);color:var(--amber-text)"
-            @click="suspendModal.open()"
-          >
-            <Ban :size="14" /> Suspender
-          </button>
-        </template>
-        <button v-if="canDeleteDriver" class="btn danger" @click="deleteModal.open()">
-          <Trash2 :size="14" /> Eliminar
-        </button>
-      </div>
-    </div>
+    <!-- Breadcrumb -->
+    <AppBreadcrumb
+      :items="[
+        { label: 'Conductores', to: '/drivers' },
+        { label: driver ? `${driver.firstName} ${driver.lastName}` : 'Detalle de conductor' },
+      ]"
+    />
 
     <!-- Loading -->
     <div v-if="isLoading" class="loading-placeholder">Cargando conductor…</div>
@@ -373,35 +341,82 @@ function afterSaved(msg) {
         <button v-if="canEditDriver" class="btn-sm" @click="renewModal.open(driver)">Renovar ahora</button>
       </div>
 
-      <!-- Header card -->
-      <div class="card driver-header-card">
-        <div class="driver-avatar-lg">{{ initials }}</div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-            <h2 style="font-size:19px;font-weight:700;color:var(--text)">{{ driver.firstName }} {{ driver.lastName }}</h2>
+      <div class="detail-layout">
+        <!-- Sidebar: perfil -->
+        <aside class="detail-sidebar card">
+          <div class="sidebar-profile">
+            <div class="driver-avatar-lg">{{ initials }}</div>
+            <div class="sidebar-name">{{ driver.firstName }} {{ driver.lastName }}</div>
+            <div class="sidebar-ced">{{ driver.nationalId }}</div>
             <AppBadge :status="driver.status" />
           </div>
-          <div style="display:flex;gap:24px;flex-wrap:wrap">
-            <div class="info-block"><span class="info-label">Cédula</span><div class="info-value strong">{{ driver.nationalId }}</div></div>
-            <div class="info-block"><span class="info-label">Licencia</span><div class="info-value">{{ driver.licenseNumber }}</div></div>
-            <div class="info-block"><span class="info-label">Tipo de licencia</span><div><span class="tag">{{ getLicenseCategoryLabel(driver.licenseType) }}</span></div></div>
-            <div class="info-block">
-              <span class="info-label">Vence licencia</span>
-              <div class="info-value" :class="{ 'text-red': licenseAlert?.level === 'expired', 'text-amber': licenseAlert?.level === 'warning', mint: !licenseAlert }">
-                {{ formatDate(driver.licenseExpirationDate) }}
+
+          <div class="sidebar-section">
+            <div class="sidebar-item">
+              <span class="info-label">Teléfono</span>
+              <div class="info-value">{{ driver.phone }}</div>
+            </div>
+            <div class="sidebar-item">
+              <span class="info-label">Licencia</span>
+              <div class="info-value">
+                {{ driver.licenseNumber }} <span class="tag">{{ getLicenseCategoryLabel(driver.licenseType) }}</span>
+              </div>
+              <div
+                class="lic-exp"
+                :class="{ 'text-red': licenseAlert?.level === 'expired', 'text-amber': licenseAlert?.level === 'warning' }"
+              >
+                {{ licenseAlert?.level === 'expired' ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
               </div>
             </div>
-            <div class="info-block"><span class="info-label">Teléfono</span><div class="info-value">{{ driver.phone }}</div></div>
-            <div class="info-block"><span class="info-label">Supervisor</span><div class="info-value">{{ supervisorName || 'Sin asignar' }}</div></div>
+            <div class="sidebar-item">
+              <span class="info-label">Antigüedad</span>
+              <div class="info-value">{{ seniority }} · desde {{ driver.createdAt ? formatDate(driver.createdAt) : '—' }}</div>
+            </div>
+            <div class="sidebar-item">
+              <span class="info-label">Supervisor</span>
+              <div class="info-value">{{ supervisorName || 'Sin asignar' }}</div>
+            </div>
+            <div v-if="driver.address" class="sidebar-item">
+              <span class="info-label">Dirección</span>
+              <div class="info-value" style="display:flex;align-items:center;gap:4px"><MapPin :size="12" />{{ driver.address }}</div>
+            </div>
           </div>
-          <div v-if="driver.address" style="margin-top:10px;font-size:13.5px;color:var(--text-3);display:flex;align-items:center;gap:4px">
-            <MapPin :size="12" />{{ driver.address }}
-          </div>
-        </div>
-      </div>
 
+          <div v-if="canEditDriver || canDeleteDriver" class="sidebar-actions">
+            <template v-if="canEditDriver">
+              <button class="btn sm" @click="editModal.open(driver)">
+                <Pencil :size="14" /> Editar
+              </button>
+              <button class="btn sm" @click="renewModal.open(driver)">
+                <RefreshCw :size="14" /> Renovar licencia
+              </button>
+              <button
+                v-if="driver.status === 'Suspended' || driver.status === 'Inactive'"
+                class="btn sm"
+                style="border-color:var(--mint-dark);color:var(--mint-dark)"
+                @click="handleReactivate"
+              >
+                <CheckCircle :size="14" /> Reactivar
+              </button>
+              <button
+                v-else-if="driver.status === 'Available'"
+                class="btn sm"
+                style="border-color:var(--amber-border);color:var(--amber-text)"
+                @click="suspendModal.open()"
+              >
+                <Ban :size="14" /> Suspender
+              </button>
+            </template>
+            <button v-if="canDeleteDriver" class="btn sm danger" @click="deleteModal.open()">
+              <Trash2 :size="14" /> Eliminar
+            </button>
+          </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="detail-content">
       <!-- KPIs -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr)">
         <div class="kpi">
           <div class="kpi-label">Total viajes</div>
           <div class="kpi-val">{{ tripsKpis.total }}</div>
@@ -597,6 +612,8 @@ function afterSaved(msg) {
           </div>
         </div>
       </div>
+        </div><!-- /detail-content -->
+      </div><!-- /detail-layout -->
     </div>
 
     <!-- ── BaseModal: Editar conductor ──────────────────────────────────── -->
@@ -667,13 +684,42 @@ function afterSaved(msg) {
 .loading-placeholder { padding: 48px; text-align: center; color: var(--text-3); }
 .empty-card { font-size: 14px; color: var(--text-3); text-align: center; padding: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
 
-/* Header card */
-.driver-header-card {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  margin-bottom: 20px;
+/* Layout detalle: sidebar + contenido */
+.detail-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  align-items: start;
 }
+@media (max-width: 900px) {
+  .detail-layout { grid-template-columns: 1fr; }
+}
+.detail-sidebar { height: fit-content; }
+.detail-content { min-width: 0; }
+
+.sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-name { font-size: 17px; font-weight: 700; color: var(--text); margin-top: 4px; }
+.sidebar-ced { font-size: 12.5px; color: var(--text-3); }
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-item { display: flex; flex-direction: column; gap: 3px; }
+.lic-exp { font-size: 12px; margin-top: 2px; color: var(--mint-dark); font-weight: 600; }
+.sidebar-actions { display: flex; flex-direction: column; gap: 8px; padding-top: 16px; }
+.sidebar-actions .btn { justify-content: flex-start; }
+
 .driver-avatar-lg {
   width: 68px; height: 68px; border-radius: 50%;
   background: var(--blue-light); border: 2px solid var(--blue-mid, #93c5fd);
