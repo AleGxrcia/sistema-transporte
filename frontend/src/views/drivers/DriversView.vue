@@ -74,22 +74,25 @@ async function confirmDelete() {
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de conductores</h1>
-      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
-        <Plus :size="14" /> Nuevo conductor
-      </button>
     </div>
 
     <!-- Filtros -->
-    <div class="search-row">
-      <input
-        v-model="search"
-        class="search-input"
-        placeholder="Buscar por nombre o cédula…"
-      />
-      <select v-model="statusFilter">
-        <option value="">Todos los estados</option>
-        <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
-      </select>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <input
+          v-model="search"
+          class="search-input"
+          placeholder="Buscar por nombre o cédula…"
+          style="max-width:360px"
+        />
+        <select v-model="statusFilter">
+          <option value="">Todos los estados</option>
+          <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
+        </select>
+      </div>
+      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
+        <Plus :size="14" /> Nuevo conductor
+      </button>
     </div>
 
     <!-- Loading -->
@@ -225,6 +228,36 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
+/* Fila de filtros transparente (sin tarjeta): los inputs y el botón
+   quedan directamente sobre el lienzo, igual que la referencia. */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+/* Grupo búsqueda + filtros: ocupa el espacio disponible y empuja
+   el botón de acción al final de la fila, dejando el hueco intermedio. */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 280px;
+  flex-wrap: wrap;
+}
+.filter-bar select {
+  width: auto;
+  flex: 0 0 auto;
+  min-width: 160px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
 /* Card de conductor en columna con zonas claras */
 .driver-card {
   flex-direction: column;
