@@ -1,20 +1,26 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { driverApi } from '@/services/drivers.service'
 import { useDriverStore } from '@/stores/drivers.store'
 import { useModal } from '@/composables/useModal'
 import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
-import { getErrorMessage } from '@/utils/apiError'
 import BaseModal from '@/components/ui/AppBaseModal.vue'
-import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppEmptyState from '@/components/ui/AppEmptyState.vue'
-import { Pencil, Trash2, Plus, AlertTriangle, Phone, IdCard, ShieldCheck } from '@lucide/vue'
+import { Plus, AlertTriangle, Phone, ShieldCheck } from '@lucide/vue'
 import { formatDate, getInitials } from '@/utils/formatters'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
+
+// Color de avatar determinista por conductor (paleta del sistema de diseño)
+const AVATAR_COLORS = ['var(--blue)', 'var(--purple)', 'var(--mint-dark)', 'var(--amber)', 'var(--sky)', 'var(--navy)']
+function avatarColor(driver) {
+  const key = `${driver.firstName ?? ''}${driver.lastName ?? ''}${driver.id ?? ''}`
+  let hash = 0
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
 
 const router = useRouter()
 const { can } = useAuth()
@@ -46,26 +52,9 @@ const filteredDrivers = computed(() => {
 const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
 
 const createModal = useModal()
-const deleteModal  = useModal()
-const isDeleting   = ref(false)
 
 function refresh() {
   driverStore.fetchAll()
-}
-
-async function confirmDelete() {
-  try {
-    isDeleting.value = true
-    await driverApi.delete(deleteModal.payload.value.id)
-    deleteModal.close()
-    toast.success('Conductor eliminado', `${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} fue eliminado correctamente.`)
-    refresh()
-  } catch (err) {
-    deleteModal.close()
-    toast.error('No se pudo eliminar', getErrorMessage(err, 'Error al eliminar'))
-  } finally {
-    isDeleting.value = false
-  }
 }
 </script>
 
@@ -130,26 +119,15 @@ async function confirmDelete() {
         >
           <!-- Identidad: avatar + nombre + cédula + estado -->
           <div class="dc-top">
-            <div class="driver-avatar">
+            <div class="driver-avatar" :style="{ background: avatarColor(driver) }">
               {{ getInitials(driver.firstName, driver.lastName) }}
             </div>
             <div class="dc-identity">
-              <router-link
-                :to="`/drivers/${driver.id}`"
-                class="driver-name driver-name-link"
-                @click.stop
-              >
-                {{ driver.firstName }} {{ driver.lastName }}
-              </router-link>
-              <div class="dc-cedula">
-                <IdCard :size="13" />
-                <span>{{ driver.nationalId }}</span>
-              </div>
+              <div class="driver-name">{{ driver.firstName }} {{ driver.lastName }}</div>
+              <div class="dc-cedula">{{ driver.nationalId }}</div>
             </div>
             <AppBadge :status="driver.status" />
           </div>
-
-          <div class="dc-divider" />
 
           <!-- Contacto + licencia -->
           <div class="dc-details">
@@ -168,29 +146,6 @@ async function confirmDelete() {
                 {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
               </span>
             </div>
-          </div>
-
-          <!-- Acciones (se conservan) -->
-          <div
-            v-if="(can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended') || can('delete', 'drivers')"
-            class="dc-footer"
-          >
-            <button
-              v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
-              class="icon-btn edit"
-              title="Editar"
-              @click.stop="router.push(`/drivers/${driver.id}?edit=true`)"
-            >
-              <Pencil :size="13" />
-            </button>
-            <button
-              v-if="can('delete', 'drivers')"
-              class="icon-btn reject"
-              title="Eliminar"
-              @click.stop="deleteModal.open(driver)"
-            >
-              <Trash2 :size="13" />
-            </button>
           </div>
         </div>
 
@@ -212,18 +167,6 @@ async function confirmDelete() {
         @cancel="createModal.close()"
       />
     </BaseModal>
-
-    <!-- ── ConfirmModal: Eliminar ─────────────────────────────────────────── -->
-    <ConfirmModal
-      :model-value="deleteModal.isOpen.value"
-      title="¿Eliminar conductor?"
-      :message="`Esta acción eliminará permanentemente a ${deleteModal.payload.value?.firstName} ${deleteModal.payload.value?.lastName} del sistema.`"
-      confirm-text="Eliminar"
-      variant="danger"
-      :is-loading="isDeleting"
-      @update:model-value="deleteModal.close()"
-      @confirm="confirmDelete"
-    />
   </div>
 </template>
 
@@ -258,25 +201,33 @@ async function confirmDelete() {
   color: var(--text-2);
 }
 
-/* Card de conductor en columna con zonas claras */
+/* Card de conductor en columna con zonas claras (igual que la referencia) */
 .driver-card {
   flex-direction: column;
+  align-items: stretch;
   gap: 0;
-  padding: 16px;
+  padding: 18px;
+  border-radius: 13px;
+}
+.driver-card:hover {
+  border-color: var(--blue-mid);
 }
 
 /* Zona 1 — identidad */
 .dc-top {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 13px;
   width: 100%;
+  margin-bottom: 14px;
 }
 .driver-avatar {
-  width: 44px;
-  height: 44px;
-  background: rgba(18, 26, 45, 0.07);
-  color: var(--navy);
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
 }
 .dc-identity {
   flex: 1;
@@ -285,39 +236,30 @@ async function confirmDelete() {
 .driver-name {
   display: block;
   font-size: 14.5px;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .dc-cedula {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-3);
-  margin-top: 3px;
-}
-.dc-cedula svg {
-  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.dc-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 14px 0;
-}
-
-/* Zona 2 — contacto + licencia */
+/* Zona 2 — contacto + licencia (divisor superior, igual que la referencia) */
 .dc-details {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 7px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
 }
 .dc-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 .dc-ico {
@@ -335,16 +277,6 @@ async function confirmDelete() {
 }
 .dc-line.danger .dc-ico {
   color: var(--red);
-}
-
-/* Zona 3 — acciones (se conservan) */
-.dc-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
 }
 
 .driver-card--add {

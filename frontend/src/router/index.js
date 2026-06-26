@@ -99,12 +99,30 @@ const routes = [
         props: true,
         meta: { title: 'Detalle de solicitud', module: 'requests' },
       },
+      {
+        path: 'requests/:id/assign',
+        name: 'request-assign',
+        component: () => import('@/views/assignments/AssignmentView.vue'),
+        props: true,
+        meta: {
+          title: 'Asignar recursos',
+          module: 'requests',
+          roles: ['Administrador', 'Supervisor'],
+        },
+      },
 
       {
         path: 'schedules',
         name: 'schedules',
         component: () => import('@/views/schedule/ScheduleView.vue'),
         meta: { title: 'Agenda', module: 'schedules' },
+      },
+      {
+        path: 'schedules/:id',
+        name: 'schedule-trip',
+        component: () => import('@/views/schedule/TripDetailView.vue'),
+        props: true,
+        meta: { title: 'Detalle de viaje', module: 'schedules' },
       },
 
       {

@@ -165,8 +165,8 @@ const weekColumns = computed(() =>
 
 const selectedDayItems = computed(() => assignmentsForDay(dayjs(selectedDate.value)))
 
-function viewRequest(a) {
-  router.push(`/requests/${a.requestId}`)
+function openTrip(a) {
+  router.push(`/schedules/${a.requestId}`)
 }
 </script>
 
@@ -271,7 +271,7 @@ function viewRequest(a) {
                   :key="a.assignmentId"
                   class="ag-event"
                   :class="eventStatusClass(a.status)"
-                  @click.stop="viewRequest(a)"
+                  @click.stop="openTrip(a)"
                 >
                   {{ dayjs(a.departureTime).format('HH:mm') }} · {{ a.destination }}
                 </div>
@@ -293,7 +293,7 @@ function viewRequest(a) {
               v-for="a in selectedDayItems"
               :key="a.assignmentId"
               class="ag-panel-trip"
-              @click="viewRequest(a)"
+              @click="openTrip(a)"
             >
               <div class="ag-panel-trip-time">{{ dayjs(a.departureTime).format('HH:mm') }}</div>
               <div class="ag-panel-trip-body">
@@ -330,7 +330,7 @@ function viewRequest(a) {
               :key="a.assignmentId"
               class="ag-event ag-event--week"
               :class="eventStatusClass(a.status)"
-              @click="viewRequest(a)"
+              @click="openTrip(a)"
             >
               {{ dayjs(a.departureTime).format('HH:mm') }} · {{ a.destination }}
             </div>
@@ -353,7 +353,7 @@ function viewRequest(a) {
           v-for="a in selectedDayItems"
           :key="a.assignmentId"
           class="ag-timeline-row"
-          @click="viewRequest(a)"
+          @click="openTrip(a)"
         >
           <div class="ag-timeline-time">
             <div class="ag-timeline-start">{{ dayjs(a.departureTime).format('HH:mm') }}</div>
