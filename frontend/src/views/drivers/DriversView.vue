@@ -12,7 +12,7 @@ import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppEmptyState from '@/components/ui/AppEmptyState.vue'
-import { Pencil, Trash2, Plus, AlertTriangle } from '@lucide/vue'
+import { Pencil, Trash2, Plus, AlertTriangle, Phone, IdCard, ShieldCheck } from '@lucide/vue'
 import { formatDate, getInitials } from '@/utils/formatters'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
 
@@ -125,50 +125,69 @@ async function confirmDelete() {
           class="driver-card"
           @click="router.push(`/drivers/${driver.id}`)"
         >
-          <div class="driver-avatar">
-            {{ getInitials(driver.firstName, driver.lastName) }}
-          </div>
-          <div class="driver-info">
-            <router-link
-              :to="`/drivers/${driver.id}`"
-              class="driver-name driver-name-link"
-              @click.stop
-            >
-              {{ driver.firstName }} {{ driver.lastName }}
-            </router-link>
-            <div class="driver-meta">Cédula: {{ driver.nationalId }}</div>
-            <div class="driver-meta">Tel: {{ driver.phone }}</div>
-
-            <div
-              class="driver-lic"
-              :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
-            >
-              <AlertTriangle v-if="driver.licenseExpired || driver.licenseExpiringSoon" :size="11" />
-              Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
-              {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
+          <!-- Identidad: avatar + nombre + cédula + estado -->
+          <div class="dc-top">
+            <div class="driver-avatar">
+              {{ getInitials(driver.firstName, driver.lastName) }}
             </div>
-
-            <div class="driver-card-footer">
-              <AppBadge :status="driver.status" />
-              <div class="action-buttons">
-                <button
-                  v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
-                  class="icon-btn edit"
-                  title="Editar"
-                  @click.stop="router.push(`/drivers/${driver.id}?edit=true`)"
-                >
-                  <Pencil :size="12" />
-                </button>
-                <button
-                  v-if="can('delete', 'drivers')"
-                  class="icon-btn reject"
-                  title="Eliminar"
-                  @click.stop="deleteModal.open(driver)"
-                >
-                  <Trash2 :size="12" />
-                </button>
+            <div class="dc-identity">
+              <router-link
+                :to="`/drivers/${driver.id}`"
+                class="driver-name driver-name-link"
+                @click.stop
+              >
+                {{ driver.firstName }} {{ driver.lastName }}
+              </router-link>
+              <div class="dc-cedula">
+                <IdCard :size="13" />
+                <span>{{ driver.nationalId }}</span>
               </div>
             </div>
+            <AppBadge :status="driver.status" />
+          </div>
+
+          <div class="dc-divider" />
+
+          <!-- Contacto + licencia -->
+          <div class="dc-details">
+            <div class="dc-line">
+              <Phone :size="13" class="dc-ico" />
+              <span>{{ driver.phone }}</span>
+            </div>
+            <div
+              class="dc-line"
+              :class="{ danger: driver.licenseExpired, warn: !driver.licenseExpired && driver.licenseExpiringSoon }"
+            >
+              <AlertTriangle v-if="driver.licenseExpired || driver.licenseExpiringSoon" :size="13" class="dc-ico" />
+              <ShieldCheck v-else :size="13" class="dc-ico" />
+              <span>
+                Lic. {{ getLicenseCategoryLabel(driver.licenseType) }} —
+                {{ driver.licenseExpired ? 'Vencida' : 'Vence' }} {{ formatDate(driver.licenseExpirationDate) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Acciones (se conservan) -->
+          <div
+            v-if="(can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended') || can('delete', 'drivers')"
+            class="dc-footer"
+          >
+            <button
+              v-if="can('edit', 'drivers') && driver.status !== 'OnTrip' && driver.status !== 'Suspended'"
+              class="icon-btn edit"
+              title="Editar"
+              @click.stop="router.push(`/drivers/${driver.id}?edit=true`)"
+            >
+              <Pencil :size="13" />
+            </button>
+            <button
+              v-if="can('delete', 'drivers')"
+              class="icon-btn reject"
+              title="Eliminar"
+              @click.stop="deleteModal.open(driver)"
+            >
+              <Trash2 :size="13" />
+            </button>
           </div>
         </div>
 
@@ -206,22 +225,93 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
+/* Card de conductor en columna con zonas claras */
+.driver-card {
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+}
+
+/* Zona 1 — identidad */
+.dc-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
 .driver-avatar {
+  width: 44px;
+  height: 44px;
   background: rgba(18, 26, 45, 0.07);
   color: var(--navy);
 }
-
-.driver-card-footer {
+.dc-identity {
+  flex: 1;
+  min-width: 0;
+}
+.driver-name {
+  display: block;
+  font-size: 14.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dc-cedula {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 10px;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 3px;
+}
+.dc-cedula svg {
+  flex-shrink: 0;
 }
 
-/* Los botones de acción permanecen visibles; el hover cambia color, no opacidad */
-.driver-card-footer .action-buttons {
-  opacity: 1;
+.dc-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+
+/* Zona 2 — contacto + licencia */
+.dc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.dc-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.dc-ico {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.dc-line.warn {
+  color: var(--amber-text);
+}
+.dc-line.warn .dc-ico {
+  color: var(--amber);
+}
+.dc-line.danger {
+  color: var(--red);
+}
+.dc-line.danger .dc-ico {
+  color: var(--red);
+}
+
+/* Zona 3 — acciones (se conservan) */
+.dc-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 
 .driver-card--add {
