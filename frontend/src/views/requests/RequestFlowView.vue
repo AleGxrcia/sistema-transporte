@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/utils/apiError'
 import { formatDate, formatDateTime, getInitials } from '@/utils/formatters'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
-import { ArrowLeft, Check, X } from '@lucide/vue'
+import { ArrowLeft, Check, X, Play, Flag } from '@lucide/vue'
 
 const props = defineProps({ id: { type: String, required: true } })
 
@@ -50,7 +50,7 @@ function stepClass(index) {
   return 'inactive'
 }
 
-// ── Carga de la solicitud ───────────────────────────────────────────────────
+// Carga de la solicitud 
 async function load() {
   await store.fetchById(props.id)
   if (request.value?.status === 'Pending') {
@@ -71,7 +71,7 @@ const otherPending = computed(() =>
   store.pendingRequests.filter((r) => r.id !== request.value?.id)
 )
 
-// ── Aprobar / Rechazar ──────────────────────────────────────────────────────
+// Aprobar / Rechazar 
 const isApproving = ref(false)
 const rejectModal = useModal()
 const rejectReason = ref('')
@@ -118,7 +118,7 @@ async function handleReject() {
   }
 }
 
-// ── Asignación de recursos ──────────────────────────────────────────────────
+// Asignación de recursos
 const availableVehicles = ref([])
 const availableDrivers = ref([])
 const isLoadingResources = ref(false)
@@ -172,7 +172,65 @@ async function handleAssign() {
   }
 }
 
-// ── Recursos ya asignados (para mostrar en estados posteriores) ────────────
+// Iniciar viaje (Assigned → InProgress)
+const isStarting = ref(false)
+
+async function handleStart() {
+  try {
+    isStarting.value = true
+    await RequestsService.start(request.value.id)
+    toast.success('Viaje iniciado', 'El viaje está ahora en curso.')
+    await store.fetchById(props.id)
+  } catch (err) {
+    toast.error('No se pudo iniciar el viaje', getErrorMessage(err))
+    await store.fetchById(props.id)
+  } finally {
+    isStarting.value = false
+  }
+}
+
+// Completar viaje (InProgress → Completed)
+const completeModal = useModal()
+const actualDeparture = ref('')
+const actualReturn = ref('')
+const completeError = ref('')
+const isCompleting = ref(false)
+
+function openCompleteModal() {
+  completeError.value = ''
+  actualDeparture.value = formatDate(request.value.departureDateTime, 'YYYY-MM-DDTHH:mm')
+  actualReturn.value = formatDate(request.value.returnDateTime, 'YYYY-MM-DDTHH:mm')
+  completeModal.open()
+}
+
+async function handleComplete() {
+  if (!actualDeparture.value || !actualReturn.value) {
+    completeError.value = 'Debes indicar la hora real de salida y de regreso.'
+    return
+  }
+  if (new Date(actualReturn.value) <= new Date(actualDeparture.value)) {
+    completeError.value = 'La hora de regreso debe ser posterior a la de salida.'
+    return
+  }
+  try {
+    isCompleting.value = true
+    await RequestsService.complete(
+      request.value.id,
+      new Date(actualDeparture.value).toISOString(),
+      new Date(actualReturn.value).toISOString()
+    )
+    completeModal.close()
+    toast.success('Viaje completado', 'El vehículo y el conductor quedaron disponibles nuevamente.')
+    await store.fetchById(props.id)
+  } catch (err) {
+    completeError.value = getErrorMessage(err, 'No se pudo completar el viaje')
+    await store.fetchById(props.id)
+  } finally {
+    isCompleting.value = false
+  }
+}
+
+// Recursos ya asignados (para mostrar en estados posteriores)
 const assignedVehicle = ref(null)
 const assignedDriver = ref(null)
 
@@ -266,6 +324,18 @@ async function loadAssignedResources() {
           </div>
           <div v-else-if="request.status === 'Pending'" class="alert amber" style="margin-top:14px">
             Esta solicitud está pendiente de revisión por un supervisor.
+          </div>
+
+          <!-- Acciones: iniciar / completar viaje -->
+          <div v-if="request.status === 'Assigned' && canManage" class="form-actions" style="justify-content:flex-start">
+            <button class="btn primary" :disabled="isStarting" @click="handleStart">
+              <Play :size="14" /> Iniciar viaje
+            </button>
+          </div>
+          <div v-else-if="request.status === 'InProgress' && canManage" class="form-actions" style="justify-content:flex-start">
+            <button class="btn success" @click="openCompleteModal">
+              <Flag :size="14" /> Completar viaje
+            </button>
           </div>
         </div>
 
@@ -409,6 +479,30 @@ async function loadAssignedResources() {
       </div>
       <span v-if="assignError" class="field-error">{{ assignError }}</span>
     </ConfirmModal>
+
+    <!-- Modal: Completar viaje -->
+    <ConfirmModal
+      :model-value="completeModal.isOpen.value"
+      title="Completar viaje"
+      message="Registra las horas reales de salida y regreso. Al completar, el vehículo y el conductor quedarán disponibles."
+      confirm-text="Completar viaje"
+      variant="primary"
+      :is-loading="isCompleting"
+      @update:model-value="completeModal.close()"
+      @confirm="handleComplete"
+    >
+      <div class="complete-grid">
+        <div class="form-group">
+          <label>Salida real <span class="required">*</span></label>
+          <input v-model="actualDeparture" type="datetime-local" />
+        </div>
+        <div class="form-group">
+          <label>Regreso real <span class="required">*</span></label>
+          <input v-model="actualReturn" type="datetime-local" />
+        </div>
+      </div>
+      <span v-if="completeError" class="field-error">{{ completeError }}</span>
+    </ConfirmModal>
   </div>
 </template>
 
@@ -477,5 +571,16 @@ async function loadAssignedResources() {
   border-color: var(--blue) !important;
   background: var(--blue-light);
   box-shadow: 0 0 0 1px var(--blue);
+}
+
+.complete-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.complete-grid .form-group { min-width: 0; }
+.complete-grid input {
+  width: 100%;
+  box-sizing: border-box;
 }
 </style>
