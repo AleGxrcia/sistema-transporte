@@ -32,4 +32,12 @@ export const RequestsService = {
   cancel(id, reason) {
     return apiClient.patch(`/requests/${id}/cancel`, { reason })
   },
+
+  start(id) {
+    return apiClient.patch(`/requests/${id}/start`)
+  },
+
+  complete(id, actualDepartureTime, actualReturnTime) {
+    return apiClient.patch(`/requests/${id}/complete`, { actualDepartureTime, actualReturnTime })
+  },
 }
