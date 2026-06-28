@@ -54,9 +54,14 @@ async function load() {
 async function loadResources() {
   try {
     isLoadingResources.value = true
+    // Ventana del viaje: el backend excluye recursos con asignación activa que se solape.
+    const window = {
+      from: request.value.departureDateTime,
+      to: request.value.returnDateTime,
+    }
     const [vehiclesRes, driversRes] = await Promise.all([
-      VehiclesService.available(request.value.passengerCount),
-      driverApi.available(),
+      VehiclesService.available(request.value.passengerCount, window),
+      driverApi.available(window),
     ])
     allVehicles.value = vehiclesRes.data ?? []
     allDrivers.value = driversRes.data ?? []

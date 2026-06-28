@@ -5,8 +5,8 @@ export const VehiclesService = {
         return apiClient.get('/vehicles', { params })
     },
 
-    available(minPassengers = 1) {
-        return apiClient.get('/vehicles/available', { params: { minPassengers } })
+    available(minPassengers = 1, params = {}) {
+        return apiClient.get('/vehicles/available', { params: { minPassengers, ...params } })
     },
 
     getById(id) {
