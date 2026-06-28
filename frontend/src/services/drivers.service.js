@@ -5,8 +5,8 @@ export const driverApi = {
     return apiClient.get('/drivers', { params })
   },
 
-  available() {
-    return apiClient.get('/drivers/available')
+  available(params = {}) {
+    return apiClient.get('/drivers/available', { params })
   },
 
   getById(id) {
