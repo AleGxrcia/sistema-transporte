@@ -48,6 +48,13 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
             return Status == DriverStatus.Available && !License.IsExpired();
         }
 
+        public bool CanReceiveAssignment()
+        {
+            return Status != DriverStatus.Inactive
+                && Status != DriverStatus.Suspended
+                && !License.IsExpired();
+        }
+
         public void UpdateContactInfo(string phone, string? address)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(phone);

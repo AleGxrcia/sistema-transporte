@@ -220,6 +220,9 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
 
         public bool IsAvailableForAssignment() => Status == VehicleStatus.Available;
 
+        public bool CanReceiveAssignment() =>
+            Status != VehicleStatus.Inactive && Status != VehicleStatus.InMaintenance;
+
         // Alertas dashboard
         public bool HasUpcomingMaintenanceWithinDays(int days)
         {
