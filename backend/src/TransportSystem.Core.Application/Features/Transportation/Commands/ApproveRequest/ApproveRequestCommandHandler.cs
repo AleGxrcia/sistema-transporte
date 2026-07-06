@@ -22,8 +22,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Appr
 
         public async Task Handle(ApproveRequestCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Supervisor) && !_currentUser.IsInRole(UserRole.Admin))
-                throw new ForbiddenException("aprobar solicitudes", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("aprobar solicitudes", "Administrador o Supervisor");
 
             var request = await _requestRepository.GetByIdAsync(command.RequestId, cancellationToken)
                 ?? throw new NotFoundException("Solicitud", command.RequestId);

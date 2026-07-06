@@ -24,8 +24,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Crea
 
         public async Task<Guid> Handle(CreateTravelRequestCommand command, CancellationToken cancellationToken)
         {
-            if (_currentUser.IsInRole(UserRole.Admin))
-                throw new ForbiddenException("crear solicitudes de transporte", "Operador o Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Operator))
+                throw new ForbiddenException("crear solicitudes de transporte", "Administrador u Operador");
 
             var year = DateTime.UtcNow.Year;
             var sequence = await _requestRepository.GetNextSequenceAsync(year, cancellationToken);

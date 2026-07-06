@@ -21,8 +21,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.React
 
         public async Task Handle(ReactivateDriverCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin) && !_currentUser.IsInRole(UserRole.Supervisor))
-                throw new ForbiddenException("reactivar conductores", "Supervisor");
+            if (!_currentUser.IsAdmin)
+                throw new ForbiddenException("reactivar conductores", "Administrador");
 
             var driver = await _repository.GetByIdAsync(command.Id, cancellationToken)
                 ?? throw new NotFoundException("Conductor", command.Id);

@@ -37,9 +37,11 @@ namespace TransportSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAvailable(
             [FromQuery] int minPassengers = 1,
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null,
             CancellationToken cancellationToken = default)
         {
-            var result = await Sender.Send(new GetAvailableVehiclesQuery(minPassengers), cancellationToken);
+            var result = await Sender.Send(new GetAvailableVehiclesQuery(minPassengers, from, to), cancellationToken);
             return Ok(result);
         }
 

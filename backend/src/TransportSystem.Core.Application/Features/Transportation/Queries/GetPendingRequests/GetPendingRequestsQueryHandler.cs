@@ -20,8 +20,7 @@ namespace TransportSystem.Core.Application.Features.Transportation.Queries.GetPe
 
         public async Task<IReadOnlyList<TravelRequestDto>> Handle(GetPendingRequestsQuery request, CancellationToken cancellationToken)
         {
-            var isSupervisorOrAdmin =
-                _currentUser.IsInRole(UserRole.Supervisor) || _currentUser.IsInRole(UserRole.Admin);
+            var isSupervisorOrAdmin = _currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor);
 
             var all = await _repository.GetAllAsync(cancellationToken);
 

@@ -50,6 +50,7 @@ namespace TransportSystem.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Operator")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]

@@ -33,8 +33,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
 
         public async Task<Guid> Handle(AssignVehicleAndDriverCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Supervisor) && !_currentUser.IsInRole(UserRole.Admin))
-                throw new ForbiddenException("asignar vehículos y conductores", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("asignar vehículos y conductores", "Administrador o Supervisor");
 
             // Cargar los 4 objetos
             var request = await _requestRepository.GetByIdAsync(command.RequestId, cancellationToken)
@@ -60,24 +60,27 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
                 throw new DomainException("REQUEST_NOT_APPROVED",
                     $"La solicitud debe estar aprobada para asignar recursos. Estado actual: '{request.Status}'.");
 
-            if (!vehicle.IsAvailableForAssignment())
+            // Operatividad: el recurso debe estar operativo (no inactivo/mantenimiento/suspendido,
+            // licencia vigente). El choque de horario lo valida la agenda más abajo, lo que permite
+            // asignar varios viajes sin solape al mismo vehículo/conductor.
+            if (!vehicle.CanReceiveAssignment())
                 throw new DomainException("VEHICLE_UNAVAILABLE",
-                    "El vehículo no está disponible para asignación.");
+                    $"El vehículo no está operativo para asignación. Estado actual: '{vehicle.Status}'.");
 
             if (driver.License.IsExpired())
                 throw new DomainException("DRIVER_LICENSE_EXPIRED",
                     "El conductor no puede ser asignado porque su licencia está vencida.");
 
-            if (!driver.IsAvailableForAssignment())
+            if (!driver.CanReceiveAssignment())
                 throw new DomainException("DRIVER_UNAVAILABLE",
-                    $"El conductor no está disponible para asignación. Estado actual: '{driver.Status}'.");
+                    $"El conductor no está operativo para asignación. Estado actual: '{driver.Status}'.");
 
             if (!vehicle.Capacity.CanAccommodate(request.PassengerCount))
                 throw new DomainException("VEHICLE_CAPACITY_INSUFFICIENT",
                     $"El vehículo tiene capacidad para {vehicle.Capacity.Passengers} pasajeros, " +
                     $"pero la solicitud requiere {request.PassengerCount}.");
 
-            // Schedule valida disponibilidad de horario
+            // Schedule valida que no haya solape de horario para el vehículo ni el conductor.
             var assignment = schedule.AddAssignment(
                 requestId: request.Id,
                 vehicleId: vehicle.Id,
@@ -85,13 +88,11 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Assi
                 timeSlot: request.RequestedTimeSlot,
                 assignedByUserId: _currentUser.Id);
 
+            // No se marca OnTrip aquí: el recurso queda reservado para esta ventana pero sigue
+            // disponible para otras. La transición a OnTrip ocurre al iniciar el viaje.
             request.AssignResources(vehicle.Id, driver.Id);
-            vehicle.MarkAsOnTrip();
-            driver.MarkAsOnTrip();
 
             _requestRepository.Update(request);
-            _vehicleRepository.Update(vehicle);
-            _driverRepository.Update(driver);
             if (!isNewSchedule)
                 _scheduleRepository.Update(schedule);
 

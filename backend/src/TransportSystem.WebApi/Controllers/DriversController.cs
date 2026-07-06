@@ -32,9 +32,12 @@ namespace TransportSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyList<AvailableDriverDto>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAvailable(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAvailable(
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null,
+            CancellationToken cancellationToken = default)
         {
-            var result = await Sender.Send(new GetAvailableDriversQuery(), cancellationToken);
+            var result = await Sender.Send(new GetAvailableDriversQuery(from, to), cancellationToken);
             return Ok(result);
         }
 

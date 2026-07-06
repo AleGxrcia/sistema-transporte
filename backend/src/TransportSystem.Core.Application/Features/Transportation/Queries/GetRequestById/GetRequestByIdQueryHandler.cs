@@ -23,8 +23,7 @@ namespace TransportSystem.Core.Application.Features.Transportation.Queries.GetRe
             var req = await _repository.GetByIdAsync(request.Id, cancellationToken)
                 ?? throw new NotFoundException("Solicitud", request.Id);
 
-            var isSupervisorOrAdmin =
-                _currentUser.IsInRole(UserRole.Supervisor) || _currentUser.IsInRole(UserRole.Admin);
+            var isSupervisorOrAdmin = _currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor);
 
             if (!isSupervisorOrAdmin && req.RequestedByUserId != _currentUser.Id)
                 throw new NotFoundException("Solicitud", request.Id);
