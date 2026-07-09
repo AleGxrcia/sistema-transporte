@@ -4,13 +4,19 @@
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de usuarios</h1>
-      <button class="btn primary" @click="openCreate">
+      <button v-if="!isArchived" class="btn primary" @click="openCreate">
         + Nuevo usuario
       </button>
     </div>
 
+    <!-- Toggle Activos / Archivados -->
+    <div class="view-toggle">
+      <button :class="{ active: !isArchived }" @click="setView('active')">Activos</button>
+      <button :class="{ active: isArchived }" @click="setView('archived')">Archivados</button>
+    </div>
+
     <!-- KPIs -->
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div v-if="!isArchived" class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
       <div class="kpi">
         <div class="kpi-label">Total usuarios</div>
         <div class="kpi-val">{{ users.length }}</div>
@@ -42,7 +48,7 @@
         <option value="Supervisor">Supervisor</option>
         <option value="Operador">Operador</option>
       </select>
-      <select v-model="statusFilter">
+      <select v-if="!isArchived" v-model="statusFilter">
         <option value="">Todos los estados</option>
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
@@ -80,26 +86,32 @@
               </span>
             </td>
             <td>
-              <span class="badge" :class="u.isActive ? 'activo' : 'inactivo'">
+              <span v-if="isArchived" class="badge inactivo">• Archivado</span>
+              <span v-else class="badge" :class="u.isActive ? 'activo' : 'inactivo'">
                 • {{ u.isActive ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
             <td>
               <div class="action-buttons">
-                <button class="icon-btn edit" title="Editar" @click="openEdit(u)">
-                  <Pencil :size="14" />
-                </button>
-                <button class="icon-btn" title="Enviar enlace para restablecer contraseña"
-                  @click="handleSendReset(u)">
-                  <KeyRound :size="14" />
-                </button>
-                <button class="icon-btn" :title="u.isActive ? 'Desactivar' : 'Activar'"
-                  @click="handleToggleActive(u)">
-                  <Ban v-if="u.isActive" :size="14" />
-                  <Check v-else :size="14" />
-                </button>
-                <button class="icon-btn danger" title="Eliminar" @click="confirmDelete(u)">
-                  <Trash2 :size="14" />
+                <template v-if="!isArchived">
+                  <button class="icon-btn edit" title="Editar" @click="openEdit(u)">
+                    <Pencil :size="14" />
+                  </button>
+                  <button class="icon-btn" title="Enviar enlace para restablecer contraseña"
+                    @click="handleSendReset(u)">
+                    <KeyRound :size="14" />
+                  </button>
+                  <button class="icon-btn" :title="u.isActive ? 'Desactivar' : 'Activar'"
+                    @click="handleToggleActive(u)">
+                    <Ban v-if="u.isActive" :size="14" />
+                    <Check v-else :size="14" />
+                  </button>
+                  <button class="icon-btn danger" title="Eliminar" @click="confirmDelete(u)">
+                    <Trash2 :size="14" />
+                  </button>
+                </template>
+                <button v-else class="icon-btn restore" title="Restaurar" @click="restoreUser(u)">
+                  <RotateCcw :size="14" />
                 </button>
               </div>
             </td>
@@ -172,7 +184,7 @@
     <ModalConfirm
       v-model="showDeleteConfirm"
       title="Eliminar usuario"
-      :message="`¿Seguro que deseas eliminar a ${deleteTarget?.firstName} ${deleteTarget?.lastName}? Esta acción no se puede deshacer.`"
+      :message="`${deleteTarget?.firstName} ${deleteTarget?.lastName} se archivará: no podrá iniciar sesión y dejará de aparecer en el listado. Su historial de acciones se conserva.`"
       confirm-text="Eliminar"
       variant="danger"
       :is-loading="deleting"
@@ -187,11 +199,13 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import UsersService from '@/services/users.service.js'
 import AuthService from '@/services/auth.service.js'
 import ModalConfirm from '@/components/modals/ModalConfirm.vue'
-import { Users, UserCheck, UserX, ShieldCheck, Pencil, KeyRound, Ban, Check, Trash2 } from '@lucide/vue'
+import { Users, UserCheck, UserX, ShieldCheck, Pencil, KeyRound, Ban, Check, Trash2, RotateCcw } from '@lucide/vue'
 
 const search = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
+const viewMode = ref('active') // 'active' | 'archived'
+const isArchived = computed(() => viewMode.value === 'archived')
 const showModal = ref(false)
 const editingUser = ref(null)
 const loading = ref(false)
@@ -235,13 +249,31 @@ function initialsOf(u) {
 async function loadUsers() {
   loadError.value = ''
   try {
-    users.value = await UsersService.getAll()
+    users.value = await UsersService.getAll(isArchived.value)
   } catch {
     loadError.value = 'No se pudieron cargar los usuarios.'
   }
 }
 
 onMounted(loadUsers)
+
+function setView(mode) {
+  if (viewMode.value === mode) return
+  viewMode.value = mode
+  search.value = ''
+  roleFilter.value = ''
+  statusFilter.value = ''
+  loadUsers()
+}
+
+async function restoreUser(u) {
+  try {
+    await UsersService.restore(u.id)
+    await loadUsers()
+  } catch {
+    loadError.value = 'No se pudo restaurar el usuario.'
+  }
+}
 
 function openCreate() {
   editingUser.value = null
@@ -330,6 +362,33 @@ async function handleDelete() {
 .users {
   font-family: 'Inter', sans-serif;
 }
+
+/* Toggle Activos / Archivados */
+.view-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 14px;
+  background: var(--surface-2, #eef1f5);
+  border-radius: 8px;
+}
+.view-toggle button {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.view-toggle button.active {
+  background: var(--white);
+  color: var(--blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.icon-btn.restore { color: var(--blue); }
 
 /* User cell */
 .user-cell {

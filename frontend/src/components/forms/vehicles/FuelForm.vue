@@ -6,15 +6,20 @@ import { formatCurrency } from '@/utils/formatters'
 
 const props = defineProps({
   vehicleId: { type: String, required: true },
+  record: { type: Object, default: null },
 })
 const emit = defineEmits(['saved', 'cancel'])
 
+const isEditing = !!props.record
+
 const form = reactive({
-  recordDate: new Date().toISOString().split('T')[0],
-  gallons: null,
-  pricePerGallon: null,
-  mileageAtRefuel: null,
-  notes: '',
+  recordDate: props.record?.recordDate
+    ? new Date(props.record.recordDate).toISOString().split('T')[0]
+    : new Date().toISOString().split('T')[0],
+  gallons: props.record?.gallons ?? null,
+  pricePerGallon: props.record?.pricePerGallon ?? null,
+  mileageAtRefuel: props.record?.mileageAtRefuel ?? null,
+  notes: props.record?.notes ?? '',
 })
 
 const isSubmitting = ref(false)
@@ -42,16 +47,21 @@ async function handleSubmit() {
   if (!validate()) return
   try {
     isSubmitting.value = true
-    await VehiclesService.registerFuel(props.vehicleId, {
+    const payload = {
       recordDate: form.recordDate,
       gallons: form.gallons,
       pricePerGallon: form.pricePerGallon,
       mileageAtRefuel: form.mileageAtRefuel || 0,
       notes: form.notes || null,
-    })
+    }
+    if (isEditing) {
+      await VehiclesService.updateFuel(props.vehicleId, props.record.id, payload)
+    } else {
+      await VehiclesService.registerFuel(props.vehicleId, payload)
+    }
     emit('saved')
   } catch (err) {
-    errors.value.general = getErrorMessage(err, 'Error al registrar combustible')
+    errors.value.general = getErrorMessage(err, 'Error al guardar el registro de combustible')
   } finally {
     isSubmitting.value = false
   }
@@ -117,7 +127,7 @@ async function handleSubmit() {
     <div class="form-actions">
       <button type="button" class="btn" @click="emit('cancel')">Cancelar</button>
       <button type="submit" class="btn primary" :disabled="isSubmitting">
-        {{ isSubmitting ? 'Guardando…' : 'Registrar carga' }}
+        {{ isSubmitting ? 'Guardando…' : isEditing ? 'Actualizar carga' : 'Registrar carga' }}
       </button>
     </div>
   </form>

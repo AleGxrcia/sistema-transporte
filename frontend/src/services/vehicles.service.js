@@ -33,8 +33,20 @@ export const VehiclesService = {
         return apiClient.patch(`/vehicles/${id}/reactivate`)
     },
 
+    restore(id) {
+        return apiClient.patch(`/vehicles/${id}/restore`)
+    },
+
     registerMaintenance(id, data) {
         return apiClient.post(`/vehicles/${id}/maintenance`, data)
+    },
+
+    updateMaintenance(id, recordId, data) {
+        return apiClient.put(`/vehicles/${id}/maintenance/${recordId}`, data)
+    },
+
+    deleteMaintenance(id, recordId) {
+        return apiClient.delete(`/vehicles/${id}/maintenance/${recordId}`)
     },
 
     closeMaintenance(id, recordId, data) {
@@ -43,5 +55,13 @@ export const VehiclesService = {
 
     registerFuel(id, data) {
         return apiClient.post(`/vehicles/${id}/fuel`, data)
+    },
+
+    updateFuel(id, recordId, data) {
+        return apiClient.put(`/vehicles/${id}/fuel/${recordId}`, data)
+    },
+
+    deleteFuel(id, recordId) {
+        return apiClient.delete(`/vehicles/${id}/fuel/${recordId}`)
     },
 }

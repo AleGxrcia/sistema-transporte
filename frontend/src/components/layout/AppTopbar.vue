@@ -216,6 +216,7 @@ const oldNotifications = ref([
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
+  visibility: hidden;
 }
 
 .icon-btn:hover { background: var(--border); color: var(--text-2); }

@@ -12,20 +12,33 @@ import ConfirmModal from '@/components/modals/ModalConfirm.vue'
 import VehicleForm from '@/components/forms/vehicles/VehicleForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppEmptyState from '@/components/ui/AppEmptyState.vue'
-import { Eye, Pencil, Trash2, Plus, Truck, CheckCircle2, Wrench, Ban } from '@lucide/vue'
-import { formatKilometers } from '@/utils/formatters'
+import { Eye, Pencil, Trash2, Plus, Truck, CheckCircle2, Wrench, Ban, RotateCcw } from '@lucide/vue'
+import { formatKilometers, formatDate } from '@/utils/formatters'
 import { VEHICLE_STATUSES, VEHICLE_TYPES, getVehicleTypeLabel } from '@/utils/enumLabels'
 
 const router = useRouter()
-const { can } = useAuth()
+const { can, currentRole } = useAuth()
 const toast  = useToast()
 const vehicleStore = useVehicleStore()
+
+const isAdmin = computed(() => currentRole.value === 'Administrador')
 
 const search       = ref('')
 const statusFilter = ref('')
 const typeFilter   = ref('')
+const viewMode     = ref('active') // 'active' | 'archived'
+const isArchived   = computed(() => viewMode.value === 'archived')
 
 onMounted(() => vehicleStore.fetchAll())
+
+function setView(mode) {
+  if (viewMode.value === mode) return
+  viewMode.value = mode
+  search.value = ''
+  statusFilter.value = ''
+  typeFilter.value = ''
+  refresh()
+}
 
 const vehicles  = computed(() => vehicleStore.vehicles)
 const isLoading = computed(() => vehicleStore.isLoadingList)
@@ -59,7 +72,7 @@ const deleteModal  = useModal()
 const isDeleting   = ref(false)
 
 function refresh() {
-  vehicleStore.fetchAll()
+  vehicleStore.fetchAll(isArchived.value)
 }
 
 async function confirmDelete() {
@@ -67,16 +80,26 @@ async function confirmDelete() {
     isDeleting.value = true
     await VehiclesService.delete(deleteModal.payload.value.id)
     deleteModal.close()
-    toast.success('Vehículo eliminado', `${deleteModal.payload.value?.licensePlate} fue eliminado correctamente.`)
+    toast.success('Vehículo archivado', `${deleteModal.payload.value?.licensePlate} se archivó. Su historial se conserva.`)
     refresh()
   } catch (err) {
     deleteModal.close()
     const msg = err.response?.status === 409
-      ? 'No se puede eliminar: el vehículo tiene viajes activos.'
-      : getErrorMessage(err, 'Error al eliminar')
-    toast.error('No se pudo eliminar', msg)
+      ? 'No se puede archivar: el vehículo tiene viajes activos.'
+      : getErrorMessage(err, 'Error al archivar')
+    toast.error('No se pudo archivar', msg)
   } finally {
     isDeleting.value = false
+  }
+}
+
+async function restoreVehicle(vehicle) {
+  try {
+    await VehiclesService.restore(vehicle.id)
+    toast.success('Vehículo restaurado', `${vehicle.licensePlate} volvió a los listados.`)
+    refresh()
+  } catch (err) {
+    toast.error('No se pudo restaurar', getErrorMessage(err, 'Error al restaurar'))
   }
 }
 </script>
@@ -89,7 +112,7 @@ async function confirmDelete() {
     </div>
 
     <!-- KPIs -->
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div v-if="!isArchived" class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
       <div class="kpi">
         <div class="kpi-label">Total</div>
         <div class="kpi-val">{{ fleetStats.total }}</div>
@@ -116,6 +139,12 @@ async function confirmDelete() {
       </div>
     </div>
 
+    <!-- Toggle Activos / Archivados (solo Admin) -->
+    <div v-if="isAdmin" class="view-toggle">
+      <button :class="{ active: !isArchived }" @click="setView('active')">Activos</button>
+      <button :class="{ active: isArchived }" @click="setView('archived')">Archivados</button>
+    </div>
+
     <!-- Filtros -->
     <div class="filter-bar">
       <div class="filter-group">
@@ -134,7 +163,7 @@ async function confirmDelete() {
           <option v-for="t in VEHICLE_TYPES" :key="t.name" :value="t.name">{{ t.label }}</option>
         </select>
       </div>
-      <button v-if="can('create', 'vehicles')" class="btn primary" @click="createModal.open()">
+      <button v-if="can('create', 'vehicles') && !isArchived" class="btn primary" @click="createModal.open()">
         <Plus :size="14" /> Nuevo vehículo
       </button>
     </div>
@@ -145,10 +174,12 @@ async function confirmDelete() {
     <!-- Empty state -->
     <AppEmptyState
       v-else-if="filteredVehicles.length === 0"
-      title="Aún no hay vehículos"
-      :message="hasActiveFilters
-        ? 'No se encontraron vehículos con los filtros aplicados.'
-        : 'Registra el primer vehículo de tu flota para comenzar a gestionar solicitudes y viajes.'"
+      :title="isArchived ? 'No hay vehículos archivados' : 'Aún no hay vehículos'"
+      :message="isArchived
+        ? 'Los vehículos que archives aparecerán aquí y podrás restaurarlos.'
+        : hasActiveFilters
+          ? 'No se encontraron vehículos con los filtros aplicados.'
+          : 'Registra el primer vehículo de tu flota para comenzar a gestionar solicitudes y viajes.'"
     >
       <template #icon>
         <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
@@ -157,7 +188,7 @@ async function confirmDelete() {
           <path d="M5 17h-2v-11a1 1 0 0 1 1-1h9v12m-4 0h6m4 0h2v-6h-8m0-5h5l3 5"/>
         </svg>
       </template>
-      <template #action v-if="can('create', 'vehicles') && !hasActiveFilters">
+      <template #action v-if="can('create', 'vehicles') && !hasActiveFilters && !isArchived">
         <button class="btn primary" @click="createModal.open()">
           <Plus :size="14" /> Registrar primer vehículo
         </button>
@@ -194,21 +225,31 @@ async function confirmDelete() {
                   <button class="icon-btn view" title="Ver detalle" @click="router.push(`/vehicles/${vehicle.id}`)">
                     <Eye :size="14" />
                   </button>
+                  <template v-if="!isArchived">
+                    <button
+                      v-if="can('edit', 'vehicles') && vehicle.status !== 'OnTrip'"
+                      class="icon-btn edit"
+                      title="Editar"
+                      @click="router.push(`/vehicles/${vehicle.id}?edit=true`)"
+                    >
+                      <Pencil :size="14" />
+                    </button>
+                    <button
+                      v-if="can('delete', 'vehicles')"
+                      class="icon-btn reject"
+                      title="Eliminar"
+                      @click="deleteModal.open(vehicle)"
+                    >
+                      <Trash2 :size="14" />
+                    </button>
+                  </template>
                   <button
-                    v-if="can('edit', 'vehicles') && vehicle.status !== 'OnTrip'"
-                    class="icon-btn edit"
-                    title="Editar"
-                    @click="router.push(`/vehicles/${vehicle.id}?edit=true`)"
+                    v-else
+                    class="icon-btn restore"
+                    :title="vehicle.deletedAt ? `Archivado el ${formatDate(vehicle.deletedAt)} · Restaurar` : 'Restaurar'"
+                    @click="restoreVehicle(vehicle)"
                   >
-                    <Pencil :size="14" />
-                  </button>
-                  <button
-                    v-if="can('delete', 'vehicles')"
-                    class="icon-btn reject"
-                    title="Eliminar"
-                    @click="deleteModal.open(vehicle)"
-                  >
-                    <Trash2 :size="14" />
+                    <RotateCcw :size="14" />
                   </button>
                 </div>
               </td>
@@ -235,7 +276,7 @@ async function confirmDelete() {
     <ConfirmModal
       :model-value="deleteModal.isOpen.value"
       title="¿Eliminar vehículo?"
-      :message="`Esta acción eliminará permanentemente el vehículo ${deleteModal.payload.value?.licensePlate} del sistema.`"
+      :message="`El vehículo ${deleteModal.payload.value?.licensePlate} se archivará y dejará de aparecer en los listados. Su historial de viajes, consumo y mantenimiento se conserva.`"
       confirm-text="Eliminar"
       variant="danger"
       :is-loading="isDeleting"
@@ -274,5 +315,34 @@ async function confirmDelete() {
   padding: 0 10px;
   font-size: 13.5px;
   color: var(--text-2);
+}
+
+/* Toggle Activos / Archivados */
+.view-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 14px;
+  background: var(--surface-2, #eef1f5);
+  border-radius: 8px;
+}
+.view-toggle button {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.view-toggle button.active {
+  background: var(--surface, #fff);
+  color: var(--blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.icon-btn.restore {
+  color: var(--blue);
 }
 </style>

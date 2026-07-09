@@ -19,7 +19,7 @@ import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import RenewLicenseForm from '@/components/forms/drivers/RenewLicenseForm.vue'
 import {
   Pencil, RefreshCw, Ban, CheckCircle, Trash2, AlertTriangle,
-  Route, Calendar, MapPin, Eye, CircleUser,
+  Route, Calendar, MapPin, Eye, CircleUser, RotateCcw,
 } from '@lucide/vue'
 import { formatDate, getInitials, daysUntil } from '@/utils/formatters'
 import { getLicenseCategoryLabel } from '@/utils/enumLabels'
@@ -37,8 +37,11 @@ const toast        = useToast()
 const driver    = computed(() => driverStore.currentDriver)
 const isLoading = computed(() => driverStore.isLoadingDetail)
 
-const canEditDriver   = computed(() => can('edit', 'drivers'))
-const canDeleteDriver = computed(() => can('delete', 'drivers'))
+const isArchived      = computed(() => driver.value?.isDeleted === true)
+// Un conductor archivado no admite ediciones: solo puede restaurarse.
+const canEditDriver   = computed(() => can('edit', 'drivers') && !isArchived.value)
+const canDeleteDriver = computed(() => can('delete', 'drivers') && !isArchived.value)
+const canRestoreDriver = computed(() => can('delete', 'drivers') && isArchived.value)
 
 const initials = computed(() =>
   driver.value ? getInitials(driver.value.firstName, driver.value.lastName) : ''
@@ -296,13 +299,26 @@ async function handleDelete() {
     isDeleting.value = true
     await driverApi.delete(props.id)
     deleteModal.close()
-    toast.success('Conductor eliminado', 'El registro fue eliminado del sistema.')
+    toast.success('Conductor archivado', 'El conductor se archivó. Su historial se conserva.')
     router.push('/drivers')
   } catch (err) {
     deleteModal.close()
-    toast.error('Error', getErrorMessage(err, 'No se pudo eliminar'))
+    const msg = err.response?.status === 409
+      ? 'No se puede archivar: el conductor tiene viajes activos.'
+      : getErrorMessage(err, 'No se pudo archivar')
+    toast.error('Error', msg)
   } finally {
     isDeleting.value = false
+  }
+}
+
+async function handleRestore() {
+  try {
+    await driverApi.restore(props.id)
+    toast.success('Conductor restaurado', 'El conductor volvió a los listados.')
+    driverStore.fetchById(props.id)
+  } catch (err) {
+    toast.error('Error', getErrorMessage(err, 'No se pudo restaurar'))
   }
 }
 
@@ -334,8 +350,15 @@ function afterSaved(msg) {
 
     <!-- Contenido -->
     <div v-else-if="driver">
+      <!-- Banner de archivado -->
+      <div v-if="isArchived" class="license-banner banner--expired">
+        <AlertTriangle :size="15" />
+        Este conductor está archivado{{ driver.deletedAt ? ` desde el ${formatDate(driver.deletedAt)}` : '' }}. Restáuralo para poder gestionarlo.
+        <button v-if="canRestoreDriver" class="btn-sm" @click="handleRestore">Restaurar</button>
+      </div>
+
       <!-- Alerta de licencia -->
-      <div v-if="licenseAlert" class="license-banner" :class="`banner--${licenseAlert.level}`">
+      <div v-if="licenseAlert && !isArchived" class="license-banner" :class="`banner--${licenseAlert.level}`">
         <AlertTriangle :size="15" />
         {{ licenseAlert.label }}
         <button v-if="canEditDriver" class="btn-sm" @click="renewModal.open(driver)">Renovar ahora</button>
@@ -382,7 +405,16 @@ function afterSaved(msg) {
             </div>
           </div>
 
-          <div v-if="canEditDriver || canDeleteDriver" class="sidebar-actions">
+          <div v-if="canRestoreDriver" class="sidebar-actions">
+            <button
+              class="btn sm"
+              style="border-color:var(--blue);color:var(--blue)"
+              @click="handleRestore"
+            >
+              <RotateCcw :size="14" /> Restaurar
+            </button>
+          </div>
+          <div v-else-if="canEditDriver || canDeleteDriver" class="sidebar-actions">
             <template v-if="canEditDriver">
               <button class="btn sm" @click="editModal.open(driver)">
                 <Pencil :size="14" /> Editar
@@ -670,7 +702,7 @@ function afterSaved(msg) {
     <ConfirmModal
       :model-value="deleteModal.isOpen.value"
       title="¿Eliminar conductor?"
-      :message="`Esta acción eliminará permanentemente a ${driver?.firstName} ${driver?.lastName} del sistema.`"
+      :message="`${driver?.firstName} ${driver?.lastName} se archivará y dejará de aparecer en los listados. Su historial de viajes se conserva.`"
       confirm-text="Eliminar"
       variant="danger"
       :is-loading="isDeleting"

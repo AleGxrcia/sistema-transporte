@@ -22,7 +22,7 @@ import MaintenanceForm from '@/components/forms/vehicles/MaintenanceForm.vue'
 import FuelForm from '@/components/forms/vehicles/FuelForm.vue'
 import {
   Pencil, Wrench, Fuel, PowerOff, Trash2, CheckCircle, RefreshCw,
-  Route, Calendar, ClipboardList, Truck, Eye,
+  Route, Calendar, ClipboardList, Truck, Eye, RotateCcw, AlertTriangle,
 } from '@lucide/vue'
 import { formatDate, formatKilometers, formatCurrency, formatNumber } from '@/utils/formatters'
 import { getVehicleTypeLabel, getMaintenanceTypeLabel } from '@/utils/enumLabels'
@@ -41,10 +41,13 @@ const toast        = useToast()
 const vehicle   = computed(() => vehicleStore.currentVehicle)
 const isLoading = computed(() => vehicleStore.isLoadingDetail)
 
-const canEditVehicle      = computed(() => can('edit', 'vehicles'))
-const canDeleteVehicle    = computed(() => can('delete', 'vehicles'))
-const canManageMaintenance = computed(() => can('create', 'maintenance'))
-const canManageFuel        = computed(() => can('create', 'fuel'))
+const isArchived           = computed(() => vehicle.value?.isDeleted === true)
+// Un vehículo archivado no admite gestión: solo puede restaurarse.
+const canEditVehicle      = computed(() => can('edit', 'vehicles') && !isArchived.value)
+const canDeleteVehicle    = computed(() => can('delete', 'vehicles') && !isArchived.value)
+const canManageMaintenance = computed(() => can('create', 'maintenance') && !isArchived.value)
+const canManageFuel        = computed(() => can('create', 'fuel') && !isArchived.value)
+const canRestoreVehicle    = computed(() => can('delete', 'vehicles') && isArchived.value)
 
 // ── Tabs ───────────────────────────────────────────────────────────────────
 const activeTab = ref(0)
@@ -57,10 +60,14 @@ const fuelModal         = useModal()
 const deactivateModal   = useModal()
 const deleteModal       = useModal()
 const closeMaintModal   = useModal()
+const deleteFuelModal   = useModal()
+const deleteMaintModal  = useModal()
 
 const isDeactivating  = ref(false)
 const isDeleting      = ref(false)
 const isClosingMaint  = ref(false)
+const isDeletingFuel  = ref(false)
+const isDeletingMaint = ref(false)
 const closeMaintForm  = ref({ actualExitDate: new Date().toISOString().split('T')[0], cost: null })
 const closeMaintError = ref('')
 
@@ -296,19 +303,29 @@ async function handleReactivate() {
   }
 }
 
+async function handleRestore() {
+  try {
+    await VehiclesService.restore(props.id)
+    toast.success('Vehículo restaurado', 'El vehículo volvió a los listados.')
+    vehicleStore.fetchById(props.id)
+  } catch (err) {
+    toast.error('No se pudo restaurar', getErrorMessage(err, 'Error al restaurar'))
+  }
+}
+
 async function handleDelete() {
   try {
     isDeleting.value = true
     await VehiclesService.delete(props.id)
     deleteModal.close()
-    toast.success('Vehículo eliminado', 'El registro fue eliminado del sistema.')
+    toast.success('Vehículo archivado', 'El vehículo se archivó. Su historial se conserva.')
     router.push('/vehicles')
   } catch (err) {
     deleteModal.close()
     const msg = err.response?.status === 409
-      ? 'No se puede eliminar: tiene viajes activos.'
-      : getErrorMessage(err, 'Error al eliminar')
-    toast.error('No se pudo eliminar', msg)
+      ? 'No se puede archivar: tiene viajes activos.'
+      : getErrorMessage(err, 'Error al archivar')
+    toast.error('No se pudo archivar', msg)
   } finally {
     isDeleting.value = false
   }
@@ -342,17 +359,51 @@ function afterVehicleSaved() {
 }
 
 function afterMaintenanceSaved() {
+  const wasEditing = !!maintenanceModal.payload.value
   maintenanceModal.close()
-  toast.success('Guardado', 'Mantenimiento registrado')
+  toast.success('Guardado', wasEditing ? 'Mantenimiento actualizado' : 'Mantenimiento registrado')
   vehicleStore.fetchById(props.id)
   maintenanceStore.fetchScheduled(true)
 }
 
 function afterFuelSaved() {
+  const wasEditing = !!fuelModal.payload.value
   fuelModal.close()
-  toast.success('Guardado', 'Carga de combustible registrada')
+  toast.success('Guardado', wasEditing ? 'Carga de combustible actualizada' : 'Carga de combustible registrada')
   vehicleStore.fetchById(props.id)
   loadFuelHistory()
+}
+
+async function handleDeleteFuel() {
+  try {
+    isDeletingFuel.value = true
+    await VehiclesService.deleteFuel(props.id, deleteFuelModal.payload.value.id)
+    deleteFuelModal.close()
+    toast.success('Registro eliminado', 'La carga de combustible fue eliminada.')
+    vehicleStore.fetchById(props.id)
+    loadFuelHistory()
+  } catch (err) {
+    deleteFuelModal.close()
+    toast.error('Error', getErrorMessage(err, 'No se pudo eliminar la carga de combustible'))
+  } finally {
+    isDeletingFuel.value = false
+  }
+}
+
+async function handleDeleteMaintenance() {
+  try {
+    isDeletingMaint.value = true
+    await VehiclesService.deleteMaintenance(props.id, deleteMaintModal.payload.value.id)
+    deleteMaintModal.close()
+    toast.success('Mantenimiento eliminado', 'El registro de mantenimiento fue eliminado.')
+    vehicleStore.fetchById(props.id)
+    maintenanceStore.fetchScheduled(true)
+  } catch (err) {
+    deleteMaintModal.close()
+    toast.error('Error', getErrorMessage(err, 'No se pudo eliminar el mantenimiento'))
+  } finally {
+    isDeletingMaint.value = false
+  }
 }
 </script>
 
@@ -376,6 +427,15 @@ function afterFuelSaved() {
 
     <!-- Contenido -->
     <div v-else-if="vehicle">
+
+      <!-- Banner de archivado -->
+      <div
+        v-if="isArchived"
+        style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;border-radius:8px;background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber-border);font-size:13px"
+      >
+        <AlertTriangle :size="15" />
+        Este vehículo está archivado{{ vehicle.deletedAt ? ` desde el ${formatDate(vehicle.deletedAt)}` : '' }}. Restáuralo para poder gestionarlo.
+      </div>
 
       <!-- Header card -->
       <div class="card vehicle-header-card">
@@ -413,6 +473,14 @@ function afterFuelSaved() {
               </button>
               <button v-if="canDeleteVehicle" class="btn sm danger" @click="deleteModal.open()">
                 <Trash2 :size="14" /> Eliminar
+              </button>
+              <button
+                v-if="canRestoreVehicle"
+                class="btn sm"
+                style="border-color:var(--blue);color:var(--blue)"
+                @click="handleRestore"
+              >
+                <RotateCcw :size="14" /> Restaurar
               </button>
             </div>
           </div>
@@ -604,17 +672,28 @@ function afterFuelSaved() {
                   <span class="field-label">Salida real</span>
                   <div class="field-value">{{ formatDate(record.actualExitDate) }}</div>
                 </div>
-                <div v-if="record.isClosed" style="margin-left:auto;align-self:center">
-                  <span class="tag" style="color:var(--mint-dark);border-color:#6ee7b7;background:var(--mint-bg)">Cerrado</span>
+                <div style="margin-left:auto;align-self:center;display:flex;gap:6px;align-items:center">
+                  <span
+                    v-if="record.isClosed"
+                    class="tag"
+                    style="color:var(--mint-dark);border-color:#6ee7b7;background:var(--mint-bg)"
+                  >Cerrado</span>
+                  <button
+                    v-else-if="canManageMaintenance"
+                    class="btn-sm"
+                    @click="openCloseMaintenance(record)"
+                  >
+                    <CheckCircle :size="12" /> Cerrar mantenimiento
+                  </button>
+                  <template v-if="canManageMaintenance">
+                    <button class="icon-btn" title="Editar mantenimiento" @click="maintenanceModal.open(record)">
+                      <Pencil :size="13" />
+                    </button>
+                    <button class="icon-btn danger" title="Eliminar mantenimiento" @click="deleteMaintModal.open(record)">
+                      <Trash2 :size="13" />
+                    </button>
+                  </template>
                 </div>
-                <button
-                  v-else-if="canManageMaintenance"
-                  class="btn-sm"
-                  style="margin-left:auto;align-self:center"
-                  @click="openCloseMaintenance(record)"
-                >
-                  <CheckCircle :size="12" /> Cerrar mantenimiento
-                </button>
               </div>
             </div>
           </div>
@@ -659,6 +738,7 @@ function afterFuelSaved() {
                 <tr>
                   <th>Fecha</th><th>Galones</th><th>Precio/Galón</th><th>Costo total</th>
                   <th>Km al cargar</th><th>Km recorridos</th><th>Rendimiento</th>
+                  <th v-if="canManageFuel" style="text-align:center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -673,6 +753,14 @@ function afterFuelSaved() {
                   </td>
                   <td style="color:var(--mint-dark);font-weight:600">
                     {{ record.efficiencyKmPerGallon != null ? `${record.efficiencyKmPerGallon} km/gl` : '—' }}
+                  </td>
+                  <td v-if="canManageFuel" style="text-align:center;white-space:nowrap">
+                    <button class="icon-btn" title="Editar carga" @click="fuelModal.open(record)">
+                      <Pencil :size="13" />
+                    </button>
+                    <button class="icon-btn danger" title="Eliminar carga" @click="deleteFuelModal.open(record)">
+                      <Trash2 :size="13" />
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -708,9 +796,13 @@ function afterFuelSaved() {
       :model-value="maintenanceModal.isOpen.value"
       @update:model-value="maintenanceModal.close()"
     >
-      <template #header><h3>Registrar mantenimiento</h3></template>
+      <template #header>
+        <h3>{{ maintenanceModal.payload.value ? 'Editar mantenimiento' : 'Registrar mantenimiento' }}</h3>
+      </template>
       <MaintenanceForm
+        :key="maintenanceModal.payload.value?.id || 'new'"
         :vehicle-id="id"
+        :record="maintenanceModal.payload.value"
         @saved="afterMaintenanceSaved"
         @cancel="maintenanceModal.close()"
       />
@@ -721,9 +813,13 @@ function afterFuelSaved() {
       :model-value="fuelModal.isOpen.value"
       @update:model-value="fuelModal.close()"
     >
-      <template #header><h3>Registrar carga de combustible</h3></template>
+      <template #header>
+        <h3>{{ fuelModal.payload.value ? 'Editar carga de combustible' : 'Registrar carga de combustible' }}</h3>
+      </template>
       <FuelForm
+        :key="fuelModal.payload.value?.id || 'new'"
         :vehicle-id="id"
+        :record="fuelModal.payload.value"
         @saved="afterFuelSaved"
         @cancel="fuelModal.close()"
       />
@@ -767,12 +863,36 @@ function afterFuelSaved() {
     <ConfirmModal
       :model-value="deleteModal.isOpen.value"
       title="¿Eliminar vehículo?"
-      :message="`Esta acción eliminará permanentemente el vehículo ${vehicle?.licensePlate} del sistema.`"
+      :message="`El vehículo ${vehicle?.licensePlate} se archivará y dejará de aparecer en los listados. Su historial de viajes, consumo y mantenimiento se conserva.`"
       confirm-text="Eliminar"
       variant="danger"
       :is-loading="isDeleting"
       @update:model-value="deleteModal.close()"
       @confirm="handleDelete"
+    />
+
+    <!-- ── ConfirmModal: Eliminar carga de combustible ────────────────────── -->
+    <ConfirmModal
+      :model-value="deleteFuelModal.isOpen.value"
+      title="¿Eliminar carga de combustible?"
+      message="Este registro se eliminará de forma permanente del historial. El kilometraje del vehículo se recalculará."
+      confirm-text="Eliminar"
+      variant="danger"
+      :is-loading="isDeletingFuel"
+      @update:model-value="deleteFuelModal.close()"
+      @confirm="handleDeleteFuel"
+    />
+
+    <!-- ── ConfirmModal: Eliminar mantenimiento ───────────────────────────── -->
+    <ConfirmModal
+      :model-value="deleteMaintModal.isOpen.value"
+      title="¿Eliminar mantenimiento?"
+      message="Este registro de mantenimiento se eliminará de forma permanente. Si el vehículo estaba en taller por este registro, volverá a estar disponible."
+      confirm-text="Eliminar"
+      variant="danger"
+      :is-loading="isDeletingMaint"
+      @update:model-value="deleteMaintModal.close()"
+      @confirm="handleDeleteMaintenance"
     />
   </div>
 </template>
@@ -871,4 +991,7 @@ function afterFuelSaved() {
   gap: 4px;
 }
 .btn-sm:hover { background: var(--bg); }
+
+.icon-btn.danger { color: var(--red, #dc2626); }
+.icon-btn.danger:hover { background: var(--red-bg, #fef2f2); border-color: var(--red, #dc2626); }
 </style>

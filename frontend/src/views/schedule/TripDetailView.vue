@@ -5,6 +5,7 @@ import { useRequestsStore } from '@/stores/requests.store'
 import { VehiclesService } from '@/services/vehicles.service'
 import { driverApi } from '@/services/drivers.service'
 import { formatDate, getInitials } from '@/utils/formatters'
+import { getLicenseCategoryLabel } from '@/utils/license'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppBreadcrumb from '@/components/ui/AppBreadcrumb.vue'
 
@@ -104,7 +105,7 @@ const breadcrumbItems = computed(() => [
             <div class="resource-block-avatar">{{ getInitials(driver.firstName, driver.lastName) }}</div>
             <div>
               <div class="resource-block-name">{{ driver.firstName }} {{ driver.lastName }}</div>
-              <div class="resource-block-sub">Licencia {{ driver.licenseType }} · vigente</div>
+              <div class="resource-block-sub">Licencia {{ getLicenseCategoryLabel(driver.licenseType) }} · vigente</div>
             </div>
           </div>
           <div v-else class="resource-block-empty">

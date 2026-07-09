@@ -14,6 +14,8 @@ const isEditing = !!props.driver
 const form = reactive(
   isEditing
     ? {
+        firstName: props.driver.firstName || '',
+        lastName: props.driver.lastName || '',
         phone: props.driver.phone || '',
         address: props.driver.address || '',
         supervisorId: props.driver.supervisorId || null,
@@ -45,13 +47,14 @@ onMounted(async () => {
 
 function validate() {
   const errs = {}
+
+  if (!form.firstName?.trim()) errs.firstName = 'El nombre es requerido'
+  else if (form.firstName.length > 100) errs.firstName = 'Máximo 100 caracteres'
+
+  if (!form.lastName?.trim()) errs.lastName = 'El apellido es requerido'
+  else if (form.lastName.length > 100) errs.lastName = 'Máximo 100 caracteres'
+
   if (!isEditing) {
-    if (!form.firstName?.trim()) errs.firstName = 'El nombre es requerido'
-    else if (form.firstName.length > 100) errs.firstName = 'Máximo 100 caracteres'
-
-    if (!form.lastName?.trim()) errs.lastName = 'El apellido es requerido'
-    else if (form.lastName.length > 100) errs.lastName = 'Máximo 100 caracteres'
-
     if (!/^\d{11}$/.test(form.nationalId?.trim() || '')) {
       errs.nationalId = 'La cédula debe tener exactamente 11 dígitos'
     }
@@ -78,6 +81,8 @@ async function handleSubmit() {
     isSubmitting.value = true
     if (isEditing) {
       await driverApi.update(props.driver.id, {
+        firstName: form.firstName,
+        lastName: form.lastName,
         phone: form.phone,
         address: form.address || null,
         supervisorId: form.supervisorId || null,
@@ -113,19 +118,19 @@ async function handleSubmit() {
     <div v-if="errors.general" class="alert red">{{ errors.general }}</div>
 
     <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre <span class="required">*</span></label>
+        <input v-model="form.firstName" placeholder="Juan" :class="{ 'input-error': errors.firstName }" />
+        <span v-if="errors.firstName" class="field-error">{{ errors.firstName }}</span>
+      </div>
+
+      <div class="form-group">
+        <label>Apellido <span class="required">*</span></label>
+        <input v-model="form.lastName" placeholder="Pérez" :class="{ 'input-error': errors.lastName }" />
+        <span v-if="errors.lastName" class="field-error">{{ errors.lastName }}</span>
+      </div>
+
       <template v-if="!isEditing">
-        <div class="form-group">
-          <label>Nombre <span class="required">*</span></label>
-          <input v-model="form.firstName" placeholder="Juan" :class="{ 'input-error': errors.firstName }" />
-          <span v-if="errors.firstName" class="field-error">{{ errors.firstName }}</span>
-        </div>
-
-        <div class="form-group">
-          <label>Apellido <span class="required">*</span></label>
-          <input v-model="form.lastName" placeholder="Pérez" :class="{ 'input-error': errors.lastName }" />
-          <span v-if="errors.lastName" class="field-error">{{ errors.lastName }}</span>
-        </div>
-
         <div class="form-group">
           <label>Cédula <span class="required">*</span></label>
           <input

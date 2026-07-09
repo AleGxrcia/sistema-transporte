@@ -29,6 +29,10 @@ export const RequestsService = {
     return apiClient.patch(`/requests/${id}/assign`, { vehicleId, driverId })
   },
 
+  reassign(id, vehicleId, driverId) {
+    return apiClient.patch(`/requests/${id}/reassign`, { vehicleId, driverId })
+  },
+
   cancel(id, reason) {
     return apiClient.patch(`/requests/${id}/cancel`, { reason })
   },

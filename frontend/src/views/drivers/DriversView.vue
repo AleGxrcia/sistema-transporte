@@ -9,8 +9,10 @@ import BaseModal from '@/components/ui/AppBaseModal.vue'
 import DriverForm from '@/components/forms/drivers/DriverForm.vue'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import AppEmptyState from '@/components/ui/AppEmptyState.vue'
-import { Plus, AlertTriangle, Phone, ShieldCheck } from '@lucide/vue'
+import { Plus, AlertTriangle, Phone, ShieldCheck, RotateCcw } from '@lucide/vue'
 import { formatDate, getInitials } from '@/utils/formatters'
+import { getErrorMessage } from '@/utils/apiError'
+import { driverApi } from '@/services/drivers.service'
 import { DRIVER_STATUSES, getLicenseCategoryLabel } from '@/utils/enumLabels'
 
 // Color de avatar determinista por conductor (paleta del sistema de diseño)
@@ -23,14 +25,36 @@ function avatarColor(driver) {
 }
 
 const router = useRouter()
-const { can } = useAuth()
+const { can, currentRole } = useAuth()
 const toast  = useToast()
 const driverStore = useDriverStore()
 
+const isAdmin = computed(() => currentRole.value === 'Administrador')
+
 const search       = ref('')
 const statusFilter = ref('')
+const viewMode     = ref('active') // 'active' | 'archived'
+const isArchived   = computed(() => viewMode.value === 'archived')
 
 onMounted(() => driverStore.fetchAll())
+
+function setView(mode) {
+  if (viewMode.value === mode) return
+  viewMode.value = mode
+  search.value = ''
+  statusFilter.value = ''
+  refresh()
+}
+
+async function restoreDriver(driver) {
+  try {
+    await driverApi.restore(driver.id)
+    toast.success('Conductor restaurado', `${driver.firstName} ${driver.lastName} volvió a los listados.`)
+    refresh()
+  } catch (err) {
+    toast.error('No se pudo restaurar', getErrorMessage(err, 'Error al restaurar'))
+  }
+}
 
 const drivers   = computed(() => driverStore.drivers)
 const isLoading = computed(() => driverStore.isLoadingList)
@@ -54,7 +78,7 @@ const hasActiveFilters = computed(() => !!(search.value || statusFilter.value))
 const createModal = useModal()
 
 function refresh() {
-  driverStore.fetchAll()
+  driverStore.fetchAll(isArchived.value)
 }
 </script>
 
@@ -63,6 +87,12 @@ function refresh() {
     <!-- Header -->
     <div class="page-header">
       <h1>Gestión de conductores</h1>
+    </div>
+
+    <!-- Toggle Activos / Archivados (solo Admin) -->
+    <div v-if="isAdmin" class="view-toggle">
+      <button :class="{ active: !isArchived }" @click="setView('active')">Activos</button>
+      <button :class="{ active: isArchived }" @click="setView('archived')">Archivados</button>
     </div>
 
     <!-- Filtros -->
@@ -79,7 +109,7 @@ function refresh() {
           <option v-for="s in DRIVER_STATUSES" :key="s.name" :value="s.name">{{ s.label }}</option>
         </select>
       </div>
-      <button v-if="can('create', 'drivers')" class="btn primary" @click="createModal.open()">
+      <button v-if="can('create', 'drivers') && !isArchived" class="btn primary" @click="createModal.open()">
         <Plus :size="14" /> Nuevo conductor
       </button>
     </div>
@@ -90,10 +120,12 @@ function refresh() {
     <!-- Empty state -->
     <AppEmptyState
       v-else-if="filteredDrivers.length === 0"
-      title="Aún no hay conductores"
-      :message="hasActiveFilters
-        ? 'No se encontraron conductores con los filtros aplicados.'
-        : 'Registra el primer conductor para comenzar a asignar viajes.'"
+      :title="isArchived ? 'No hay conductores archivados' : 'Aún no hay conductores'"
+      :message="isArchived
+        ? 'Los conductores que archives aparecerán aquí y podrás restaurarlos.'
+        : hasActiveFilters
+          ? 'No se encontraron conductores con los filtros aplicados.'
+          : 'Registra el primer conductor para comenzar a asignar viajes.'"
     >
       <template #icon>
         <svg width="30" height="30" fill="none" stroke="var(--blue)" stroke-width="1.5" viewBox="0 0 24 24">
@@ -101,7 +133,7 @@ function refresh() {
           <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
         </svg>
       </template>
-      <template #action v-if="can('create', 'drivers') && !hasActiveFilters">
+      <template #action v-if="can('create', 'drivers') && !hasActiveFilters && !isArchived">
         <button class="btn primary" @click="createModal.open()">
           <Plus :size="14" /> Registrar primer conductor
         </button>
@@ -147,9 +179,17 @@ function refresh() {
               </span>
             </div>
           </div>
+
+          <!-- Acción restaurar (modo archivados) -->
+          <div v-if="isArchived" class="dc-archived">
+            <span class="dc-archived-date">Archivado {{ formatDate(driver.deletedAt) }}</span>
+            <button class="btn ghost sm" @click.stop="restoreDriver(driver)">
+              <RotateCcw :size="13" /> Restaurar
+            </button>
+          </div>
         </div>
 
-        <div v-if="can('create', 'drivers')" class="driver-card driver-card--add" @click="createModal.open()">
+        <div v-if="can('create', 'drivers') && !isArchived" class="driver-card driver-card--add" @click="createModal.open()">
           <div class="add-icon"><Plus :size="16" /></div>
           <span>Agregar conductor</span>
         </div>
@@ -199,6 +239,47 @@ function refresh() {
   padding: 0 10px;
   font-size: 13.5px;
   color: var(--text-2);
+}
+
+/* Toggle Activos / Archivados */
+.view-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 14px;
+  background: var(--surface-2, #eef1f5);
+  border-radius: 8px;
+}
+.view-toggle button {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.view-toggle button.active {
+  background: var(--surface, #fff);
+  color: var(--blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Pie de card en modo archivado */
+.dc-archived {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.dc-archived-date {
+  font-size: 11.5px;
+  color: var(--text-3);
 }
 
 /* Card de conductor en columna con zonas claras (igual que la referencia) */
