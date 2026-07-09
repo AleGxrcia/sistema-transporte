@@ -9,12 +9,13 @@ function toUser(dto) {
     lastName: dto.lastName,
     role: roleLabel(dto.role),
     isActive: dto.isActive,
+    isDeleted: dto.isDeleted,
   }
 }
 
 const UsersService = {
-  async getAll() {
-    const { data } = await apiClient.get('/users')
+  async getAll(archived = false) {
+    const { data } = await apiClient.get('/users', { params: { archived } })
     return data.map(toUser)
   },
 
@@ -37,6 +38,10 @@ const UsersService = {
 
   async remove(id) {
     await apiClient.delete(`/users/${id}`)
+  },
+
+  async restore(id) {
+    await apiClient.patch(`/users/${id}/restore`)
   },
 
   async activate(id) {
