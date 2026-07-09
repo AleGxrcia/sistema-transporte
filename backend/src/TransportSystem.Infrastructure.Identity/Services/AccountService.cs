@@ -40,7 +40,7 @@ namespace TransportSystem.Infrastructure.Identity.Services
         {
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null)
+            if (user is null || user.IsDeleted)
                 throw new UnauthorizedException("Credenciales inválidas.");
 
             if (!user.IsActive)
@@ -84,6 +84,10 @@ namespace TransportSystem.Infrastructure.Identity.Services
 
             if (user is null)
                 throw new UnauthorizedException("Token inválido.");
+
+            // Un usuario archivado o desactivado no puede renovar su sesión.
+            if (user.IsDeleted || !user.IsActive)
+                throw new UnauthorizedException("La cuenta no está activa.");
 
             var token = user.RefreshTokens.Single(t => t.Token == refreshToken);
 
@@ -173,8 +177,36 @@ namespace TransportSystem.Infrastructure.Identity.Services
 
         public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default)
         {
+            var user = await _identityContext.Users
+                .Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
+                ?? throw new NotFoundException($"Usuario '{userId}' no encontrado.");
+
+            // Soft delete: se archiva y se desactiva (bloquea el login) conservando la
+            // trazabilidad. Se revocan los refresh tokens activos para cerrar la sesión.
+            user.IsDeleted = true;
+            user.DeletedAt = DateTime.UtcNow;
+            user.IsActive = false;
+
+            foreach (var token in user.RefreshTokens.Where(t => t.IsActive))
+                token.Revoked = DateTime.UtcNow;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
+        }
+
+        public async Task RestoreUserAsync(string userId, CancellationToken cancellationToken = default)
+        {
             var user = await FindOrThrowAsync(userId);
-            var result = await _userManager.DeleteAsync(user);
+
+            // Restaurar reactiva la cuenta y la vuelve a incluir en el listado.
+            user.IsDeleted = false;
+            user.DeletedAt = null;
+            user.IsActive = true;
+
+            var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
                 throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
@@ -202,9 +234,12 @@ namespace TransportSystem.Infrastructure.Identity.Services
             return ToUserResult(user, await GetRoleAsync(user));
         }
 
-        public async Task<IReadOnlyList<UserResult>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UserResult>> GetAllAsync(bool archivedOnly = false, CancellationToken cancellationToken = default)
         {
-            var users = await _userManager.Users.AsNoTracking().ToListAsync(cancellationToken);
+            var users = await _userManager.Users
+                .Where(u => u.IsDeleted == archivedOnly)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var results = new List<UserResult>();
             foreach (var user in users)
@@ -310,6 +345,6 @@ namespace TransportSystem.Infrastructure.Identity.Services
         }
 
         private static UserResult ToUserResult(ApplicationUser user, UserRole role)
-            => new(user.Id, user.Email!, user.FirstName, user.LastName, role, user.IsActive);
+            => new(user.Id, user.Email!, user.FirstName, user.LastName, role, user.IsActive, user.IsDeleted);
     }
 }
