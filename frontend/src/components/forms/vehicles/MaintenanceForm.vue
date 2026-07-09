@@ -2,21 +2,26 @@
 import { reactive, ref } from 'vue'
 import { VehiclesService } from '@/services/vehicles.service'
 import { getErrorMessage } from '@/utils/apiError'
-import { MAINTENANCE_TYPES } from '@/utils/enumLabels'
+import { MAINTENANCE_TYPES, maintenanceTypeValueByName } from '@/utils/enumLabels'
 
 const props = defineProps({
   vehicleId: { type: String, required: true },
+  record: { type: Object, default: null },
 })
 const emit = defineEmits(['saved', 'cancel'])
 
+const isEditing = !!props.record
+
+const toDateInput = (d) => (d ? new Date(d).toISOString().split('T')[0] : '')
+
 const form = reactive({
-  type: null,
-  description: '',
-  entryDate: '',
-  workshop: '',
-  estimatedExitDate: '',
-  nextMaintenanceDateScheduled: '',
-  nextMaintenanceKmScheduled: null,
+  type: props.record ? maintenanceTypeValueByName(props.record.type) : null,
+  description: props.record?.description ?? '',
+  entryDate: toDateInput(props.record?.entryDate),
+  workshop: props.record?.workshop ?? '',
+  estimatedExitDate: toDateInput(props.record?.estimatedExitDate),
+  nextMaintenanceDateScheduled: toDateInput(props.record?.nextMaintenanceDateScheduled),
+  nextMaintenanceKmScheduled: props.record?.nextMaintenanceKmScheduled ?? null,
 })
 
 const isSubmitting = ref(false)
@@ -28,7 +33,8 @@ function validate() {
   if (!form.description.trim()) errs.description = 'La descripción es requerida'
   else if (form.description.length > 500) errs.description = 'Máximo 500 caracteres'
   if (!form.entryDate) errs.entryDate = 'La fecha de entrada es requerida'
-  if (form.workshop && form.workshop.length > 200) errs.workshop = 'Máximo 200 caracteres'
+  if (!form.workshop.trim()) errs.workshop = 'El taller es requerido'
+  else if (form.workshop.length > 200) errs.workshop = 'Máximo 200 caracteres'
   if (form.nextMaintenanceKmScheduled !== null && form.nextMaintenanceKmScheduled <= 0) {
     errs.nextMaintenanceKmScheduled = 'Debe ser mayor a 0'
   }
@@ -40,7 +46,7 @@ async function handleSubmit() {
   if (!validate()) return
   try {
     isSubmitting.value = true
-    await VehiclesService.registerMaintenance(props.vehicleId, {
+    const payload = {
       type: form.type,
       description: form.description,
       entryDate: form.entryDate,
@@ -48,10 +54,15 @@ async function handleSubmit() {
       estimatedExitDate: form.estimatedExitDate || null,
       nextMaintenanceDateScheduled: form.nextMaintenanceDateScheduled || null,
       nextMaintenanceKmScheduled: form.nextMaintenanceKmScheduled || null,
-    })
+    }
+    if (isEditing) {
+      await VehiclesService.updateMaintenance(props.vehicleId, props.record.id, payload)
+    } else {
+      await VehiclesService.registerMaintenance(props.vehicleId, payload)
+    }
     emit('saved')
   } catch (err) {
-    errors.value.general = getErrorMessage(err, 'Error al registrar mantenimiento')
+    errors.value.general = getErrorMessage(err, 'Error al guardar el mantenimiento')
   } finally {
     isSubmitting.value = false
   }
@@ -121,7 +132,7 @@ async function handleSubmit() {
     <div class="form-actions">
       <button type="button" class="btn" @click="emit('cancel')">Cancelar</button>
       <button type="submit" class="btn primary" :disabled="isSubmitting">
-        {{ isSubmitting ? 'Guardando…' : 'Registrar mantenimiento' }}
+        {{ isSubmitting ? 'Guardando…' : isEditing ? 'Actualizar mantenimiento' : 'Registrar mantenimiento' }}
       </button>
     </div>
   </form>
