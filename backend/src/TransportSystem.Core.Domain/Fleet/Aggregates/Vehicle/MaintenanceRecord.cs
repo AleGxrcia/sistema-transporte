@@ -46,6 +46,25 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
 
         public bool IsClosed => ActualExitDate.HasValue;
 
+        internal void UpdateDetails(MaintenanceType type, string description, DateTime entryDate, string workshop,
+            DateTime? estimatedExitDate, DateTime? nextMaintenanceDateScheduled, Mileage? nextMaintenanceKmScheduled)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(description);
+            ArgumentException.ThrowIfNullOrWhiteSpace(workshop);
+
+            if (ActualExitDate.HasValue && ActualExitDate.Value < entryDate.Date)
+                throw new DomainException("MAINTENANCE_INVALID_EXIT_DATE",
+                    "La fecha de entrada no puede ser posterior a la fecha de salida real.");
+
+            Type = type;
+            Description = description.Trim();
+            EntryDate = entryDate.Date;
+            Workshop = workshop.Trim();
+            EstimatedExitDate = estimatedExitDate?.Date;
+            NextMaintenanceDateScheduled = nextMaintenanceDateScheduled?.Date;
+            NextMaintenanceKmScheduled = nextMaintenanceKmScheduled;
+        }
+
         internal void Close(DateTime actualExitDate, decimal cost)
         {
             if (IsClosed)

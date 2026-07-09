@@ -2,7 +2,7 @@
 
 namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
 {
-    public class Vehicle : AggregateRoot<Guid>
+    public class Vehicle : AggregateRoot<Guid>, ISoftDeletable
     {
         public string Brand { get; set; }
         public string Model { get; set; }
@@ -16,6 +16,10 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? LastMaintenanceDate { get; private set; }
+
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
+        public Guid? DeletedByUserId { get; private set; }
 
         private readonly List<MaintenanceRecord> _maintenanceRecords = [];
         private readonly List<FuelRecord> _fuelRecords = [];
@@ -137,6 +141,36 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
             UpdatedAt = DateTime.UtcNow;
         }
 
+        // Soft delete: archiva el vehículo conservando su historial.
+        public void MarkAsDeleted(Guid deletedByUserId)
+        {
+            if (Status == VehicleStatus.OnTrip)
+                throw new DomainException("VEHICLE_INVALID_TRANSITION",
+                    "No se puede archivar un vehículo que está actualmente en viaje.");
+
+            if (IsDeleted) return;
+
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+            DeletedByUserId = deletedByUserId;
+            // Un vehículo archivado no puede quedar operativo: se marca inactivo
+            // para que nunca aparezca como disponible mientras conserva su historial.
+            Status = VehicleStatus.Inactive;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Restore()
+        {
+            if (!IsDeleted) return;
+
+            IsDeleted = false;
+            DeletedAt = null;
+            DeletedByUserId = null;
+            // Al restaurar vuelve a estar disponible en los listados operativos.
+            Status = VehicleStatus.Available;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public MaintenanceRecord RegisterMaintenance(MaintenanceType type, string description, DateTime entryDate, string workshop, 
             Guid registeredByUserId, DateTime? estimatedExitDate = null, DateTime? nextMaintenanceDateScheduled = null,
             Mileage? nextMaintenanceKmScheduled = null)
@@ -216,6 +250,73 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
             UpdatedAt = DateTime.UtcNow;
 
             return record;
+        }
+
+        public void UpdateFuelRecord(Guid fuelRecordId, DateTime recordDate, decimal gallons, decimal pricePerGallon,
+            Mileage mileageAtRefuel, string? notes)
+        {
+            var record = _fuelRecords.FirstOrDefault(r => r.Id == fuelRecordId)
+                ?? throw new DomainException("FUEL_RECORD_NOT_FOUND",
+                    $"El registro de combustible {fuelRecordId} no existe para este vehículo.");
+
+            record.Update(recordDate, gallons, pricePerGallon, mileageAtRefuel, notes);
+            RecalculateCurrentMileage();
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void DeleteFuelRecord(Guid fuelRecordId)
+        {
+            var record = _fuelRecords.FirstOrDefault(r => r.Id == fuelRecordId)
+                ?? throw new DomainException("FUEL_RECORD_NOT_FOUND",
+                    $"El registro de combustible {fuelRecordId} no existe para este vehículo.");
+
+            _fuelRecords.Remove(record);
+            RecalculateCurrentMileage();
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateMaintenanceRecord(Guid maintenanceRecordId, MaintenanceType type, string description,
+            DateTime entryDate, string workshop, DateTime? estimatedExitDate,
+            DateTime? nextMaintenanceDateScheduled, Mileage? nextMaintenanceKmScheduled)
+        {
+            var record = _maintenanceRecords.FirstOrDefault(r => r.Id == maintenanceRecordId)
+                ?? throw new DomainException("MAINTENANCE_NOT_FOUND",
+                    $"El registro de mantenimiento {maintenanceRecordId} no existe para este vehículo.");
+
+            record.UpdateDetails(type, description, entryDate, workshop, estimatedExitDate,
+                nextMaintenanceDateScheduled, nextMaintenanceKmScheduled);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void DeleteMaintenanceRecord(Guid maintenanceRecordId)
+        {
+            var record = _maintenanceRecords.FirstOrDefault(r => r.Id == maintenanceRecordId)
+                ?? throw new DomainException("MAINTENANCE_NOT_FOUND",
+                    $"El registro de mantenimiento {maintenanceRecordId} no existe para este vehículo.");
+
+            // Si se elimina un mantenimiento abierto que mantiene el vehículo en taller
+            // (y no queda otro abierto), el vehículo vuelve a estar disponible.
+            if (!record.IsClosed && Status == VehicleStatus.InMaintenance
+                && !_maintenanceRecords.Any(r => r.Id != record.Id && !r.IsClosed))
+            {
+                Status = VehicleStatus.Available;
+            }
+
+            _maintenanceRecords.Remove(record);
+            RecalculateLastMaintenanceDate();
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        private void RecalculateCurrentMileage()
+        {
+            var maxMileage = _fuelRecords.Count > 0 ? _fuelRecords.Max(r => r.MileageAtRefuel.Value) : 0;
+            CurrentMileage = Mileage.Create(maxMileage);
+        }
+
+        private void RecalculateLastMaintenanceDate()
+        {
+            var closed = _maintenanceRecords.Where(r => r.ActualExitDate.HasValue).ToList();
+            LastMaintenanceDate = closed.Count > 0 ? closed.Max(r => r.ActualExitDate!.Value) : null;
         }
 
         public bool IsAvailableForAssignment() => Status == VehicleStatus.Available;

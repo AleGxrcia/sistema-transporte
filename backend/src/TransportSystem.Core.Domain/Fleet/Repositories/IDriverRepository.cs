@@ -16,6 +16,10 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
         Task<IReadOnlyList<Driver>> GetAllAsync(
             CancellationToken cancellationToken = default);
 
+        // Archivados (soft-deleted). Solo para gestión del Administrador.
+        Task<IReadOnlyList<Driver>> GetArchivedAsync(
+            CancellationToken cancellationToken = default);
+
         Task<IReadOnlyList<Driver>> GetAvailableForAssignmentAsync(CancellationToken
             cancellationToken = default);
 

@@ -37,5 +37,22 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Vehicle
                 CreatedAt = DateTime.UtcNow
             };
         }
+
+        internal void Update(DateTime recordDate, decimal gallons, decimal pricePerGallon,
+            Mileage mileageAtRefuel, string? notes)
+        {
+            if (gallons <= 0)
+                throw new DomainException("FUEL_GALLONS_INVALID", "La cantidad de galones debe ser mayor a cero.");
+
+            if (pricePerGallon <= 0)
+                throw new DomainException("FUEL_PRICE_INVALID", "El precio por galón debe ser mayor a cero.");
+
+            RecordDate = recordDate.Date;
+            Gallons = Math.Round(gallons, 3);
+            PricePerGallon = Math.Round(pricePerGallon, 2);
+            TotalCost = Math.Round(gallons * pricePerGallon, 2);
+            MileageAtRefuel = mileageAtRefuel;
+            Notes = notes?.Trim();
+        }
     }
 }
