@@ -12,11 +12,11 @@ export const useDriverStore = defineStore('drivers', () => {
   const isLoadingDetail = ref(false)
   const detailError = ref(null)
 
-  async function fetchAll() {
+  async function fetchAll(archived = false) {
     try {
       isLoadingList.value = true
       listError.value = null
-      const response = await driverApi.list()
+      const response = await driverApi.list({ archived })
       drivers.value = response.data
     } catch (err) {
       listError.value = getErrorMessage(err, 'Error al cargar conductores')

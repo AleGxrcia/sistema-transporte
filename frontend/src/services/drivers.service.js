@@ -33,6 +33,10 @@ export const driverApi = {
     return apiClient.patch(`/drivers/${id}/reactivate`)
   },
 
+  restore(id) {
+    return apiClient.patch(`/drivers/${id}/restore`)
+  },
+
   renewLicense(id, data) {
     return apiClient.patch(`/drivers/${id}/license`, data)
   },
