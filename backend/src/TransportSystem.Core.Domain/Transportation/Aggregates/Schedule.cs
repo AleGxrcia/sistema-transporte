@@ -62,6 +62,40 @@ namespace TransportSystem.Core.Domain.Transportation.Aggregates
             return assignment;
         }
 
+        public Assignment ReassignAssignment(Guid requestId, Guid newVehicleId, Guid newDriverId, Guid reassignedByUserId)
+        {
+            var assignment = _assignments.FirstOrDefault(a => a.RequestId == requestId && a.IsActive())
+                ?? throw new DomainException("ASSIGNMENT_NOT_FOUND",
+                    "No existe una asignación activa para esta solicitud en este día.");
+
+            var vehicleConflict = _assignments.FirstOrDefault(a =>
+                a.Id != assignment.Id &&
+                a.VehicleId == newVehicleId &&
+                a.IsActive() &&
+                a.TimeSlot.OverlapsWith(assignment.TimeSlot));
+
+            if (vehicleConflict is not null)
+                throw new DomainException("SCHEDULE_VEHICLE_CONFLICT",
+                    $"El vehículo ya tiene una asignación activa que se superpone: {vehicleConflict.TimeSlot}.");
+
+            var driverConflict = _assignments.FirstOrDefault(a =>
+                a.Id != assignment.Id &&
+                a.DriverId == newDriverId &&
+                a.IsActive() &&
+                a.TimeSlot.OverlapsWith(assignment.TimeSlot));
+
+            if (driverConflict is not null)
+                throw new DomainException("SCHEDULE_DRIVER_CONFLICT",
+                    $"El conductor ya tiene una asignación activa que se superpone: {driverConflict.TimeSlot}.");
+
+            assignment.Reassign(newVehicleId, newDriverId);
+            UpdatedAt = DateTime.UtcNow;
+
+            RaiseDomainEvent(new AssignmentCreatedEvent(Id, assignment.Id, newVehicleId, newDriverId));
+
+            return assignment;
+        }
+
         public void CancelAssignment(Guid assignmentId, string reason)
         {
             var assignment = _assignments.FirstOrDefault(a => a.Id == assignmentId)
