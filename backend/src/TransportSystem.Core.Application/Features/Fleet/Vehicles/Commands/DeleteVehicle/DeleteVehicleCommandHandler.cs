@@ -26,17 +26,19 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.Dele
 
         public async Task Handle(DeleteVehicleCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin))
+            if (!_currentUser.IsAdmin)
                 throw new ForbiddenException("eliminar vehículos", "Administrador");
 
             var vehicle = await _repository.GetByIdAsync(command.Id, cancellationToken)
                 ?? throw new NotFoundException("Vehículo", command.Id);
 
-            if (await _scheduleRepository.HasAnyAssignmentForVehicleAsync(command.Id, cancellationToken))
-                throw new DomainException("VEHICLE_HAS_TRIP_HISTORY",
-                    "No se puede eliminar un vehículo con viajes registrados; desactívelo en su lugar.");
+            if (await _scheduleRepository.HasActiveAssignmentForVehicleAsync(command.Id, cancellationToken))
+                throw new DomainException("VEHICLE_HAS_ACTIVE_ASSIGNMENTS",
+                    "No se puede archivar un vehículo con viajes programados o en curso. Cancele o complete esos viajes primero.");
 
-            _repository.Delete(vehicle);
+            // Soft delete: se archiva conservando el historial de viajes, consumo y mantenimiento.
+            vehicle.MarkAsDeleted(_currentUser.Id);
+            _repository.Update(vehicle);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

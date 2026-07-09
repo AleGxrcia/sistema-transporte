@@ -26,17 +26,19 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.Delet
 
         public async Task Handle(DeleteDriverCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin))
+            if (!_currentUser.IsAdmin)
                 throw new ForbiddenException("eliminar conductores", "Administrador");
 
             var driver = await _repository.GetByIdAsync(command.Id, cancellationToken)
                 ?? throw new NotFoundException("Conductor", command.Id);
 
-            if (await _scheduleRepository.HasAnyAssignmentForDriverAsync(command.Id, cancellationToken))
-                throw new DomainException("DRIVER_HAS_TRIP_HISTORY",
-                    "No se puede eliminar un conductor con viajes registrados; desactívelo en su lugar.");
+            if (await _scheduleRepository.HasActiveAssignmentForDriverAsync(command.Id, cancellationToken))
+                throw new DomainException("DRIVER_HAS_ACTIVE_ASSIGNMENTS",
+                    "No se puede archivar un conductor con viajes programados o en curso. Cancele o complete esos viajes primero.");
 
-            _repository.Delete(driver);
+            // Soft delete: se archiva conservando su historial de viajes.
+            driver.MarkAsDeleted(_currentUser.Id);
+            _repository.Update(driver);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
