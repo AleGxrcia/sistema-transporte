@@ -25,9 +25,9 @@ namespace TransportSystem.WebApi.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyList<UserResult>))]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] bool archived = false, CancellationToken cancellationToken = default)
         {
-            var result = await _accountService.GetAllAsync(cancellationToken);
+            var result = await _accountService.GetAllAsync(archived, cancellationToken);
             return Ok(result);
         }
 
@@ -92,6 +92,16 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> Deactivate(string id, CancellationToken cancellationToken)
         {
             await _accountService.SetUserActiveStatusAsync(id, false, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/restore")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Restore(string id, CancellationToken cancellationToken)
+        {
+            await _accountService.RestoreUserAsync(id, cancellationToken);
             return NoContent();
         }
 

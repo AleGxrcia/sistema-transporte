@@ -6,6 +6,7 @@ using TransportSystem.Core.Application.Features.Transportation.Commands.AssignVe
 using TransportSystem.Core.Application.Features.Transportation.Commands.CancelRequest;
 using TransportSystem.Core.Application.Features.Transportation.Commands.CompleteTrip;
 using TransportSystem.Core.Application.Features.Transportation.Commands.CreateTravelRequest;
+using TransportSystem.Core.Application.Features.Transportation.Commands.ReassignVehicleAndDriver;
 using TransportSystem.Core.Application.Features.Transportation.Commands.RejectRequest;
 using TransportSystem.Core.Application.Features.Transportation.Commands.StartTrip;
 using TransportSystem.Core.Application.Features.Transportation.Queries.GetAllRequests;
@@ -97,6 +98,19 @@ namespace TransportSystem.WebApi.Controllers
             Guid id, [FromBody] AssignRequestBody body, CancellationToken cancellationToken)
         {
             await Sender.Send(new AssignVehicleAndDriverCommand(id, body.VehicleId, body.DriverId), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/reassign")]
+        [Authorize(Roles = "Admin,Supervisor")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> Reassign(
+            Guid id, [FromBody] AssignRequestBody body, CancellationToken cancellationToken)
+        {
+            await Sender.Send(new ReassignVehicleAndDriverCommand(id, body.VehicleId, body.DriverId), cancellationToken);
             return NoContent();
         }
 

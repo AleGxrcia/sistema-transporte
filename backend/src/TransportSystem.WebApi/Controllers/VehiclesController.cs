@@ -3,11 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using TransportSystem.Core.Application.Dtos.Vehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.CloseMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeactivateVehicle;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeleteFuel;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeleteMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.DeleteVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.ReactivateVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterFuel;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterMaintenance;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.UpdateFuel;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.UpdateMaintenance;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RegisterVehicle;
+using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.RestoreVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.UpdateVehicle;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Queries.GetAvailableVehicles;
 using TransportSystem.Core.Application.Features.Fleet.Vehicles.Queries.GetVehicleById;
@@ -24,10 +29,12 @@ namespace TransportSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyList<VehicleDto>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] bool archived = false,
+            CancellationToken cancellationToken = default)
         {
             var result = await Sender.Send(
-                new GetVehiclesQuery(), cancellationToken);
+                new GetVehiclesQuery(archived), cancellationToken);
             return Ok(result);
         }
 
@@ -116,6 +123,16 @@ namespace TransportSystem.WebApi.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id:guid}/restore")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
+        {
+            await Sender.Send(new RestoreVehicleCommand(id), cancellationToken);
+            return NoContent();
+        }
+
         [HttpPost("{id:guid}/maintenance")]
         [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -150,6 +167,38 @@ namespace TransportSystem.WebApi.Controllers
             return NoContent();
         }
 
+        [HttpPut("{id:guid}/maintenance/{recordId:guid}")]
+        [Authorize(Roles = "Admin,Supervisor")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> UpdateMaintenance(
+            Guid id,
+            Guid recordId,
+            [FromBody] UpdateMaintenanceRequest body,
+            CancellationToken cancellationToken)
+        {
+            await Sender.Send(new UpdateMaintenanceCommand(
+                id, recordId, body.Type, body.Description, body.EntryDate,
+                body.Workshop, body.EstimatedExitDate,
+                body.NextMaintenanceDateScheduled, body.NextMaintenanceKmScheduled), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}/maintenance/{recordId:guid}")]
+        [Authorize(Roles = "Admin,Supervisor")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> DeleteMaintenance(
+            Guid id,
+            Guid recordId,
+            CancellationToken cancellationToken)
+        {
+            await Sender.Send(new DeleteMaintenanceCommand(id, recordId), cancellationToken);
+            return NoContent();
+        }
+
         [HttpPost("{id:guid}/fuel")]
         [Authorize(Roles = "Admin,Supervisor")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -165,6 +214,36 @@ namespace TransportSystem.WebApi.Controllers
                 body.PricePerGallon, body.MileageAtRefuel, body.Notes), cancellationToken);
 
             return CreatedAtRoute("GetVehicleById", new { id }, new { fuelRecordId = recordId });
+        }
+
+        [HttpPut("{id:guid}/fuel/{recordId:guid}")]
+        [Authorize(Roles = "Admin,Supervisor")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> UpdateFuel(
+            Guid id,
+            Guid recordId,
+            [FromBody] UpdateFuelRequest body,
+            CancellationToken cancellationToken)
+        {
+            await Sender.Send(new UpdateFuelCommand(
+                id, recordId, body.RecordDate, body.Gallons,
+                body.PricePerGallon, body.MileageAtRefuel, body.Notes), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}/fuel/{recordId:guid}")]
+        [Authorize(Roles = "Admin,Supervisor")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteFuel(
+            Guid id,
+            Guid recordId,
+            CancellationToken cancellationToken)
+        {
+            await Sender.Send(new DeleteFuelCommand(id, recordId), cancellationToken);
+            return NoContent();
         }
     }
 }

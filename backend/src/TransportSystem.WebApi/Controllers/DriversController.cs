@@ -5,6 +5,7 @@ using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.DeleteDri
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.ReactivateDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.RegisterDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.RenewLicense;
+using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.RestoreDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.SuspendDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.UpdateDriver;
 using TransportSystem.Core.Application.Features.Fleet.Drivers.Queries.GetAvailableDrivers;
@@ -22,9 +23,9 @@ namespace TransportSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyList<DriverDto>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] bool archived = false, CancellationToken cancellationToken = default)
         {
-            var result = await Sender.Send(new GetDriversQuery());
+            var result = await Sender.Send(new GetDriversQuery(archived), cancellationToken);
             return Ok(result);
         }
 
@@ -72,7 +73,8 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> Update(
             Guid id, [FromBody] UpdateDriverRequest body, CancellationToken cancellationToken)
         {
-            await Sender.Send(new UpdateDriverCommand(id, body.Phone, body.Address, body.SupervisorId), cancellationToken);
+            await Sender.Send(new UpdateDriverCommand(
+                id, body.FirstName, body.LastName, body.Phone, body.Address, body.SupervisorId), cancellationToken);
             return NoContent();
         }
 
@@ -106,6 +108,16 @@ namespace TransportSystem.WebApi.Controllers
         public async Task<IActionResult> Reactivate(Guid id, CancellationToken cancellationToken)
         {
             await Sender.Send(new ReactivateDriverCommand(id), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/restore")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
+        {
+            await Sender.Send(new RestoreDriverCommand(id), cancellationToken);
             return NoContent();
         }
 
