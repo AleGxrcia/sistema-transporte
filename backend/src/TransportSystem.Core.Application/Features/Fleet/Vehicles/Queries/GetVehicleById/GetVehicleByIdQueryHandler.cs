@@ -24,7 +24,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Queries.GetVe
 
             var maintenance = vehicle.MaintenanceRecords.Select(m => new MaintenanceRecordDto(
                 m.Id, m.Type.ToString(), m.Description, m.EntryDate,
-                m.EstimatedExitDate, m.ActualExitDate, m.Cost, m.Workshop, m.IsClosed
+                m.EstimatedExitDate, m.ActualExitDate, m.Cost, m.Workshop, m.IsClosed,
+                m.NextMaintenanceDateScheduled, m.NextMaintenanceKmScheduled?.Value
             )).ToList();
 
             var fuel = vehicle.FuelRecords.Select(f => new FuelRecordDto(
@@ -43,10 +44,12 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Queries.GetVe
                 vehicle.Capacity.Passengers,
                 vehicle.Status.ToString(), 
                 vehicle.CurrentMileage.Value,
-                vehicle.LastMaintenanceDate, 
-                maintenance, 
-                fuel, 
-                vehicle.CreatedAt
+                vehicle.LastMaintenanceDate,
+                maintenance,
+                fuel,
+                vehicle.CreatedAt,
+                vehicle.IsDeleted,
+                vehicle.DeletedAt
             );
         }
     }

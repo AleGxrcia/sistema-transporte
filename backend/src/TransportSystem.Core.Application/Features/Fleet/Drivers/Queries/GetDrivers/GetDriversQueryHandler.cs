@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using TransportSystem.Core.Application.Common.Exceptions;
+using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Core.Application.Dtos.Driver;
 using TransportSystem.Core.Domain.Fleet.Repositories;
 
@@ -7,16 +9,23 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Queries.GetDri
     public class GetDriversQueryHandler : IRequestHandler<GetDriversQuery, IReadOnlyList<DriverDto>>
     {
         private readonly IDriverRepository _repository;
+        private readonly ICurrentUser _currentUser;
 
-        public GetDriversQueryHandler(IDriverRepository repository)
+        public GetDriversQueryHandler(IDriverRepository repository, ICurrentUser currentUser)
         {
             _repository = repository;
+            _currentUser = currentUser;
         }
 
         public async Task<IReadOnlyList<DriverDto>> Handle(
             GetDriversQuery request, CancellationToken cancellationToken)
         {
-            var drivers = await _repository.GetAllAsync(cancellationToken);
+            if (request.ArchivedOnly && !_currentUser.IsAdmin)
+                throw new ForbiddenException("ver conductores archivados", "Administrador");
+
+            var drivers = request.ArchivedOnly
+                ? await _repository.GetArchivedAsync(cancellationToken)
+                : await _repository.GetAllAsync(cancellationToken);
 
             var driversDto = drivers.Select(d => new DriverDto(
                 d.Id,
@@ -31,9 +40,11 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Queries.GetDri
                 d.Phone, 
                 d.Address, 
                 d.Status.ToString(),
-                d.SupervisorId, 
-                d.CreatedAt, 
-                d.UpdatedAt
+                d.SupervisorId,
+                d.CreatedAt,
+                d.UpdatedAt,
+                d.IsDeleted,
+                d.DeletedAt
             )).ToList();
 
             return driversDto;

@@ -15,6 +15,8 @@
         string Status,
         Guid? SupervisorId,
         DateTime? CreatedAt,
-        DateTime? UpdatedAt
+        DateTime? UpdatedAt,
+        bool IsDeleted,
+        DateTime? DeletedAt
     );
 }
