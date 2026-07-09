@@ -23,6 +23,7 @@ const toast = useToast()
 
 const request = computed(() => store.currentRequest)
 const isLoading = computed(() => store.isLoadingDetail)
+const isReassign = computed(() => request.value?.status === 'Assigned')
 
 const isLoadingResources = ref(false)
 const allVehicles = ref([])
@@ -43,8 +44,8 @@ async function load() {
   await store.fetchById(props.id)
   const r = request.value
   if (!r) return
-  // Esta pantalla es solo para asignar recursos a una solicitud aprobada.
-  if (r.status !== 'Approved' || !can('approve', 'requests')) {
+  // Esta pantalla asigna recursos a una solicitud aprobada, o reasigna una ya asignada.
+  if (!['Approved', 'Assigned'].includes(r.status) || !can('approve', 'requests')) {
     router.replace(`/requests/${props.id}`)
     return
   }
@@ -142,9 +143,15 @@ function openConfirm() {
 async function handleConfirm() {
   try {
     isAssigning.value = true
-    await RequestsService.assign(props.id, selectedVehicleId.value, selectedDriverId.value)
-    confirmModal.close()
-    toast.success('Asignación confirmada', 'El vehículo y conductor fueron asignados al viaje.')
+    if (isReassign.value) {
+      await RequestsService.reassign(props.id, selectedVehicleId.value, selectedDriverId.value)
+      confirmModal.close()
+      toast.success('Asignación actualizada', 'El vehículo y conductor del viaje fueron reasignados.')
+    } else {
+      await RequestsService.assign(props.id, selectedVehicleId.value, selectedDriverId.value)
+      confirmModal.close()
+      toast.success('Asignación confirmada', 'El vehículo y conductor fueron asignados al viaje.')
+    }
     router.push(`/requests/${props.id}`)
   } catch (err) {
     assignError.value = getErrorMessage(err, 'No se pudo confirmar la asignación')
@@ -163,7 +170,7 @@ const scheduleLabel = computed(() => {
 <template>
   <div>
     <div class="page-header">
-      <h1>Asignar recursos</h1>
+      <h1>{{ isReassign ? 'Reasignar recursos' : 'Asignar recursos' }}</h1>
     </div>
 
     <div v-if="isLoading" class="loading-placeholder">Cargando solicitud…</div>
@@ -298,7 +305,7 @@ const scheduleLabel = computed(() => {
         <div class="summary-actions">
           <button class="summary-cancel" @click="router.push(`/requests/${props.id}`)">Cancelar</button>
           <button class="summary-confirm" @click="openConfirm">
-            <Check :size="15" /> Confirmar asignación
+            <Check :size="15" /> {{ isReassign ? 'Confirmar reasignación' : 'Confirmar asignación' }}
           </button>
         </div>
       </div>
@@ -308,9 +315,11 @@ const scheduleLabel = computed(() => {
     <ConfirmModal
       v-if="selectedVehicle && selectedDriver"
       :model-value="confirmModal.isOpen.value"
-      title="Confirmar asignación"
-      message="Una vez asignados, los recursos quedarán bloqueados para este horario."
-      confirm-text="Confirmar asignación"
+      :title="isReassign ? 'Confirmar reasignación' : 'Confirmar asignación'"
+      :message="isReassign
+        ? 'Se reemplazarán el vehículo y conductor actuales por los seleccionados para este horario.'
+        : 'Una vez asignados, los recursos quedarán bloqueados para este horario.'"
+      :confirm-text="isReassign ? 'Confirmar reasignación' : 'Confirmar asignación'"
       variant="primary"
       :is-loading="isAssigning"
       @update:model-value="confirmModal.close()"

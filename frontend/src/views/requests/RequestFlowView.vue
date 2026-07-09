@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/utils/apiError'
 import { formatDate, formatDateTime } from '@/utils/formatters'
 import AppBadge from '@/components/ui/AppBadge.vue'
 import ConfirmModal from '@/components/modals/ModalConfirm.vue'
-import { ArrowLeft, Check, X, Play, Flag } from '@lucide/vue'
+import { ArrowLeft, Check, X, Play, Flag, RefreshCw } from '@lucide/vue'
 
 const props = defineProps({ id: { type: String, required: true } })
 
@@ -272,6 +272,9 @@ async function loadAssignedResources() {
           <div v-if="request.status === 'Assigned' && canManage" class="form-actions" style="justify-content:flex-start">
             <button class="btn primary" :disabled="isStarting" @click="handleStart">
               <Play :size="14" /> Iniciar viaje
+            </button>
+            <button class="btn" @click="router.push(`/requests/${request.id}/assign`)">
+              <RefreshCw :size="14" /> Cambiar asignación
             </button>
           </div>
           <div v-else-if="request.status === 'InProgress' && canManage" class="form-actions" style="justify-content:flex-start">
