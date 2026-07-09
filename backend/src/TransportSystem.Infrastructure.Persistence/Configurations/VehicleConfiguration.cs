@@ -42,6 +42,10 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             builder.Property(v => v.CreatedAt).IsRequired();
             builder.Property(v => v.UpdatedAt);
 
+            builder.Property(v => v.IsDeleted).IsRequired().HasDefaultValue(false);
+            builder.Property(v => v.DeletedAt);
+            builder.Property(v => v.DeletedByUserId);
+
             // LicensePlate
             builder.OwnsOne(v => v.LicensePlate, lp =>
             {
@@ -106,6 +110,9 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             // Indices
             builder.HasIndex(v => v.Status)
                 .HasDatabaseName("IX_Vehicles_StatusId");
+
+            builder.HasIndex(v => v.IsDeleted)
+                .HasDatabaseName("IX_Vehicles_IsDeleted");
         }
     }
 }

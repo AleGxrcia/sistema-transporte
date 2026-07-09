@@ -33,7 +33,17 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<Vehicle>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _dbcontext.Vehicles
+                .Where(v => !v.IsDeleted)
                 .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Vehicle>> GetArchivedAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbcontext.Vehicles
+                .Where(v => v.IsDeleted)
+                .AsNoTracking()
+                .OrderByDescending(v => v.DeletedAt)
                 .ToListAsync(cancellationToken);
         }
 
@@ -42,7 +52,8 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken = default)
         {
             return await _dbcontext.Vehicles
-                .Where(v => v.Status == VehicleStatus.Available
+                .Where(v => !v.IsDeleted
+                        && v.Status == VehicleStatus.Available
                         && v.Capacity.Passengers >= minPassengers)
                 .AsNoTracking()
                 .OrderBy(v => v.Capacity.Passengers)
@@ -79,7 +90,7 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
 
             return await _dbcontext.Vehicles
                 .Include(v => v.MaintenanceRecords)
-                .Where(v => v.MaintenanceRecords.Any(m =>
+                .Where(v => !v.IsDeleted && v.MaintenanceRecords.Any(m =>
                     m.NextMaintenanceDateScheduled.HasValue &&
                     m.ActualExitDate == null &&
                     m.NextMaintenanceDateScheduled.Value <= thresholdDate))
