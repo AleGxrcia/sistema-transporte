@@ -4,6 +4,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.Updat
 {
     public record UpdateDriverCommand(
         Guid Id,
+        string FirstName,
+        string LastName,
         string Phone,
         string? Address,
         Guid? SupervisorId
