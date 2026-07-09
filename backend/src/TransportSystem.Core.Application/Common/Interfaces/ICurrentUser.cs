@@ -8,7 +8,9 @@ namespace TransportSystem.Core.Application.Common.Interfaces
         string Email { get; }
         UserRole Role { get; }
         bool IsAuthenticated { get; }
-        bool IsInRole(UserRole role) => Role == role;
 
+        bool IsInRole(UserRole role) => Role == role;
+        bool IsAdmin => Role == UserRole.Admin;
+        bool IsInAnyRole(params UserRole[] roles) => roles.Contains(Role);
     }
 }

@@ -15,6 +15,10 @@ namespace TransportSystem.Core.Domain.Fleet.Repositories
         Task<IReadOnlyList<Vehicle>> GetAllAsync(
             CancellationToken cancellationToken = default);
 
+        // Archivados (soft-deleted). Solo para gestión del Administrador.
+        Task<IReadOnlyList<Vehicle>> GetArchivedAsync(
+            CancellationToken cancellationToken = default);
+
         Task<Vehicle?> GetByLicensePlateAsync(
             string licensePlate, 
             CancellationToken cancellationToken = default);

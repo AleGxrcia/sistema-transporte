@@ -36,6 +36,10 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
             builder.Property(d => d.CreatedAt).IsRequired();
             builder.Property(d => d.UpdatedAt);
 
+            builder.Property(d => d.IsDeleted).IsRequired().HasDefaultValue(false);
+            builder.Property(d => d.DeletedAt);
+            builder.Property(d => d.DeletedByUserId);
+
             // Value Object: NationalId
             builder.OwnsOne(d => d.NationalId, ni =>
             {
@@ -81,6 +85,9 @@ namespace TransportSystem.Infrastructure.Persistence.Configurations
 
             builder.HasIndex(d => d.SupervisorId)
                 .HasDatabaseName("IX_Drivers_SupervisorId");
+
+            builder.HasIndex(d => d.IsDeleted)
+                .HasDatabaseName("IX_Drivers_IsDeleted");
         }
     }
 }

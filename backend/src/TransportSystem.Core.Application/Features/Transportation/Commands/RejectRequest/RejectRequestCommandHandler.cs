@@ -4,7 +4,7 @@ using TransportSystem.Core.Application.Common.Exceptions;
 using TransportSystem.Core.Application.Common.Interfaces;
 using TransportSystem.Core.Domain.Transportation.Repositories;
 
-namespace TransportSystem.Core.Application.Features.Transportation.Commands.CompleteTrip
+namespace TransportSystem.Core.Application.Features.Transportation.Commands.RejectRequest
 {
     public class RejectRequestCommandHandler : IRequestHandler<RejectRequestCommand>
     {
@@ -22,8 +22,8 @@ namespace TransportSystem.Core.Application.Features.Transportation.Commands.Comp
 
         public async Task Handle(RejectRequestCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Supervisor) && !_currentUser.IsInRole(UserRole.Admin))
-                throw new ForbiddenException("rechazar solicitudes", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("rechazar solicitudes", "Administrador o Supervisor");
 
             var request = await _requestRepository.GetByIdAsync(command.RequestId, cancellationToken)
                 ?? throw new NotFoundException("Solicitud", command.RequestId);

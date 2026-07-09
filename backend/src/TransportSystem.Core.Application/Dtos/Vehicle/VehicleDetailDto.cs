@@ -17,6 +17,8 @@ namespace TransportSystem.Core.Application.Dtos.Vehicle
         DateTime? LastMaintenanceDate,
         IReadOnlyList<MaintenanceRecordDto> MaintenanceRecords,
         IReadOnlyList<FuelRecordDto> FuelRecords,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        bool IsDeleted,
+        DateTime? DeletedAt
     );
 }

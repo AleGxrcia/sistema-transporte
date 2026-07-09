@@ -98,6 +98,17 @@ namespace TransportSystem.Core.Domain.Transportation.Aggregates
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public void ReassignResources(Guid vehicleId, Guid driverId)
+        {
+            if (Status != RequestStatus.Assigned)
+                throw new DomainException("REQUEST_INVALID_TRANSITION",
+                    "Solo una solicitud ya asignada (y que aún no ha iniciado) puede reasignarse.");
+
+            AssignedVehicleId = vehicleId;
+            AssignedDriverId = driverId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public void StartTrip()
         {
             if (Status != RequestStatus.Assigned)

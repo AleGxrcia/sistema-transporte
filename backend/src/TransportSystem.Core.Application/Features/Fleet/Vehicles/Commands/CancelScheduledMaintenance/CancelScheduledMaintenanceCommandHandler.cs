@@ -21,8 +21,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.Canc
 
         public async Task Handle(CancelScheduledMaintenanceCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin) && !_currentUser.IsInRole(UserRole.Supervisor))
-                throw new ForbiddenException("cancelar mantenimiento programado", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("cancelar mantenimiento programado", "Administrador o Supervisor");
 
             var vehicle = await _repository.GetByIdWithDetailsAsync(command.VehicleId, cancellationToken)
                 ?? throw new NotFoundException("Vehículo", command.VehicleId);

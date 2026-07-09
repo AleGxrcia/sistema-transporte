@@ -11,7 +11,7 @@ using TransportSystem.WebApi.Contracts.Maintenance;
 
 namespace TransportSystem.WebApi.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Supervisor")]
     [Route("api/maintenance")]
     public class MaintenanceController : ApiControllerBase
     {

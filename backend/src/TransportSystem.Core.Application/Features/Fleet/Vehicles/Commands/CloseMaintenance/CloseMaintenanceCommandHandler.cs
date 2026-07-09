@@ -21,8 +21,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.Clos
 
         public async Task Handle(CloseMaintenanceRecordCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin) && !_currentUser.IsInRole(UserRole.Supervisor))
-                throw new ForbiddenException("cerrar mantenimiento", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("cerrar mantenimiento", "Administrador o Supervisor");
 
             var vehicle = await _repository.GetByIdWithDetailsAsync(command.VehicleId, cancellationToken)
                 ?? throw new NotFoundException("Vehículo", command.VehicleId);

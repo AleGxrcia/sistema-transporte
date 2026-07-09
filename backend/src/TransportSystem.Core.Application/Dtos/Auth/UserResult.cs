@@ -8,6 +8,7 @@ namespace TransportSystem.Core.Application.Dtos.Auth
         string FirstName,
         string LastName,
         UserRole Role,
-        bool IsActive
+        bool IsActive,
+        bool IsDeleted
     );
 }

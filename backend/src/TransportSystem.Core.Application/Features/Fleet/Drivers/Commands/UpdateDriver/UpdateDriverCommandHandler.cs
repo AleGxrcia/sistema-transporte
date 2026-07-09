@@ -27,6 +27,7 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Commands.Updat
             var driver = await _repository.GetByIdAsync(command.Id, cancellationToken)
                 ?? throw new NotFoundException("Conductor", command.Id);
 
+            driver.UpdatePersonalInfo(command.FirstName, command.LastName);
             driver.UpdateContactInfo(command.Phone, command.Address);
             driver.AssignSupervisor(command.SupervisorId);
 

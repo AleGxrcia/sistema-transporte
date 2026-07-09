@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using TransportSystem.Core.Application.Features.Transportation.Commands.CompleteTrip;
 
 namespace TransportSystem.Core.Application.Features.Transportation.Commands.RejectRequest
 {

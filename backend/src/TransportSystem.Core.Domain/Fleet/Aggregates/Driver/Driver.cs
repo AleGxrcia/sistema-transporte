@@ -2,7 +2,7 @@
 
 namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
 {
-    public class Driver : AggregateRoot<Guid>
+    public class Driver : AggregateRoot<Guid>, ISoftDeletable
     {
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
@@ -16,6 +16,10 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
 
         public DateTime? CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
+
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
+        public Guid? DeletedByUserId { get; private set; }
 
         private Driver() { }
 
@@ -46,6 +50,22 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
         public bool IsAvailableForAssignment()
         {
             return Status == DriverStatus.Available && !License.IsExpired();
+        }
+
+        public bool CanReceiveAssignment()
+        {
+            return Status != DriverStatus.Inactive
+                && Status != DriverStatus.Suspended
+                && !License.IsExpired();
+        }
+
+        public void UpdatePersonalInfo(string firstName, string lastName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
+            FirstName = firstName.Trim();
+            LastName = lastName.Trim();
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void UpdateContactInfo(string phone, string? address)
@@ -129,6 +149,36 @@ namespace TransportSystem.Core.Domain.Fleet.Aggregates.Driver
         {
             ArgumentNullException.ThrowIfNull(newLicense);
             License = newLicense;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        // Soft delete: archiva el conductor conservando su historial.
+        public void MarkAsDeleted(Guid deletedByUserId)
+        {
+            if (Status == DriverStatus.OnTrip)
+                throw new DomainException("DRIVER_INVALID_TRANSITION",
+                    "No se puede archivar un conductor que está actualmente en viaje.");
+
+            if (IsDeleted) return;
+
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+            DeletedByUserId = deletedByUserId;
+            // Un conductor archivado no puede quedar operativo: se marca inactivo
+            // para que nunca aparezca como disponible mientras conserva su historial.
+            Status = DriverStatus.Inactive;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Restore()
+        {
+            if (!IsDeleted) return;
+
+            IsDeleted = false;
+            DeletedAt = null;
+            DeletedByUserId = null;
+            // Al restaurar vuelve a estar disponible en los listados operativos.
+            Status = DriverStatus.Available;
             UpdatedAt = DateTime.UtcNow;
         }
     }

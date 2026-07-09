@@ -9,6 +9,8 @@
         DateTime? ActualExitDate,
         decimal? Cost,
         string Workshop,
-        bool IsClosed
+        bool IsClosed,
+        DateTime? NextMaintenanceDateScheduled,
+        decimal? NextMaintenanceKmScheduled
     );
 }

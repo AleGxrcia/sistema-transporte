@@ -50,6 +50,17 @@ namespace TransportSystem.Core.Domain.Transportation.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        internal void Reassign(Guid vehicleId, Guid driverId)
+        {
+            if (Status != AssignmentStatus.Scheduled)
+                throw new DomainException("ASSIGNMENT_INVALID_TRANSITION",
+                    "Solo una asignación programada (aún no iniciada) puede reasignarse.");
+
+            VehicleId = vehicleId;
+            DriverId = driverId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         internal void Complete(DateTime actualDeparture, DateTime actualReturn)
         {
             if (Status != AssignmentStatus.InProgress)

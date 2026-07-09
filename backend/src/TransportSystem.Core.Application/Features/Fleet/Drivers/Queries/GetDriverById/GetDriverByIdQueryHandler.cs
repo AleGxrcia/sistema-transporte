@@ -33,9 +33,11 @@ namespace TransportSystem.Core.Application.Features.Fleet.Drivers.Queries.GetDri
                 driver.Phone, 
                 driver.Address, 
                 driver.Status.ToString(),
-                driver.SupervisorId, 
-                driver.CreatedAt, 
-                driver.UpdatedAt
+                driver.SupervisorId,
+                driver.CreatedAt,
+                driver.UpdatedAt,
+                driver.IsDeleted,
+                driver.DeletedAt
             );
         }
     }

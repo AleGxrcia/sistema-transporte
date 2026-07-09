@@ -22,8 +22,8 @@ namespace TransportSystem.Core.Application.Features.Fleet.Vehicles.Commands.Regi
 
         public async Task<Guid> Handle(RegisterMaintenanceCommand command, CancellationToken cancellationToken)
         {
-            if (!_currentUser.IsInRole(UserRole.Admin) && !_currentUser.IsInRole(UserRole.Supervisor))
-                throw new ForbiddenException("registrar mantenimiento", "Supervisor");
+            if (!_currentUser.IsInAnyRole(UserRole.Admin, UserRole.Supervisor))
+                throw new ForbiddenException("registrar mantenimiento", "Administrador o Supervisor");
 
             var vehicle = await _repository.GetByIdWithDetailsAsync(command.VehicleId, cancellationToken)
                 ?? throw new NotFoundException("Vehículo", command.VehicleId);

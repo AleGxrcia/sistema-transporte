@@ -32,8 +32,18 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<Driver>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _dbcontext.Drivers
+                .Where(d => !d.IsDeleted)
                 .AsNoTracking()
                 .OrderBy(d => d.LastName)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Driver>> GetArchivedAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbcontext.Drivers
+                .Where(d => d.IsDeleted)
+                .AsNoTracking()
+                .OrderByDescending(d => d.DeletedAt)
                 .ToListAsync(cancellationToken);
         }
 
@@ -42,7 +52,8 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
             var today = DateTime.UtcNow.Date;
 
             return await _dbcontext.Drivers
-                .Where(d => d.Status == DriverStatus.Available 
+                .Where(d => !d.IsDeleted
+                        && d.Status == DriverStatus.Available
                         && d.License.ExpirationDate >= today)
                 .AsNoTracking()
                 .OrderBy(d => d.LastName)
@@ -74,7 +85,8 @@ namespace TransportSystem.Infrastructure.Persistence.Repositories
             var thresholdDate = today.AddDays(withinDays);
 
             return await _dbcontext.Drivers
-                .Where(d => d.Status != DriverStatus.Inactive
+                .Where(d => !d.IsDeleted
+                        && d.Status != DriverStatus.Inactive
                         && d.License.ExpirationDate >= today
                         && d.License.ExpirationDate <= thresholdDate)
                 .AsNoTracking()
